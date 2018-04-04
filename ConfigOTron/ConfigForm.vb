@@ -18,7 +18,7 @@ Public Class ConfigForm
 
         'param arrays
         Dim aRcp = {"rcp26", "rcp45", "rcp85"}
-        Dim aVar = {"snow", "ice_thickness", "ice_fraction", "wind"}
+        Dim aVar = {"snow", "sith", "sico", "wind"}
         Dim aSub = {"ANN", "MAM", "JJA", "SON", "DJF"}
         Dim aLang = {"en", "fr"}
 
@@ -55,7 +55,7 @@ Public Class ConfigForm
 
         'param arrays
         Dim aRcp = {"rcp26", "rcp45", "rcp85"}
-        Dim aVar = {"snow", "ice_thickness", "ice_fraction", "wind"}
+        Dim aVar = {"snow", "sith", "sico", "wind"}
         Dim aSub = {"ANN", "MAM", "JJA", "SON", "DJF"}
 
         For Each var As String In aVar
@@ -86,9 +86,9 @@ Public Class ConfigForm
         Select Case variable
             Case "snow"
                 varfancy = "SnowDepth"
-            Case "ice_thickness"
+            Case "sith"
                 varfancy = "SeaIceThickness"
-            Case "ice_fraction"
+            Case "sico"
                 varfancy = "SeaIceConcentration"
             Case "wind"
                 varfancy = "WindSpeed"
