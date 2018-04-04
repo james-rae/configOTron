@@ -23,22 +23,33 @@ Partial Class ConfigForm
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.cmdEnhance = New System.Windows.Forms.Button()
+        Me.cmdEnhanceMini = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'cmdEnhance
         '
-        Me.cmdEnhance.Location = New System.Drawing.Point(53, 73)
+        Me.cmdEnhance.Location = New System.Drawing.Point(54, 35)
         Me.cmdEnhance.Name = "cmdEnhance"
         Me.cmdEnhance.Size = New System.Drawing.Size(304, 87)
         Me.cmdEnhance.TabIndex = 0
-        Me.cmdEnhance.Text = "Enhance"
+        Me.cmdEnhance.Text = "Enhance - Full Configs"
         Me.cmdEnhance.UseVisualStyleBackColor = True
+        '
+        'cmdEnhanceMini
+        '
+        Me.cmdEnhanceMini.Location = New System.Drawing.Point(54, 142)
+        Me.cmdEnhanceMini.Name = "cmdEnhanceMini"
+        Me.cmdEnhanceMini.Size = New System.Drawing.Size(304, 87)
+        Me.cmdEnhanceMini.TabIndex = 1
+        Me.cmdEnhanceMini.Text = "Enhance - Mini Configs"
+        Me.cmdEnhanceMini.UseVisualStyleBackColor = True
         '
         'ConfigForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(435, 262)
+        Me.Controls.Add(Me.cmdEnhanceMini)
         Me.Controls.Add(Me.cmdEnhance)
         Me.Name = "ConfigForm"
         Me.Text = "Config O Tron"
@@ -47,4 +58,5 @@ Partial Class ConfigForm
     End Sub
 
     Friend WithEvents cmdEnhance As Button
+    Friend WithEvents cmdEnhanceMini As Button
 End Class
