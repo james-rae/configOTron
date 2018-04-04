@@ -1,0 +1,27 @@
+logs/*
+!.gitkeep
+node_modules/
+lib/
+bower_components/
+dist/
+build/
+docbuild/
+tmp/
+.tmp/
+report/
+.DS_Store
+.idea
+typings/
+tsd.json
+.vagrant/
+apidocs/
+.vscode/
+dump/
+bin/
+obj/
+
+# VIM files
+*~
+*.swp
+*.swo
+npm-debug.log
