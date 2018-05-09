@@ -122,9 +122,10 @@ Public Class ConfigForm
             pad2 & """layerType"": ""esriTile""," & vbCrLf &
             pad2 & """url"": """ & url & """," & vbCrLf &
             pad2 & """state"": {" & vbCrLf &
-            pad3 & """opacity"": 0.8," & vbCrLf &
+            pad3 & """opacity"": 1," & vbCrLf &
             pad3 & """visibility"": false" & vbCrLf &
-            pad2 & "}" & vbCrLf &
+            pad2 & "}," & vbCrLf &
+            pad2 & """controls"": [""data""]" & vbCrLf &
             pad & "}" & IIf(trailingComma, ",", "") & vbCrLf
 
         Return json
