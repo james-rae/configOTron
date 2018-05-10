@@ -146,10 +146,9 @@ Public Class ConfigForm
         Const pad3 As String = "          "
 
         Dim url = MakeLayerURL(variable, subPeroid, rcp, year)
-        Dim splitter As String() = url.Split("/")
 
         Dim json As String = pad & "{" & vbCrLf &
-            pad2 & """id"": """ & splitter(splitter.Length - 2) & """," & vbCrLf &
+            pad2 & """id"": ""WIND_RCP85_" & MagicIndex(subPeroid, year) & """," & vbCrLf &
             pad2 & """layerType"": ""esriDynamic""," & vbCrLf &
             pad2 & """url"": """ & url & """," & vbCrLf &
             pad2 & """state"": {" & vbCrLf &
