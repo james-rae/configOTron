@@ -80,12 +80,12 @@ Public Class ConfigForm
     Private Function MakeLayerURL(variable As String, subPeroid As String, rcp As String, year As String) As String
         ' e.g. http://cipgis.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5_SeaIceThickness/SeaIceThickness_2061_20yr_SON_rcp45/MapServer
 
-        Return "http://cipgis.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5/WIND_RCP85/MapServer"
+        Dim roooot As String = "http://cipgis.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5/"
 
         'Dim varfancy As String = ""
         'Select Case variable
         '    Case "snow"
-        '        varfancy = "SnowDepth"
+        '        varfancy = "SNOW"
         '    Case "sith"
         '        varfancy = "SeaIceThickness"
         '    Case "sico"
@@ -94,37 +94,46 @@ Public Class ConfigForm
         '        varfancy = "WindSpeed"
         'End Select
 
-        'Return roooot & varfancy & "/" & varfancy & "_" & year & "_20yr_" & subPeroid & "_" & rcp & "/MapServer"
+        Return roooot & "CMIP5_" & UCase(variable) & "/MapServer"
     End Function
 
-    Function MagicIndex(subPeroid As String, year As String) As String
-        Dim yearI, periodI As Integer
+    Function MagicIndex(rcp As String, subPeroid As String, year As String) As String
+        Dim yearI, periodI, rcpI As Integer
+
+        Select Case rcp
+            Case "rcp26"
+                rcpI = 0
+            Case "rcp45"
+                rcpI = 26
+            Case "rcp85"
+                rcpI = 52
+        End Select
 
         Select Case subPeroid
             Case "DJF"
-                periodI = 0
+                periodI = 21
             Case "JJA"
-                periodI = 4
+                periodI = 11
             Case "MAM"
-                periodI = 8
+                periodI = 6
             Case "SON"
-                periodI = 12
-            Case "ANN"
                 periodI = 16
+            Case "ANN"
+                periodI = 1
         End Select
 
         Select Case year
             Case "2021"
-                yearI = 0
-            Case "2041"
                 yearI = 1
-            Case "2061"
+            Case "2041"
                 yearI = 2
-            Case "2081"
+            Case "2061"
                 yearI = 3
+            Case "2081"
+                yearI = 4
         End Select
 
-        Return periodI + yearI
+        Return periodI + yearI + rcpI
 
     End Function
 
@@ -146,16 +155,17 @@ Public Class ConfigForm
         Const pad3 As String = "          "
 
         Dim url = MakeLayerURL(variable, subPeroid, rcp, year)
+        Dim magic = MagicIndex(rcp, subPeroid, year)
 
         Dim json As String = pad & "{" & vbCrLf &
-            pad2 & """id"": ""WIND_RCP85_" & MagicIndex(subPeroid, year) & """," & vbCrLf &
+            pad2 & """id"": """ & variable & "_" & magic & """," & vbCrLf &
             pad2 & """layerType"": ""esriDynamic""," & vbCrLf &
             pad2 & """url"": """ & url & """," & vbCrLf &
             pad2 & """state"": {" & vbCrLf &
             pad3 & """opacity"": 1," & vbCrLf &
             pad3 & """visibility"": false" & vbCrLf &
             pad2 & "}," & vbCrLf &
-            pad2 & """layerEntries"": [{""index"": " & MagicIndex(subPeroid, year) & " }]," & vbCrLf &
+            pad2 & """layerEntries"": [{""index"": " & magic & " }]," & vbCrLf &
             pad2 & """controls"": [""data""]" & vbCrLf &
             pad & "}" & IIf(trailingComma, ",", "") & vbCrLf
 
