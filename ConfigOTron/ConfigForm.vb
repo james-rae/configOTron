@@ -74,7 +74,35 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeMiniFileName(variable As String, subPeroid As String, rcp As String) As String
-        Return "cmip5-layer-configs-" & variable & "-" & subPeroid & "-" & rcp & ".json"
+
+        Dim badAlyVar As String = ""
+        Dim badAlyPeriod As String = ""
+
+        Select Case subPeroid
+            Case "DJF"
+                badAlyPeriod = "winter"
+            Case "JJA"
+                badAlyPeriod = "summer"
+            Case "MAM"
+                badAlyPeriod = "spring"
+            Case "SON"
+                badAlyPeriod = "fall"
+            Case "ANN"
+                badAlyPeriod = "annual"
+        End Select
+
+        Select Case variable
+            Case "snow"
+                badAlyVar = "snd"
+            Case "sith"
+                badAlyVar = "sit"
+            Case "sico"
+                badAlyVar = "sic"
+            Case "wind"
+                badAlyVar = "sfcwind"
+        End Select
+
+        Return "cmip5-layer-configs-" & badAlyVar & "-" & badAlyPeriod & "-" & rcp & ".json"
     End Function
 
     Private Function MakeLayerURL(variable As String, subPeroid As String, rcp As String, year As String) As String
