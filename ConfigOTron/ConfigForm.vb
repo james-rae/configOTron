@@ -190,7 +190,7 @@ Public Class ConfigForm
             pad2 & """layerType"": ""esriDynamic""," & vbCrLf &
             pad2 & """url"": """ & url & """," & vbCrLf &
             pad2 & """state"": {" & vbCrLf &
-            pad3 & """opacity"": 1," & vbCrLf &
+            pad3 & """opacity"": 0.85," & vbCrLf &
             pad3 & """visibility"": false" & vbCrLf &
             pad2 & "}," & vbCrLf &
             pad2 & """layerEntries"": [{""index"": " & magic & " }]," & vbCrLf &
