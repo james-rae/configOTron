@@ -108,7 +108,7 @@ Public Class ConfigForm
     Private Function MakeLayerURL(variable As String, subPeroid As String, rcp As String, year As String) As String
         ' e.g. http://cipgis.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5_SeaIceThickness/SeaIceThickness_2061_20yr_SON_rcp45/MapServer
 
-        Dim roooot As String = "http://cipgis.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5/"
+        Dim roooot As String = "http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5/"
 
         'Dim varfancy As String = ""
         'Select Case variable
