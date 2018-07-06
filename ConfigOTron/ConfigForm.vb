@@ -3,21 +3,27 @@
 Public Class ConfigForm
 
     ' arrays of domains. global scope for sharing fun
+    Shared aLang = {"en", "fr"}
     Shared aRcp = {"rcp26", "rcp45", "rcp85"}
     Shared aCMIP5Var = {"snow", "sith", "sico", "wind"}
+    Shared aDCSVar = {"tmean", "tmin", "tmax", "prec"}
     Shared aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
     Shared aYear = {"2021", "2041", "2061", "2081"}
+
 
     Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
     Const PAD1 As String = "    "
     Const PAD2 As String = "      "
     Const PAD3 As String = "        "
 
+
+
     Private Sub cmdEnhanceMini_Click(sender As Object, e As EventArgs) Handles cmdEnhanceMini.Click
 
         'MAIN STARTING POINT OF APP.
 
         MakeCMIP5Configs()
+        MakeDCSConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
@@ -168,7 +174,7 @@ Public Class ConfigForm
     End Function
 
     ''' <summary>
-    ''' Makes the overall structure of a config file
+    ''' Makes the structure of a config file for a language
     ''' </summary>
     ''' <param name="legendPart"></param>
     ''' <param name="supportLayerPart"></param>
@@ -186,6 +192,19 @@ Public Class ConfigForm
             "  ""dataLayers"": [" & vbCrLf &
             dataLayerPart & vbCrLf &
             "  ]" & vbCrLf &
+            "}" & vbCrLf
+
+        Return json
+    End Function
+
+    Private Function MakeLangStructure(nugget As LangNugget) As String
+        'should iterate through nugget...being lazy and hardcoding
+        Dim json As String = "{" & vbCrLf &
+            "  ""en"": " & vbCrLf &
+            nugget.en & vbCrLf &
+            "  ," & vbCrLf &
+            "  ""fr"": " & vbCrLf &
+            nugget.fr & vbCrLf &
             "}" & vbCrLf
 
         Return json
@@ -229,7 +248,7 @@ Public Class ConfigForm
                     Dim legund = MakeCMIP5Legend(var, season, rcp)
 
                     Dim fileguts = MakeConfigStructure(legund, "", dataLayers)
-                    WriteConfig("test_" & var & season & rcp & ".json", fileguts)
+                    WriteConfig("testcmip5_" & var & season & rcp & ".json", fileguts)
 
                 Next
             Next
@@ -266,6 +285,68 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeCMIP5Legend(variable As String, season As String, rcp As String) As String
+
+        Return "{ ""legend"": true }"
+
+    End Function
+
+#End Region
+
+#Region " DCS "
+
+    Private Sub MakeDCSConfigs()
+        For Each var As String In aDCSVar
+            For Each season As String In aSeason
+                For Each rcp As String In aRcp
+                    Dim nugget As New LangNugget
+                    For Each lang As String In aLang
+                        'TODO will need to pipe lang as a param to these 3 functions
+                        Dim dataLayers = MakeDCSYearSet(var, season, rcp)  ' TODO we may need to add a 5th year period for "historical"
+                        Dim legund = MakeDCSLegend(var, season, rcp)
+
+                        Dim configstruct = MakeConfigStructure(legund, "", dataLayers)
+
+                        nugget.setLang(lang, configstruct)
+                    Next
+
+                    Dim fileguts = MakeLangStructure(nugget)
+                    WriteConfig("testdcs_" & var & season & rcp & ".json", fileguts)
+
+                Next
+            Next
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' Makes the Data Layer array for DCS "set of four time periods"
+    ''' </summary>
+    ''' <param name="variable"></param>
+    ''' <param name="season"></param>
+    ''' <param name="rcp"></param>
+    ''' <returns></returns>
+    Private Function MakeDCSYearSet(variable As String, season As String, rcp As String) As String
+
+        Dim lset As String = ""
+
+        For Each year As String In aYear
+            lset = lset & MakeDCSDataLayer(variable, season, rcp, year) & IIf(year <> "2081", ",", "") & vbCrLf
+        Next
+
+        Return lset
+
+    End Function
+
+    Private Function MakeDCSDataLayer(variable As String, season As String, rcp As String, year As String) As String
+
+        'calculate url (might be a constant)
+        'calculate wms layer id
+        'derive unique layer id (ramp id)
+
+        Return MakeWMSLayerConfig("url", "id", 1, True, "wmslayer")
+
+    End Function
+
+    Private Function MakeDCSLegend(variable As String, season As String, rcp As String) As String
 
         Return "{ ""legend"": true }"
 
