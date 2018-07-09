@@ -120,17 +120,17 @@ Public Class ConfigForm
         'TODO do we need to have a STYLE parameter added?
         'TODO most likely remove data parameter, unless we add in json table, then might need it
 
-        Dim json As String = pad1 & "{" & vbCrLf &
-            pad2 & """id"": """ & id & """," & vbCrLf &
-            pad2 & """layerType"":  ""ogcWMS""," & vbCrLf &
-            pad2 & """url"": """ & url & """," & vbCrLf &
-            pad2 & """state"": {" & vbCrLf &
-            pad3 & """opacity"": " & opacity & "," & vbCrLf &
-            pad3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
-            pad2 & "}," & vbCrLf &
-            pad2 & """layerEntries"": [{""id"": """ & layer & """ }]," & vbCrLf &
-            pad2 & """controls"": [""data""]" & vbCrLf &
-            pad1 & "}" & vbCrLf
+        Dim json As String = PAD1 & "{" & vbCrLf &
+            PAD2 & """id"": """ & id & """," & vbCrLf &
+            PAD2 & """layerType"":  ""ogcWMS""," & vbCrLf &
+            PAD2 & """url"": """ & url & """," & vbCrLf &
+            PAD2 & """state"": {" & vbCrLf &
+            PAD3 & """opacity"": " & opacity & "," & vbCrLf &
+            PAD3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
+            PAD2 & "}," & vbCrLf &
+            PAD2 & """layerEntries"": [{""id"": """ & layer & """ }]," & vbCrLf &
+            PAD2 & """controls"": [""data""]" & vbCrLf &
+            PAD1 & "}"
 
         Return json
 
@@ -158,16 +158,17 @@ Public Class ConfigForm
 
         'TODO if we need the 'name' element, will need some translations and the lang param coming in
         'TODO verify that we can delete the "control" part for tiles.
-        Dim json As String = pad1 & "{" & vbCrLf &
-            pad2 & """id"": """ & id & """," & vbCrLf &
-            pad2 & """layerType"": ""esriTile""," & vbCrLf &
-            pad2 & """url"": """ & url & """," & vbCrLf &
-            pad2 & """state"": {" & vbCrLf &
-            pad3 & """opacity"": " & opacity & "," & vbCrLf &
-            pad3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
-            pad2 & "}," & vbCrLf &
-            pad2 & """controls"": [""data""]" & vbCrLf &
-            pad1 & "}"
+        Dim json As String = PAD1 & "{" & vbCrLf &
+            PAD2 & """id"": """ & id & """," & vbCrLf &
+            PAD2 & """layerType"": ""esriTile""," & vbCrLf &
+            PAD2 & """url"": """ & url & """," & vbCrLf &
+            PAD2 & """state"": {" & vbCrLf &
+            PAD3 & """opacity"": " & opacity & "," & vbCrLf &
+            PAD3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
+            PAD2 & "}" & vbCrLf &
+            PAD1 & "}"
+
+        ' pad2 & """controls"": [""data""]" & vbCrLf &
 
         Return json
 
@@ -235,7 +236,35 @@ Public Class ConfigForm
 
     End Sub
 
+#Region " Support Layers "
 
+    Private Function MakeSupportSet(city As Boolean, prov As Boolean) As String
+        Dim sGuts As String = ""
+
+        If city Then
+            sGuts = sGuts & MakeCitiesConfig() & "," & vbCrLf
+        End If
+
+        If prov Then
+            sGuts = sGuts & MakeProvinceConfig() & "," & vbCrLf
+        End If
+
+        'trim last comma
+        Return sGuts.Substring(0, sGuts.Length - 3)
+
+    End Function
+
+    Private Function MakeProvinceConfig() As String
+
+        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Provinces/MapServer", "prov_support", 1, True)
+    End Function
+
+    Private Function MakeCitiesConfig() As String
+
+        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Cities/MapServer", "city_support", 1, False)
+    End Function
+
+#End Region
 
 #Region " CMIP5 "
 
@@ -303,8 +332,9 @@ Public Class ConfigForm
                         'TODO will need to pipe lang as a param to these 3 functions
                         Dim dataLayers = MakeDCSYearSet(var, season, rcp)  ' TODO we may need to add a 5th year period for "historical"
                         Dim legund = MakeDCSLegend(var, season, rcp)
+                        Dim support = MakeSupportSet(True, True)
 
-                        Dim configstruct = MakeConfigStructure(legund, "", dataLayers)
+                        Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
                         nugget.setLang(lang, configstruct)
                     Next
