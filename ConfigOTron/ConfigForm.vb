@@ -166,6 +166,7 @@ Public Class ConfigForm
 
         'TODO if we need the 'name' element, will need another input param
         'TODO verify that we can delete the "control" part for tiles.
+        'TODO we might also want "controls": ["visibility", "opacity", "reload", "settings"],
         Dim json As String = PAD1 & "{" & vbCrLf &
             PAD2 & """id"": """ & id & """," & vbCrLf &
             PAD2 & """layerType"": ""esriTile""," & vbCrLf &
@@ -182,7 +183,7 @@ Public Class ConfigForm
 
     End Function
 
-    Private Function MakeWFSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean) As String
+    Private Function MakeWFSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, nameField As String) As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"ogcWfs",
@@ -200,6 +201,7 @@ Public Class ConfigForm
             PAD2 & """id"": """ & id & """," & vbCrLf &
             PAD2 & """layerType"": ""ogcWfs""," & vbCrLf &
             PAD2 & """url"": """ & url & """," & vbCrLf &
+            PAD2 & """nameField"": """ & nameField & """," & vbCrLf &
             PAD2 & """state"": {" & vbCrLf &
             PAD3 & """opacity"": " & opacity & "," & vbCrLf &
             PAD3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
@@ -231,7 +233,7 @@ Public Class ConfigForm
             "  ""dataLayers"": [" & vbCrLf &
             dataLayerPart & vbCrLf &
             "  ]" & vbCrLf &
-            "}" & vbCrLf
+            "}"
 
         Return json
     End Function
@@ -244,9 +246,9 @@ Public Class ConfigForm
     Private Function MakeLangStructure(nugget As LangNugget) As String
         'should iterate through nugget...being lazy and hardcoding
         Dim json As String = "{" & vbCrLf &
-            "  ""en"": " &
+            """en"": " &
             nugget.en & "," & vbCrLf &
-            "  ""fr"": " &
+            """fr"": " &
             nugget.fr & vbCrLf &
             "}"
         Return json
@@ -269,7 +271,7 @@ Public Class ConfigForm
 
 #Region " Support Layers "
 
-    Private Function MakeSupportSet(city As Boolean, prov As Boolean) As String
+    Private Function MakeSupportSet(city As Boolean, prov As Boolean, labels As Boolean) As String
         Dim sGuts As String = ""
 
         If city Then
@@ -278,6 +280,10 @@ Public Class ConfigForm
 
         If prov Then
             sGuts = sGuts & MakeProvinceConfig() & "," & vbCrLf
+        End If
+
+        If labels Then
+            sGuts = sGuts & MakeLabelsConfig() & "," & vbCrLf
         End If
 
         'trim last comma
@@ -295,6 +301,11 @@ Public Class ConfigForm
         Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Cities/MapServer", "city_support", 1, False)
     End Function
 
+    Private Function MakeLabelsConfig() As String
+
+        Return MakeTileLayerConfig("http://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_TXT_3978/MapServer", "labels_support", 1, True)
+    End Function
+
 #End Region
 
 #Region " CMIP5 "
@@ -307,7 +318,7 @@ Public Class ConfigForm
                     For Each lang As String In aLang
                         Dim dataLayers = MakeCMIP5YearSet(var, season, rcp, lang)
                         Dim legund = MakeCMIP5Legend(var, season, rcp, lang)
-                        Dim support = MakeSupportSet(True, True)
+                        Dim support = MakeSupportSet(True, True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -373,7 +384,7 @@ Public Class ConfigForm
                     For Each lang As String In aLang
                         Dim dataLayers = MakeDCSYearSet(var, season, rcp, lang)  ' TODO we may need to add a 5th year period for "historical"
                         Dim legund = MakeDCSLegend(var, season, rcp, lang)
-                        Dim support = MakeSupportSet(True, True)
+                        Dim support = MakeSupportSet(True, True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -400,7 +411,7 @@ Public Class ConfigForm
         Dim lset As String = ""
 
         For Each year As String In aYear
-            lset = lset & MakeDCSDataLayer(variable, season, rcp, year, lang) & IIf(year <> "2081", ",", "") & vbCrLf
+            lset = lset & MakeDCSDataLayer(variable, season, rcp, year, lang) & IIf(year <> "2081", "," & vbCrLf, "")
         Next
 
         Return lset
@@ -467,7 +478,7 @@ Public Class ConfigForm
                 For Each lang As String In aLang
                     Dim dataLayers = MakeAHCCDDataLayer(var, season, lang)
                     Dim legund = MakeAHCCDLegend(var, season, lang)
-                    Dim support = MakeSupportSet(True, True)
+                    Dim support = MakeSupportSet(True, True, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -512,7 +523,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "AHCCD_" & variable & "_" & season & "_" & lang
 
-        Return MakeWFSLayerConfig(url, rampID, 1, True)
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "station_id")
 
     End Function
 
