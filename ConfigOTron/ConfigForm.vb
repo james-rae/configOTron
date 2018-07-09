@@ -121,7 +121,7 @@ Public Class ConfigForm
         '  ]
         '}
 
-        'TODO if we need the 'name' element, will need some translations and the lang param coming in
+        'TODO if we need the 'name' element, will need another input param
         'TODO do we need to have a STYLE parameter added?
         'TODO most likely remove data parameter, unless we add in json table, then might need it
 
@@ -161,7 +161,7 @@ Public Class ConfigForm
         '  }
         '}
 
-        'TODO if we need the 'name' element, will need some translations and the lang param coming in
+        'TODO if we need the 'name' element, will need another input param
         'TODO verify that we can delete the "control" part for tiles.
         Dim json As String = PAD1 & "{" & vbCrLf &
             PAD2 & """id"": """ & id & """," & vbCrLf &
@@ -178,6 +178,36 @@ Public Class ConfigForm
         Return json
 
     End Function
+
+    Private Function MakeWFSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean) As String
+        '{
+        '  "id":"canadaElevation",
+        '  "layerType":"ogcWfs",
+        '  "url":"http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=temp_mean",
+        '  "nameField": "station_id",
+        '  "state": {
+        '    "opacity": 0.5,
+        '    "visibility": false
+        '  },
+        '  "controls": ["data"]
+        '}
+
+        'TODO if we need the 'name' element, will need another input param
+        Dim json As String = PAD1 & "{" & vbCrLf &
+            PAD2 & """id"": """ & id & """," & vbCrLf &
+            PAD2 & """layerType"": ""esriTile""," & vbCrLf &
+            PAD2 & """url"": """ & url & """," & vbCrLf &
+            PAD2 & """state"": {" & vbCrLf &
+            PAD3 & """opacity"": " & opacity & "," & vbCrLf &
+            PAD3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
+            PAD2 & "}," & vbCrLf &
+            PAD2 & """controls"": [""data""]" & vbCrLf &
+            PAD1 & "}"
+
+        Return json
+
+    End Function
+
 
     ''' <summary>
     ''' Makes the structure of a config file for a language
@@ -270,11 +300,19 @@ Public Class ConfigForm
         For Each var As String In aCMIP5Var
             For Each season As String In aSeason
                 For Each rcp As String In aRcp
+                    Dim nugget As New LangNugget
+                    For Each lang As String In aLang
+                        Dim dataLayers = MakeCMIP5YearSet(var, season, rcp, lang)
+                        Dim legund = MakeCMIP5Legend(var, season, rcp, lang)
+                        Dim support = MakeSupportSet(True, True)
 
-                    Dim dataLayers = MakeCMIP5YearSet(var, season, rcp)
-                    Dim legund = MakeCMIP5Legend(var, season, rcp)
+                        Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
-                    Dim fileguts = MakeConfigStructure(legund, "", dataLayers)
+                        nugget.setLang(lang, configstruct)
+
+                    Next
+
+                    Dim fileguts = MakeLangStructure(nugget)
                     WriteConfig("testcmip5_" & var & season & rcp & ".json", fileguts)
 
                 Next
@@ -289,19 +327,19 @@ Public Class ConfigForm
     ''' <param name="season"></param>
     ''' <param name="rcp"></param>
     ''' <returns></returns>
-    Private Function MakeCMIP5YearSet(variable As String, season As String, rcp As String) As String
+    Private Function MakeCMIP5YearSet(variable As String, season As String, rcp As String, lang As String) As String
 
         Dim lset As String = ""
 
         For Each year As String In aYear
-            lset = lset & MakeCMIP5DataLayer(variable, season, rcp, year) & IIf(year <> "2081", ",", "") & vbCrLf
+            lset = lset & MakeCMIP5DataLayer(variable, season, rcp, year, lang) & IIf(year <> "2081", ",", "") & vbCrLf
         Next
 
         Return lset
 
     End Function
 
-    Private Function MakeCMIP5DataLayer(variable As String, season As String, rcp As String, year As String) As String
+    Private Function MakeCMIP5DataLayer(variable As String, season As String, rcp As String, year As String, lang As String) As String
 
         'calculate url (might be a constant)
         'calculate wms layer id
@@ -311,7 +349,7 @@ Public Class ConfigForm
 
     End Function
 
-    Private Function MakeCMIP5Legend(variable As String, season As String, rcp As String) As String
+    Private Function MakeCMIP5Legend(variable As String, season As String, rcp As String, lang As String) As String
 
         Return "{ ""legend"": true }"
 
@@ -330,7 +368,6 @@ Public Class ConfigForm
                 For Each rcp As String In aRcp
                     Dim nugget As New LangNugget
                     For Each lang As String In aLang
-                        'TODO will need to pipe lang as a param to these 3 functions
                         Dim dataLayers = MakeDCSYearSet(var, season, rcp, lang)  ' TODO we may need to add a 5th year period for "historical"
                         Dim legund = MakeDCSLegend(var, season, rcp, lang)
                         Dim support = MakeSupportSet(True, True)
