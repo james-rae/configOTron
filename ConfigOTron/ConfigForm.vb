@@ -30,6 +30,7 @@ Public Class ConfigForm
         MakeDCSConfigs()
         MakeAHCCDConfigs()
         MakeCAPAConfigs()
+        MakeHydroConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
@@ -535,6 +536,7 @@ Public Class ConfigForm
         Return "{ ""legend"": true }"
 
     End Function
+
 #End Region
 
 #Region " CAPA "
@@ -611,6 +613,58 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeCAPALegend(variable As String, lang As String) As String
+
+        Return "{ ""legend"": true }"
+
+    End Function
+
+#End Region
+
+#Region " Hydrometric "
+
+    ''' <summary>
+    ''' Create set of config files for Hydro
+    ''' </summary>
+    Private Sub MakeHydroConfigs()
+
+        'TODO there are no differences in service URL for language.
+        '     if we dont need langauge anywhere else, we can simpley do one configstruct then assign to both langs in the nugget
+        Dim nugget As New LangNugget
+        For Each lang As String In aLang
+            Dim dataLayers = MakeHydroDataLayer(lang)
+            Dim legund = MakeHydroLegend(lang)
+            Dim support = MakeSupportSet(True, True, True)
+
+            Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
+
+            nugget.setLang(lang, configstruct)
+        Next
+
+        Dim fileguts = MakeLangStructure(nugget)
+        WriteConfig("testHydro.json", fileguts)
+    End Sub
+
+
+    Private Function MakeHydroDataLayer(lang As String) As String
+        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
+        '     the get capabilities is 8mb on public geomet.
+        '     need aly's CORS patch done before I can test this
+        '     Mike suggestion to duplicate the layer id arg on the main url 
+
+        'calculate url (might be a constant)
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/items?STATUS_EN=\%22Active\%22
+
+
+        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/items?STATUS_EN=Active"
+
+        'derive unique layer id (ramp id)
+        Dim rampID As String = "Hydro_" & lang
+
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME")
+
+    End Function
+
+    Private Function MakeHydroLegend(lang As String) As String
 
         Return "{ ""legend"": true }"
 
