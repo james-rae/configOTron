@@ -6,11 +6,13 @@ Public Class ConfigForm
     Shared aLang = {"en", "fr"}
     Shared aRcp = {"rcp26", "rcp45", "rcp85"}
     Shared aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
+    Shared aCAPAVar = {"qp25", "qp10"}
     Shared aCMIP5Var = {"snow", "sith", "sico", "wind"}
     Shared aDCSVar = {"tmean", "tmin", "tmax", "prec"}
     Shared aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
     Shared aSeasonMonth = {"ANN", "MAM", "JJA", "SON", "DJF", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
     Shared aYear = {"2021", "2041", "2061", "2081"}
+    Shared aHour = {"24", "6"} 'want this order on time slider
 
 
     Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
@@ -27,6 +29,7 @@ Public Class ConfigForm
         MakeCMIP5Configs()
         MakeDCSConfigs()
         MakeAHCCDConfigs()
+        MakeCAPAConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
@@ -532,6 +535,87 @@ Public Class ConfigForm
         Return "{ ""legend"": true }"
 
     End Function
+#End Region
+
+#Region " CAPA "
+
+    ''' <summary>
+    ''' Create set of config files for CAPA
+    ''' </summary>
+    Private Sub MakeCAPAConfigs()
+        For Each var As String In aCAPAVar
+
+
+            Dim nugget As New LangNugget
+            For Each lang As String In aLang
+                Dim dataLayers = MakeCAPAHourSet(var, lang)
+                Dim legund = MakeCAPALegend(var, lang)
+                Dim support = MakeSupportSet(True, True, True)
+
+                Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
+
+                nugget.setLang(lang, configstruct)
+            Next
+
+            Dim fileguts = MakeLangStructure(nugget)
+            WriteConfig("testCAPA_" & var & ".json", fileguts)
+
+        Next
+    End Sub
+
+    ''' <summary>
+    ''' Makes the Data Layer array for CAPA "set of two time periods"
+    ''' </summary>
+    ''' <param name="variable"></param>
+    ''' <param name="lang"></param>
+    ''' <returns></returns>
+    Private Function MakeCAPAHourSet(variable As String, lang As String) As String
+
+        Dim lset As String = ""
+
+        For Each hour As String In aHour
+            lset = lset & MakeCAPADataLayer(variable, hour, lang) & IIf(hour <> "6", "," & vbCrLf, "")
+        Next
+
+        Return lset
+
+    End Function
+
+    Private Function MakeCAPADataLayer(variable As String, hour As String, lang As String) As String
+        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
+        '     the get capabilities is 8mb on public geomet.
+        '     need aly's CORS patch done before I can test this
+        '     Mike suggestion to duplicate the layer id arg on the main url 
+
+        'calculate url (might be a constant)
+        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=HRDPA.6F 
+        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=HRDPA.24F
+        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=RDPA.6F 
+        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=RDPA.24F
+
+        Dim url As String = "http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=" & lang
+
+        'TODO make global to prevent re-creating every iteration?
+        Dim dVari As New Dictionary(Of String, String) From {{"qp25", "HRDPA"}, {"qp10", "RDPA"}}
+
+        'calculate wms layer id
+        Dim varCode As String = dVari.Item(variable)
+
+        Dim wmsCode As String = varCode & "." & hour & "F"
+
+        'derive unique layer id (ramp id)
+        Dim rampID As String = "CAPA_" & variable & "_" & hour & "_" & lang
+
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode)
+
+    End Function
+
+    Private Function MakeCAPALegend(variable As String, lang As String) As String
+
+        Return "{ ""legend"": true }"
+
+    End Function
+
 #End Region
 
 #Region " Legacy Code "
