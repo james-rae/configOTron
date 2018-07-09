@@ -5,9 +5,11 @@ Public Class ConfigForm
     ' arrays of domains. global scope for sharing fun
     Shared aLang = {"en", "fr"}
     Shared aRcp = {"rcp26", "rcp45", "rcp85"}
+    Shared aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
     Shared aCMIP5Var = {"snow", "sith", "sico", "wind"}
     Shared aDCSVar = {"tmean", "tmin", "tmax", "prec"}
     Shared aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
+    Shared aSeasonMonth = {"ANN", "MAM", "JJA", "SON", "DJF", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
     Shared aYear = {"2021", "2041", "2061", "2081"}
 
 
@@ -24,6 +26,7 @@ Public Class ConfigForm
 
         MakeCMIP5Configs()
         MakeDCSConfigs()
+        MakeAHCCDConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
@@ -127,7 +130,7 @@ Public Class ConfigForm
 
         Dim json As String = PAD1 & "{" & vbCrLf &
             PAD2 & """id"": """ & rampId & """," & vbCrLf &
-            PAD2 & """layerType"":  ""ogcWMS""," & vbCrLf &
+            PAD2 & """layerType"":  ""ogcWms""," & vbCrLf &
             PAD2 & """url"": """ & url & """," & vbCrLf &
             PAD2 & """state"": {" & vbCrLf &
             PAD3 & """opacity"": " & opacity & "," & vbCrLf &
@@ -195,7 +198,7 @@ Public Class ConfigForm
         'TODO if we need the 'name' element, will need another input param
         Dim json As String = PAD1 & "{" & vbCrLf &
             PAD2 & """id"": """ & id & """," & vbCrLf &
-            PAD2 & """layerType"": ""esriTile""," & vbCrLf &
+            PAD2 & """layerType"": ""ogcWfs""," & vbCrLf &
             PAD2 & """url"": """ & url & """," & vbCrLf &
             PAD2 & """state"": {" & vbCrLf &
             PAD3 & """opacity"": " & opacity & "," & vbCrLf &
@@ -405,6 +408,10 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeDCSDataLayer(variable As String, season As String, rcp As String, year As String, lang As String) As String
+        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
+        '     the get capabilities is 8mb on public geomet.
+        '     need aly's CORS patch done before I can test this
+        '     Mike suggestion to duplicate the layer id arg on the main url 
 
         'calculate url (might be a constant)
         'tmean en/fr , tmin en/fr  , tmax en/fr  , prec en/fr
@@ -419,37 +426,15 @@ Public Class ConfigForm
 
         Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=" & lang
 
+        'TODO make global to prevent re-creating every iteration?
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "TX"}, {"tmin", "TN"}, {"tmax", "TM"}, {"prec", "PR"}}
+        Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "YEAR"}, {"MAM", "SPRING"}, {"JJA", "SUMMER"}, {"SON", "FALL"}, {"DJF", "WINTER"}}
+
         'calculate wms layer id
-        Dim varCode As String = ""
-        Dim seasonCode As String = ""
+        Dim varCode As String = dVari.Item(variable)
+        Dim seasonCode As String = dSeason.Item(season)
         Dim yearCode As String = year & "-" & CStr(CInt(year) + 19)
         Dim rcpCode As String = rcp.ToUpper()
-
-
-        Select Case variable
-            Case "tmean"
-                varCode = "TX"
-            Case "tmin"
-                varCode = "TN"
-            Case "tmax"
-                varCode = "TM"
-            Case "prec"
-                varCode = "PR"
-        End Select
-
-        '"ANN", "MAM", "JJA", "SON", "DJF"
-        Select Case season
-            Case "ANN"
-                seasonCode = "YEAR"
-            Case "MAM"
-                seasonCode = "SPRING"
-            Case "JJA"
-                seasonCode = "SUMMER"
-            Case "SON"
-                seasonCode = "FALL"
-            Case "DJF"
-                seasonCode = "WINTER"
-        End Select
 
         Dim wmsCode As String = "DCS." & varCode & "." & rcpCode & "." & seasonCode & "." & yearCode & "_PCTL50"
 
@@ -466,6 +451,76 @@ Public Class ConfigForm
 
     End Function
 
+#End Region
+
+#Region " AHCCD "
+    ''' <summary>
+    ''' Create set of config files for AHCCD
+    ''' </summary>
+    Private Sub MakeAHCCDConfigs()
+        For Each var As String In aAHCCDVar
+            For Each season As String In aSeasonMonth
+
+                'TODO there are no differences in service URL for language.
+                '     if we dont need langauge anywhere else, we can simpley do one configstruct then assign to both langs in the nugget
+                Dim nugget As New LangNugget
+                For Each lang As String In aLang
+                    Dim dataLayers = MakeAHCCDDataLayer(var, season, lang)
+                    Dim legund = MakeAHCCDLegend(var, season, lang)
+                    Dim support = MakeSupportSet(True, True)
+
+                    Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
+
+                    nugget.setLang(lang, configstruct)
+                Next
+
+                Dim fileguts = MakeLangStructure(nugget)
+                WriteConfig("testAHCCD_" & var & season & ".json", fileguts)
+            Next
+        Next
+    End Sub
+
+
+    Private Function MakeAHCCDDataLayer(variable As String, season As String, lang As String) As String
+        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
+        '     the get capabilities is 8mb on public geomet.
+        '     need aly's CORS patch done before I can test this
+        '     Mike suggestion to duplicate the layer id arg on the main url 
+
+        'calculate url (might be a constant)
+        'tmean , tmin , tmax , prec , surface pres , sea pres , whind
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=temp_mean&period=\"Ann\"
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=temp_min
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=temp_max
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=total_precip
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=pressure_station
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=pressure_sea_level
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=wind_speed
+
+
+        'TODO make global to prevent re-creating every iteration?
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "temp_mean"}, {"tmin", "temp_min"}, {"tmax", "temp_max"}, {"prec", "total_precip"}, {"supr", "pressure_station"}, {"slpr", "pressure_sea_level"}, {"wind", "wind_speed"}}
+        Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "Ann"}, {"MAM", "Spr"}, {"JJA", "Smr"}, {"SON", "Fal"}, {"DJF", "Win"}, {"JAN", "Jan"}, {"FEB", "Feb"}, {"MAR", "Mar"}, {"APR", "Apr"}, {"MAY", "May"}, {"JUN", "Jun"}, {"JUL", "Jul"}, {"AUG", "Aug"}, {"SEP", "Sep"}, {"OCT", "Oct"}, {"NOV", "Nov"}, {"DEC", "Dec"}}
+
+        'calculate wms layer id
+        Dim varCode As String = dVari.Item(variable)
+        Dim seasonCode As String = dSeason.Item(season)
+
+        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
+
+
+        'derive unique layer id (ramp id)
+        Dim rampID As String = "AHCCD_" & variable & "_" & season & "_" & lang
+
+        Return MakeWFSLayerConfig(url, rampID, 1, True)
+
+    End Function
+
+    Private Function MakeAHCCDLegend(variable As String, season As String, lang As String) As String
+
+        Return "{ ""legend"": true }"
+
+    End Function
 #End Region
 
 #Region " Legacy Code "
