@@ -82,6 +82,11 @@ Public Class ConfigForm
         Return roooot & "CMIP5_" & UCase(variable) & "/MapServer"
     End Function
 
+    ''' <summary>
+    ''' Turns native boolean into json text boolean
+    ''' </summary>
+    ''' <param name="bool"></param>
+    ''' <returns></returns>
     Private Function BoolToJson(bool As Boolean) As String
         'complicated
         If bool Then
@@ -95,12 +100,12 @@ Public Class ConfigForm
     ''' Generates a config structure that defines a WMS layer
     ''' </summary>
     ''' <param name="url"></param>
-    ''' <param name="id"></param>
+    ''' <param name="rampId"></param>
     ''' <param name="opacity"></param>
     ''' <param name="visible"></param>
-    ''' <param name="layer"></param>
+    ''' <param name="wmsLayerId"></param>
     ''' <returns></returns>
-    Private Function MakeWMSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, layer As String) As String
+    Private Function MakeWMSLayerConfig(url As String, rampId As String, opacity As Double, visible As Boolean, wmsLayerId As String) As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"ogcWMS",
@@ -121,14 +126,14 @@ Public Class ConfigForm
         'TODO most likely remove data parameter, unless we add in json table, then might need it
 
         Dim json As String = PAD1 & "{" & vbCrLf &
-            PAD2 & """id"": """ & id & """," & vbCrLf &
+            PAD2 & """id"": """ & rampId & """," & vbCrLf &
             PAD2 & """layerType"":  ""ogcWMS""," & vbCrLf &
             PAD2 & """url"": """ & url & """," & vbCrLf &
             PAD2 & """state"": {" & vbCrLf &
             PAD3 & """opacity"": " & opacity & "," & vbCrLf &
             PAD3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
             PAD2 & "}," & vbCrLf &
-            PAD2 & """layerEntries"": [{""id"": """ & layer & """ }]," & vbCrLf &
+            PAD2 & """layerEntries"": [{""id"": """ & wmsLayerId & """ }]," & vbCrLf &
             PAD2 & """controls"": [""data""]" & vbCrLf &
             PAD1 & "}"
 
@@ -198,30 +203,23 @@ Public Class ConfigForm
         Return json
     End Function
 
+    ''' <summary>
+    ''' Makes a config file language structure, puts appropriate content under the language properties
+    ''' </summary>
+    ''' <param name="nugget"></param>
+    ''' <returns></returns>
     Private Function MakeLangStructure(nugget As LangNugget) As String
         'should iterate through nugget...being lazy and hardcoding
         Dim json As String = "{" & vbCrLf &
-            "  ""en"": " & vbCrLf &
-            nugget.en & vbCrLf &
-            "  ," & vbCrLf &
-            "  ""fr"": " & vbCrLf &
+            "  ""en"": " &
+            nugget.en & "," & vbCrLf &
+            "  ""fr"": " &
             nugget.fr & vbCrLf &
-            "}" & vbCrLf
-
+            "}"
         Return json
     End Function
 
-    Private Function MakeLayerSet(variable As String, subPeroid As String, rcp As String) As String
 
-        Dim lset As String = ""
-
-        For Each year As String In aYear
-            lset = lset & MakeLayerSnippet(variable, subPeroid, rcp, year, year <> "2081")
-        Next
-
-        Return lset
-
-    End Function
 
     ''' <summary>
     ''' Writes content to a text file
@@ -323,6 +321,9 @@ Public Class ConfigForm
 
 #Region " DCS "
 
+    ''' <summary>
+    ''' Create set of config files for DCS
+    ''' </summary>
     Private Sub MakeDCSConfigs()
         For Each var As String In aDCSVar
             For Each season As String In aSeason
@@ -330,8 +331,8 @@ Public Class ConfigForm
                     Dim nugget As New LangNugget
                     For Each lang As String In aLang
                         'TODO will need to pipe lang as a param to these 3 functions
-                        Dim dataLayers = MakeDCSYearSet(var, season, rcp)  ' TODO we may need to add a 5th year period for "historical"
-                        Dim legund = MakeDCSLegend(var, season, rcp)
+                        Dim dataLayers = MakeDCSYearSet(var, season, rcp, lang)  ' TODO we may need to add a 5th year period for "historical"
+                        Dim legund = MakeDCSLegend(var, season, rcp, lang)
                         Dim support = MakeSupportSet(True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
@@ -354,29 +355,75 @@ Public Class ConfigForm
     ''' <param name="season"></param>
     ''' <param name="rcp"></param>
     ''' <returns></returns>
-    Private Function MakeDCSYearSet(variable As String, season As String, rcp As String) As String
+    Private Function MakeDCSYearSet(variable As String, season As String, rcp As String, lang As String) As String
 
         Dim lset As String = ""
 
         For Each year As String In aYear
-            lset = lset & MakeDCSDataLayer(variable, season, rcp, year) & IIf(year <> "2081", ",", "") & vbCrLf
+            lset = lset & MakeDCSDataLayer(variable, season, rcp, year, lang) & IIf(year <> "2081", ",", "") & vbCrLf
         Next
 
         Return lset
 
     End Function
 
-    Private Function MakeDCSDataLayer(variable As String, season As String, rcp As String, year As String) As String
+    Private Function MakeDCSDataLayer(variable As String, season As String, rcp As String, year As String, lang As String) As String
 
         'calculate url (might be a constant)
-        'calculate wms layer id
-        'derive unique layer id (ramp id)
+        'tmean en/fr , tmin en/fr  , tmax en/fr  , prec en/fr
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.TX.RCP85.FALL.2021-2040_PCTL50
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.TX.RCP85.FALL.2021-2040_PCTL50
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.TN.RCP85.FALL.2021-2040_PCTL50
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.TN.RCP85.FALL.2021-2040_PCTL50
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.TM.RCP85.FALL.2021-2040_PCTL50
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.TM.RCP85.FALL.2021-2040_PCTL50
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.PR.RCP85.FALL.2021-2040_PCTL50
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.PR.RCP85.FALL.2021-2040_PCTL50
 
-        Return MakeWMSLayerConfig("url", "id", 1, True, "wmslayer")
+        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=" & lang
+
+        'calculate wms layer id
+        Dim varCode As String = ""
+        Dim seasonCode As String = ""
+        Dim yearCode As String = year & "-" & CStr(CInt(year) + 19)
+        Dim rcpCode As String = rcp.ToUpper()
+
+
+        Select Case variable
+            Case "tmean"
+                varCode = "TX"
+            Case "tmin"
+                varCode = "TN"
+            Case "tmax"
+                varCode = "TM"
+            Case "prec"
+                varCode = "PR"
+        End Select
+
+        '"ANN", "MAM", "JJA", "SON", "DJF"
+        Select Case season
+            Case "ANN"
+                seasonCode = "YEAR"
+            Case "MAM"
+                seasonCode = "SPRING"
+            Case "JJA"
+                seasonCode = "SUMMER"
+            Case "SON"
+                seasonCode = "FALL"
+            Case "DJF"
+                seasonCode = "WINTER"
+        End Select
+
+        Dim wmsCode As String = "DCS." & varCode & "." & rcpCode & "." & seasonCode & "." & yearCode & "_PCTL50"
+
+        'derive unique layer id (ramp id)
+        Dim rampID As String = "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
+
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode)
 
     End Function
 
-    Private Function MakeDCSLegend(variable As String, season As String, rcp As String) As String
+    Private Function MakeDCSLegend(variable As String, season As String, rcp As String, lang As String) As String
 
         Return "{ ""legend"": true }"
 
@@ -491,6 +538,18 @@ Public Class ConfigForm
         oFile.Close()
 
     End Sub
+
+    Private Function MakeLayerSet(variable As String, subPeroid As String, rcp As String) As String
+
+        Dim lset As String = ""
+
+        For Each year As String In aYear
+            lset = lset & MakeLayerSnippet(variable, subPeroid, rcp, year, year <> "2081")
+        Next
+
+        Return lset
+
+    End Function
 
     Private Function MakeLayerSnippet(variable As String, subPeroid As String, rcp As String, year As String, trailingComma As Boolean) As String
         '{
