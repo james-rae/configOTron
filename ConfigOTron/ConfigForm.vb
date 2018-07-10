@@ -6,11 +6,13 @@ Public Class ConfigForm
     Shared aLang = {"en", "fr"}
     Shared aRcp = {"rcp26", "rcp45", "rcp85"}
     Shared aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
+    Shared aCanGRIDVar = {"tmean", "prec"} ' "tmin", "tmax",
     Shared aCAPAVar = {"qp25", "qp10"}
     Shared aCMIP5Var = {"snow", "sith", "sico", "wind"}
     Shared aDCSVar = {"tmean", "tmin", "tmax", "prec"}
     Shared aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
     Shared aSeasonMonth = {"ANN", "MAM", "JJA", "SON", "DJF", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
+    Shared aSeasonMonthly = {"ANN", "MAM", "JJA", "SON", "DJF", "MTH"}
     Shared aYear = {"2021", "2041", "2061", "2081"}
     Shared aHour = {"24", "6"} 'want this order on time slider
 
@@ -26,68 +28,17 @@ Public Class ConfigForm
 
         'MAIN STARTING POINT OF APP.
 
-        MakeCMIP5Configs()
+        'MakeCMIP5Configs()
         MakeDCSConfigs()
         MakeAHCCDConfigs()
         MakeCAPAConfigs()
         MakeHydroConfigs()
+        MakeCanGRIDConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
 
-
-
-    Private Function MakeMiniFileName(variable As String, subPeroid As String, rcp As String) As String
-
-        Dim badAlyVar As String = ""
-        Dim badAlyPeriod As String = ""
-
-        Select Case subPeroid
-            Case "DJF"
-                badAlyPeriod = "winter"
-            Case "JJA"
-                badAlyPeriod = "summer"
-            Case "MAM"
-                badAlyPeriod = "spring"
-            Case "SON"
-                badAlyPeriod = "fall"
-            Case "ANN"
-                badAlyPeriod = "annual"
-        End Select
-
-        Select Case variable
-            Case "snow"
-                badAlyVar = "snd"
-            Case "sith"
-                badAlyVar = "sit"
-            Case "sico"
-                badAlyVar = "sic"
-            Case "wind"
-                badAlyVar = "sfcwind"
-        End Select
-
-        Return "cmip5-layer-configs-" & badAlyVar & "-" & badAlyPeriod & "-" & rcp & ".json"
-    End Function
-
-    Private Function MakeLayerURL(variable As String, subPeroid As String, rcp As String, year As String) As String
-        ' e.g. http://cipgis.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5_SeaIceThickness/SeaIceThickness_2061_20yr_SON_rcp45/MapServer
-
-        Dim roooot As String = "http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5/"
-
-        'Dim varfancy As String = ""
-        'Select Case variable
-        '    Case "snow"
-        '        varfancy = "SNOW"
-        '    Case "sith"
-        '        varfancy = "SeaIceThickness"
-        '    Case "sico"
-        '        varfancy = "SeaIceConcentration"
-        '    Case "wind"
-        '        varfancy = "WindSpeed"
-        'End Select
-
-        Return roooot & "CMIP5_" & UCase(variable) & "/MapServer"
-    End Function
+#Region " General Structure Builders "
 
     ''' <summary>
     ''' Turns native boolean into json text boolean
@@ -273,6 +224,8 @@ Public Class ConfigForm
 
     End Sub
 
+#End Region
+
 #Region " Support Layers "
 
     Private Function MakeSupportSet(city As Boolean, prov As Boolean, labels As Boolean) As String
@@ -377,6 +330,8 @@ Public Class ConfigForm
 
 #Region " DCS "
 
+    ' WMS. Time (by year).
+
     ''' <summary>
     ''' Create set of config files for DCS
     ''' </summary>
@@ -469,6 +424,9 @@ Public Class ConfigForm
 #End Region
 
 #Region " AHCCD "
+
+    ' WFS. No Time.
+
     ''' <summary>
     ''' Create set of config files for AHCCD
     ''' </summary>
@@ -541,12 +499,13 @@ Public Class ConfigForm
 
 #Region " CAPA "
 
+    ' WMS. Time (by hour).
+
     ''' <summary>
     ''' Create set of config files for CAPA
     ''' </summary>
     Private Sub MakeCAPAConfigs()
         For Each var As String In aCAPAVar
-
 
             Dim nugget As New LangNugget
             For Each lang As String In aLang
@@ -622,6 +581,8 @@ Public Class ConfigForm
 
 #Region " Hydrometric "
 
+    ' WFS. No Time.
+
     ''' <summary>
     ''' Create set of config files for Hydro
     ''' </summary>
@@ -671,6 +632,76 @@ Public Class ConfigForm
     End Function
 
 #End Region
+
+#Region " CanGRID "
+
+    ' WMS. No Time.
+
+    ''' <summary>
+    ''' Create set of config files for CanGRID
+    ''' </summary>
+    Private Sub MakeCanGRIDConfigs()
+        For Each var As String In aCanGRIDVar
+            For Each season As String In aSeasonMonthly 'note different than SeasonMonth
+
+                Dim nugget As New LangNugget
+                For Each lang As String In aLang
+                    Dim dataLayers = MakeCanGRIDDataLayer(var, season, lang)
+                    Dim legund = MakeCanGRIDLegend(var, season, lang)
+                    Dim support = MakeSupportSet(True, True, True)
+
+                    Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
+
+                    nugget.setLang(lang, configstruct)
+                Next
+
+                Dim fileguts = MakeLangStructure(nugget)
+                WriteConfig("testCanGRID_" & var & season & ".json", fileguts)
+            Next
+        Next
+    End Sub
+
+
+    Private Function MakeCanGRIDDataLayer(variable As String, season As String, lang As String) As String
+        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
+        '     the get capabilities is 8mb on public geomet.
+        '     need aly's CORS patch done before I can test this
+        '     Mike suggestion to duplicate the layer id arg on the main url 
+
+        'calculate url (might be a constant)
+        'tmean , tmin , tmax , prec , surface pres , sea pres , whind
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en
+
+
+        'TODO make global to prevent re-creating every iteration?
+        'NOTE layer spreadsheet only indicates tmean and precip. will include other two codes if we add them.
+        '     and ??? at why TX is min and TM is max
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "TN"}, {"tmin", "TX"}, {"tmax", "TM"}, {"prec", "PR"}}
+        Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "ANNUAL"}, {"MAM", "SPRING"}, {"JJA", "SUMMER"}, {"SON", "FALL"}, {"DJF", "WINTER"}, {"MTH", "MONTHLY"}}
+
+        'calculate wms layer id
+        Dim varCode As String = dVari.Item(variable)
+        Dim seasonCode As String = dSeason.Item(season)
+
+        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=" & lang
+
+        Dim wmsCode As String = "CANGRID.TREND." & varCode & "_" & seasonCode
+
+        'derive unique layer id (ramp id)
+        Dim rampID As String = "CanGRID_" & variable & "_" & season & "_" & lang
+
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode)
+
+    End Function
+
+    Private Function MakeCanGRIDLegend(variable As String, season As String, lang As String) As String
+
+        Return "{ ""legend"": true }"
+
+    End Function
+
+#End Region
+
 
 #Region " Legacy Code "
 
@@ -826,6 +857,60 @@ Public Class ConfigForm
 
         Return json
 
+    End Function
+
+
+    Private Function MakeMiniFileName(variable As String, subPeroid As String, rcp As String) As String
+
+        Dim badAlyVar As String = ""
+        Dim badAlyPeriod As String = ""
+
+        Select Case subPeroid
+            Case "DJF"
+                badAlyPeriod = "winter"
+            Case "JJA"
+                badAlyPeriod = "summer"
+            Case "MAM"
+                badAlyPeriod = "spring"
+            Case "SON"
+                badAlyPeriod = "fall"
+            Case "ANN"
+                badAlyPeriod = "annual"
+        End Select
+
+        Select Case variable
+            Case "snow"
+                badAlyVar = "snd"
+            Case "sith"
+                badAlyVar = "sit"
+            Case "sico"
+                badAlyVar = "sic"
+            Case "wind"
+                badAlyVar = "sfcwind"
+        End Select
+
+        Return "cmip5-layer-configs-" & badAlyVar & "-" & badAlyPeriod & "-" & rcp & ".json"
+    End Function
+
+
+    Private Function MakeLayerURL(variable As String, subPeroid As String, rcp As String, year As String) As String
+        ' e.g. http://cipgis.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5_SeaIceThickness/SeaIceThickness_2061_20yr_SON_rcp45/MapServer
+
+        Dim roooot As String = "http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5/"
+
+        'Dim varfancy As String = ""
+        'Select Case variable
+        '    Case "snow"
+        '        varfancy = "SNOW"
+        '    Case "sith"
+        '        varfancy = "SeaIceThickness"
+        '    Case "sico"
+        '        varfancy = "SeaIceConcentration"
+        '    Case "wind"
+        '        varfancy = "WindSpeed"
+        'End Select
+
+        Return roooot & "CMIP5_" & UCase(variable) & "/MapServer"
     End Function
 
 #End Region
