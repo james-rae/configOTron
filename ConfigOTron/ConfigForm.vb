@@ -10,6 +10,7 @@ Public Class ConfigForm
     Shared aCAPAVar = {"qp25", "qp10"}
     Shared aCMIP5Var = {"snow", "sith", "sico", "wind"}
     Shared aDCSVar = {"tmean", "tmin", "tmax", "prec"}
+    Shared aNormalsVar = {"tmean", "tmin", "tmax", "prec", "stpr", "slpr", "wind", "mgst", "dgst"}
     Shared aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
     Shared aSeasonMonth = {"ANN", "MAM", "JJA", "SON", "DJF", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
     Shared aSeasonMonthly = {"ANN", "MAM", "JJA", "SON", "DJF", "MTH"}
@@ -22,7 +23,9 @@ Public Class ConfigForm
     Const PAD2 As String = "      "
     Const PAD3 As String = "        "
 
-
+    Const LABELS_LAYER_ID As String = "labels"
+    Const PROVINCES_LAYER_ID As String = "provinces"
+    Const CITIES_LAYER_ID As String = "cities"
 
     Private Sub cmdEnhanceMini_Click(sender As Object, e As EventArgs) Handles cmdEnhanceMini.Click
 
@@ -210,6 +213,91 @@ Public Class ConfigForm
     End Function
 
 
+    Private Function MakeSimpleLegendBlockConfig(infoType As String, content As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
+
+        Dim nugget As New ConfigNugget(indentLevel)
+
+        nugget.AddLine("{")
+        nugget.AddLine("""infoType"": """ & infoType & """,", 1)
+        nugget.AddLine("""content"": """ & content & """", 1)
+        nugget.AddLine("}" & IIf(trailingComma, ",", ""))
+
+        Return nugget.Nugget
+
+    End Function
+
+    Private Function MakeOverlayLegendBlockConfig(layerName As String, layerId As String, icon As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
+
+        Dim nugget As New ConfigNugget(indentLevel)
+
+        nugget.AddLine("{")
+        nugget.AddLine("""layerId"": """ & layerId & """,", 1)
+        nugget.AddLine("""layerName"": """ & layerName & """,", 1)
+        nugget.AddLine("""coverIcon"": """ & icon & """,", 1)
+        nugget.AddLine("""symbologyStack"": []", 1)
+        nugget.AddLine("}" & IIf(trailingComma, ",", ""))
+
+        Return nugget.Nugget
+
+    End Function
+
+    Private Function MakeLayerLegendBlockConfig(layerName As String, layerId As String, descrip As String, icon As String,
+          legendImg As String, legendText As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
+
+
+        Dim nugget As New ConfigNugget(indentLevel)
+
+        nugget.AddLine("{")
+        nugget.AddLine("""layerId"": """ & layerId & """,", 1)
+        nugget.AddLine("""layerName"": """ & layerName & """,", 1)
+        nugget.AddLine("""description"": """ & descrip & """,", 1)
+        nugget.AddLine("""coverIcon"": """ & icon & """,", 1)
+        nugget.AddLine("""symbologyStack"": [", 1)
+        nugget.AddLine("{", 2)
+        nugget.AddLine("""image"": """ & legendImg & """,", 3)
+        nugget.AddLine("""text"": """ & legendText & """", 3)
+        nugget.AddLine("}", 2)
+        nugget.AddLine("],", 1)
+        nugget.AddLine("""symbologyRenderStyle"": ""images""", 1)
+        nugget.AddLine("}" & IIf(trailingComma, ",", ""))
+
+        Return nugget.Nugget
+
+    End Function
+
+    Private Function MakeLegendTitleConfig(titleText As String, descText As String) As String
+
+        Dim json As String = MakeSimpleLegendBlockConfig("title", titleText, 2) &
+             MakeSimpleLegendBlockConfig("text", descText, 2)
+
+        Return json
+
+    End Function
+
+
+
+    Private Function MakeLegendSettingsConfig(lang As String, city As Boolean, prov As Boolean, labels As Boolean) As String
+
+        Dim bEnglish = (lang = "en")
+        Const padLevel As Integer = 2
+
+        Dim json As String = MakeSimpleLegendBlockConfig("title", IIf(bEnglish, "Settings", "[fr] Settings"), padLevel)
+
+        If city Then
+            json &= MakeOverlayLegendBlockConfig(IIf(bEnglish, "Cities", "[fr] Cities"), CITIES_LAYER_ID, "assets/images/cities.svg", padLevel, (prov Or labels))
+        End If
+
+        If labels Then
+            json &= MakeOverlayLegendBlockConfig(IIf(bEnglish, "Labels", "[fr] Labels"), LABELS_LAYER_ID, "assets/images/labels.svg", padLevel, prov)
+        End If
+
+        If prov Then
+            json &= MakeOverlayLegendBlockConfig(IIf(bEnglish, "Provinces", "[fr] Provinces"), PROVINCES_LAYER_ID, "assets/images/provinces.svg", padLevel, False)
+        End If
+
+        Return json
+
+    End Function
 
     ''' <summary>
     ''' Writes content to a text file
@@ -232,15 +320,15 @@ Public Class ConfigForm
         Dim sGuts As String = ""
 
         If city Then
-            sGuts = sGuts & MakeCitiesConfig() & "," & vbCrLf
-        End If
-
-        If prov Then
-            sGuts = sGuts & MakeProvinceConfig() & "," & vbCrLf
+            sGuts &= MakeCitiesConfig() & "," & vbCrLf
         End If
 
         If labels Then
-            sGuts = sGuts & MakeLabelsConfig() & "," & vbCrLf
+            sGuts &= MakeLabelsConfig() & "," & vbCrLf
+        End If
+
+        If prov Then
+            sGuts &= MakeProvinceConfig() & "," & vbCrLf
         End If
 
         'trim last comma
@@ -250,17 +338,17 @@ Public Class ConfigForm
 
     Private Function MakeProvinceConfig() As String
 
-        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Provinces/MapServer", "prov_support", 1, True)
+        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Provinces/MapServer", PROVINCES_LAYER_ID, 1, True)
     End Function
 
     Private Function MakeCitiesConfig() As String
 
-        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Cities/MapServer", "city_support", 1, False)
+        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Cities/MapServer", CITIES_LAYER_ID, 1, False)
     End Function
 
     Private Function MakeLabelsConfig() As String
 
-        Return MakeTileLayerConfig("http://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_TXT_3978/MapServer", "labels_support", 1, True)
+        Return MakeTileLayerConfig("http://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_TXT_3978/MapServer", LABELS_LAYER_ID, 1, True)
     End Function
 
 #End Region
@@ -438,8 +526,11 @@ Public Class ConfigForm
                 '     if we dont need langauge anywhere else, we can simpley do one configstruct then assign to both langs in the nugget
                 Dim nugget As New LangNugget
                 For Each lang As String In aLang
-                    Dim dataLayers = MakeAHCCDDataLayer(var, season, lang)
-                    Dim legund = MakeAHCCDLegend(var, season, lang)
+                    'derive unique layer id (ramp id)
+                    Dim rampID As String = "AHCCD_" & var & "_" & season & "_" & lang
+
+                    Dim dataLayers = MakeAHCCDDataLayer(var, season, lang, rampID)
+                    Dim legund = MakeAHCCDLegend(var, season, lang, rampID)
                     Dim support = MakeSupportSet(True, True, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
@@ -454,7 +545,7 @@ Public Class ConfigForm
     End Sub
 
 
-    Private Function MakeAHCCDDataLayer(variable As String, season As String, lang As String) As String
+    Private Function MakeAHCCDDataLayer(variable As String, season As String, lang As String, rampId As String) As String
         'TODO attempt to get a URL that works with &lang but without GetCapabilities.
         '     the get capabilities is 8mb on public geomet.
         '     need aly's CORS patch done before I can test this
@@ -481,17 +572,57 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
 
-
-        'derive unique layer id (ramp id)
-        Dim rampID As String = "AHCCD_" & variable & "_" & season & "_" & lang
-
-        Return MakeWFSLayerConfig(url, rampID, 1, True, "station_id")
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "station_id")
 
     End Function
 
-    Private Function MakeAHCCDLegend(variable As String, season As String, lang As String) As String
+    Private Function MakeAHCCDLegend(variable As String, season As String, lang As String, rampId As String) As String
 
-        Return "{ ""legend"": true }"
+        Dim sLegend As String = ""
+        Dim bEnglish As Boolean = (lang = "en")
+        Dim sTopTitle = IIf(bEnglish, "Data", "[fr] Data")
+        Dim sTopDescription = IIf(bEnglish, "A short AHCCD dataset description goes here", "[fr] A short AHCCD dataset description goes here")
+        Dim sLayerName As String = ""
+        Dim sVarDescription = ""
+        Dim sCoverIcon = ""
+        Dim sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=AHCCD.STATIONS&format=image/png&STYLE=default"
+
+        Select Case variable
+            Case "tmean"
+                sVarDescription = IIf(bEnglish, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here")
+                sLayerName = IIf(bEnglish, "Mean temperature", "[fr] Mean temperature")
+                sCoverIcon = "assets/images/tmean.svg"
+            Case "tmin"
+                sVarDescription = IIf(bEnglish, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here")
+                sLayerName = IIf(bEnglish, "Minimum temperature", "[fr] Minimum temperature")
+                sCoverIcon = "assets/images/tmin.svg"
+            Case "tmax"
+                sVarDescription = IIf(bEnglish, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here")
+                sLayerName = IIf(bEnglish, "Maximum temperature", "[fr] Maximum temperature")
+                sCoverIcon = "assets/images/tmax.svg"
+            Case "prec"
+                sVarDescription = IIf(bEnglish, "A short precipitation description goes here", "[fr] A short precipitation description goes here")
+                sLayerName = IIf(bEnglish, "Precipitation", "[fr] Precipitation")
+                sCoverIcon = "assets/images/precip.svg"
+            Case "supr"
+                sVarDescription = IIf(bEnglish, "A short surface pressure description goes here", "[fr] A short surface pressure description goes here")
+                sLayerName = IIf(bEnglish, "Surface pressure", "[fr] Surface pressure")
+                sCoverIcon = "assets/images/stnpress.svg"
+            Case "slpr"
+                sVarDescription = IIf(bEnglish, "A short sea level pressure description goes here", "[fr] A short sea level pressure description goes here")
+                sLayerName = IIf(bEnglish, "Sea level pressure", "[fr] Sea level pressure")
+                sCoverIcon = "assets/images/seapress.svg"
+            Case "wind"
+                sVarDescription = IIf(bEnglish, "A short wind speed description goes here", "[fr] A short wind speed description goes here")
+                sLayerName = IIf(bEnglish, "Wind speed", "[fr] Wind speed")
+                sCoverIcon = "assets/images/wind.svg"
+        End Select
+
+        sLegend &= MakeLegendTitleConfig(sTopTitle, sTopDescription) &
+            MakeLayerLegendBlockConfig(sLayerName, rampId, sVarDescription, sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+
+        Return sLegend
 
     End Function
 
@@ -702,6 +833,81 @@ Public Class ConfigForm
 
 #End Region
 
+#Region " Normals "
+
+    'TODO this section has not been done yet.
+
+    ' WFS. No Time.
+
+    ''' <summary>
+    ''' Create set of config files for Normals
+    ''' </summary>
+    Private Sub MakeNormalsConfigs()
+        For Each var As String In aNormalsVar
+            For Each season As String In aSeasonMonth
+
+                'TODO there are no differences in service URL for language.
+                '     if we dont need langauge anywhere else, we can simpley do one configstruct then assign to both langs in the nugget
+                Dim nugget As New LangNugget
+                For Each lang As String In aLang
+                    Dim dataLayers = MakeNormalsDataLayer(var, season, lang)
+                    Dim legund = MakeNormalsLegend(var, season, lang)
+                    Dim support = MakeSupportSet(True, True, True)
+
+                    Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
+
+                    nugget.setLang(lang, configstruct)
+                Next
+
+                Dim fileguts = MakeLangStructure(nugget)
+                WriteConfig("testNormals_" & var & season & ".json", fileguts)
+            Next
+        Next
+    End Sub
+
+
+    Private Function MakeNormalsDataLayer(variable As String, season As String, lang As String) As String
+        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
+        '     the get capabilities is 8mb on public geomet.
+        '     need aly's CORS patch done before I can test this
+        '     Mike suggestion to duplicate the layer id arg on the main url 
+
+        'calculate url (might be a constant)
+        'tmean , tmin , tmax , prec , surface pres , sea pres , whind
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=temp_mean&period=\"Ann\"
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=temp_min
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=temp_max
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=total_precip
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=pressure_station
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=pressure_sea_level
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=wind_speed
+
+
+        'TODO make global to prevent re-creating every iteration?
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "temp_mean"}, {"tmin", "temp_min"}, {"tmax", "temp_max"}, {"prec", "total_precip"}, {"supr", "pressure_station"}, {"slpr", "pressure_sea_level"}, {"wind", "wind_speed"}}
+        Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "Ann"}, {"MAM", "Spr"}, {"JJA", "Smr"}, {"SON", "Fal"}, {"DJF", "Win"}, {"JAN", "Jan"}, {"FEB", "Feb"}, {"MAR", "Mar"}, {"APR", "Apr"}, {"MAY", "May"}, {"JUN", "Jun"}, {"JUL", "Jul"}, {"AUG", "Aug"}, {"SEP", "Sep"}, {"OCT", "Oct"}, {"NOV", "Nov"}, {"DEC", "Dec"}}
+
+        'calculate wms layer id
+        Dim varCode As String = dVari.Item(variable)
+        Dim seasonCode As String = dSeason.Item(season)
+
+        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
+
+
+        'derive unique layer id (ramp id)
+        Dim rampID As String = "Normals_" & variable & "_" & season & "_" & lang
+
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "station_id")
+
+    End Function
+
+    Private Function MakeNormalsLegend(variable As String, season As String, lang As String) As String
+
+        Return "{ ""legend"": true }"
+
+    End Function
+
+#End Region
 
 #Region " Legacy Code "
 
