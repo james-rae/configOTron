@@ -125,19 +125,21 @@ Public Class ConfigForm
         'TODO if we need the 'name' element, will need another input param
         'TODO verify that we can delete the "control" part for tiles.
         'TODO we might also want "controls": ["visibility", "opacity", "reload", "settings"],
-        Dim json As String = PAD1 & "{" & vbCrLf &
-            PAD2 & """id"": """ & id & """," & vbCrLf &
-            PAD2 & """layerType"": ""esriTile""," & vbCrLf &
-            PAD2 & """url"": """ & url & """," & vbCrLf &
-            PAD2 & """state"": {" & vbCrLf &
-            PAD3 & """opacity"": " & opacity & "," & vbCrLf &
-            PAD3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
-            PAD2 & "}" & vbCrLf &
-            PAD1 & "}"
 
-        ' pad2 & """controls"": [""data""]" & vbCrLf &
+        Dim nugget As New ConfigNugget(2)
 
-        Return json
+        nugget.AddLine("{")
+        nugget.AddLine("""id"": """ & id & """,", 1)
+        nugget.AddLine("""layerType"": ""esriTile"",", 1)
+        nugget.AddLine("""url"": """ & url & """,", 1)
+        nugget.AddLine("""state"": {", 1)
+        nugget.AddLine("""opacity"": " & opacity & ",", 2)
+        nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
+        nugget.AddLine("},", 1)
+        'nugget.AddLine("""controls"": [""data""]", 1)
+        nugget.AddLine("}", 0, True)
+
+        Return nugget.Nugget
 
     End Function
 
@@ -155,19 +157,22 @@ Public Class ConfigForm
         '}
 
         'TODO if we need the 'name' element, will need another input param
-        Dim json As String = PAD1 & "{" & vbCrLf &
-            PAD2 & """id"": """ & id & """," & vbCrLf &
-            PAD2 & """layerType"": ""ogcWfs""," & vbCrLf &
-            PAD2 & """url"": """ & url & """," & vbCrLf &
-            PAD2 & """nameField"": """ & nameField & """," & vbCrLf &
-            PAD2 & """state"": {" & vbCrLf &
-            PAD3 & """opacity"": " & opacity & "," & vbCrLf &
-            PAD3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
-            PAD2 & "}," & vbCrLf &
-            PAD2 & """controls"": [""data""]" & vbCrLf &
-            PAD1 & "}"
 
-        Return json
+        Dim nugget As New ConfigNugget(2)
+
+        nugget.AddLine("{")
+        nugget.AddLine("""id"": """ & id & """,", 1)
+        nugget.AddLine("""layerType"": ""ogcWfs"",", 1)
+        nugget.AddLine("""url"": """ & url & """,", 1)
+        nugget.AddLine("""nameField"": """ & nameField & """,", 1)
+        nugget.AddLine("""state"": {", 1)
+        nugget.AddLine("""opacity"": " & opacity & ",", 2)
+        nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
+        nugget.AddLine("},", 1)
+        nugget.AddLine("""controls"": [""data""]", 1)
+        nugget.AddLine("}", 0, True)
+
+        Return nugget.Nugget
 
     End Function
 
