@@ -1,5 +1,12 @@
 ﻿Imports System.IO
 
+
+'OUTSTANDING THINGS
+' - adjust urls on WMS layers so they don't hit GetCapabilities
+' - adjust urls on station layers (daily, monthly, normals(?)) for additional filtering for "one point per station"
+' - update language strings
+' - proper image svg for hydro legend
+
 Public Class ConfigForm
 
     ' arrays of domains. global scope for sharing fun
@@ -28,6 +35,7 @@ Public Class ConfigForm
     Dim oCMIP5Lang As LangHive
     Dim oDailyLang As LangHive
     Dim oDCSLang As LangHive
+    Dim oHydroLang As LangHive
     Dim oMonthlyLang As LangHive
     Dim oNormalsLang As LangHive
 
@@ -46,6 +54,7 @@ Public Class ConfigForm
     Const LAYER_NAME As String = "LayerName"
     Const VAR_DESC As String = "VarDesc"
     Const COVER_ICON As String = "CovIcon"
+    Const SETTINGS_TITLE As String = "SettingsTitle"
 
     Private Sub cmdEnhanceMini_Click(sender As Object, e As EventArgs) Handles cmdEnhanceMini.Click
 
@@ -67,10 +76,11 @@ Public Class ConfigForm
     Private Sub MakeCommonLang()
         oCommonLang = New LangHive
         With oCommonLang
+            'support layer names
             .AddItem(LAYER_NAME, "Labels", "[fr] Labels", LABELS_LAYER_ID)
             .AddItem(LAYER_NAME, "Provinces", "[fr] Provinces", PROVINCES_LAYER_ID)
             .AddItem(LAYER_NAME, "Cities", "[fr] Cities", CITIES_LAYER_ID)
-
+            .AddItem(SETTINGS_TITLE, "Settings", "[fr] Settings")
         End With
     End Sub
 
@@ -220,19 +230,24 @@ Public Class ConfigForm
     ''' <returns></returns>
     Private Function MakeConfigStructure(legendPart As String, supportLayerPart As String, dataLayerPart As String) As String
         '3 named arrays of stuff
-        Dim json As String = "{" & vbCrLf &
-            "  ""legend"": [" & vbCrLf &
-            legendPart & vbCrLf &
-            "  ]," & vbCrLf &
-            "  ""supportLayers"": [" & vbCrLf &
-            supportLayerPart & vbCrLf &
-            "  ]," & vbCrLf &
-            "  ""dataLayers"": [" & vbCrLf &
-            dataLayerPart & vbCrLf &
-            "  ]" & vbCrLf &
-            "}"
 
-        Return json
+        Dim nugget As New ConfigNugget(0)
+
+        nugget.AddLine("{")
+        nugget.AddLine("""legend"": [", 1)
+        nugget.AddRaw(legendPart)
+        nugget.AddLine("],", 1)
+        nugget.AddLine("""supportLayers"": [", 1)
+        nugget.AddRaw(supportLayerPart)
+        nugget.AddLine("],", 1)
+        nugget.AddLine("""dataLayers"": [", 1)
+        nugget.AddRaw(dataLayerPart)
+        nugget.AddLine("]", 1)
+        nugget.AddLine("}", 0, True)
+
+        Return nugget.Nugget
+
+
     End Function
 
     ''' <summary>
@@ -317,21 +332,20 @@ Public Class ConfigForm
 
     Private Function MakeLegendSettingsConfig(lang As String, city As Boolean, prov As Boolean, labels As Boolean) As String
 
-        Dim bEnglish = (lang = "en")
         Const padLevel As Integer = 2
 
-        Dim json As String = MakeSimpleLegendBlockConfig("title", IIf(bEnglish, "Settings", "[fr] Settings"), padLevel)
+        Dim json As String = MakeSimpleLegendBlockConfig("title", oCommonLang.Txt(lang, SETTINGS_TITLE), padLevel)
 
         If city Then
-            json &= MakeOverlayLegendBlockConfig(IIf(bEnglish, "Cities", "[fr] Cities"), CITIES_LAYER_ID, "assets/images/cities.svg", padLevel, (prov Or labels))
+            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID), CITIES_LAYER_ID, "assets/images/cities.svg", padLevel, (prov Or labels))
         End If
 
         If labels Then
-            json &= MakeOverlayLegendBlockConfig(IIf(bEnglish, "Labels", "[fr] Labels"), LABELS_LAYER_ID, "assets/images/labels.svg", padLevel, prov)
+            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, LABELS_LAYER_ID), LABELS_LAYER_ID, "assets/images/labels.svg", padLevel, prov)
         End If
 
         If prov Then
-            json &= MakeOverlayLegendBlockConfig(IIf(bEnglish, "Provinces", "[fr] Provinces"), PROVINCES_LAYER_ID, "assets/images/provinces.svg", padLevel, False)
+            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID), PROVINCES_LAYER_ID, "assets/images/provinces.svg", padLevel, False)
         End If
 
         Return json
@@ -830,12 +844,18 @@ Public Class ConfigForm
     ''' </summary>
     Private Sub MakeHydroConfigs()
 
+        MakeHydroLang()
+
         'TODO there are no differences in service URL for language.
         '     if we dont need langauge anywhere else, we can simpley do one configstruct then assign to both langs in the nugget
         Dim nugget As New LangNugget
         For Each lang As String In aLang
-            Dim dataLayers = MakeHydroDataLayer(lang)
-            Dim legund = MakeHydroLegend(lang)
+
+            'derive unique layer id (ramp id)
+            Dim rampID As String = "Hydro_" & lang
+
+            Dim dataLayers = MakeHydroDataLayer(lang, rampID)
+            Dim legund = MakeHydroLegend(lang, rampID)
             Dim support = MakeSupportSet(lang, True, True, True)
 
             Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
@@ -847,8 +867,25 @@ Public Class ConfigForm
         WriteConfig("testHydro.json", fileguts)
     End Sub
 
+    Private Sub MakeHydroLang()
 
-    Private Function MakeHydroDataLayer(lang As String) As String
+        oHydroLang = New LangHive
+
+        'we only have one layer. so VAR_DESC might be redundant?
+
+        With oHydroLang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short Hydro dataset description goes here", "[fr] A short Hydro dataset description goes here")
+
+            .AddItem(VAR_DESC, "A short hydro description goes here (maybe)", "[fr] A short hydro description goes here (maybe)")
+            .AddItem(LAYER_NAME, "Hydrometric stations", "[fr] Hydrometric stations")
+
+        End With
+
+    End Sub
+
+
+    Private Function MakeHydroDataLayer(lang As String, rampID As String) As String
         'TODO attempt to get a URL that works with &lang but without GetCapabilities.
         '     the get capabilities is 8mb on public geomet.
         '     need aly's CORS patch done before I can test this
@@ -860,16 +897,25 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/items?STATUS_EN=Active"
 
-        'derive unique layer id (ramp id)
-        Dim rampID As String = "Hydro_" & lang
-
-        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", "LAYER NAME HERE")
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", oHydroLang.Txt(lang, LAYER_NAME))
 
     End Function
 
-    Private Function MakeHydroLegend(lang As String) As String
+    Private Function MakeHydroLegend(lang As String, rampID As String) As String
 
-        Return "{ ""legend"": true }"
+        Dim sLegend As String = ""
+        Dim sLegendUrl = "" 'TODO needs to be supplied
+
+        'TODO need a proper image
+        Dim sCoverIcon = "assets/images/happy.svg"
+
+        With oHydroLang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampID, .Txt(lang, VAR_DESC), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
 
     End Function
 

@@ -24,6 +24,12 @@
 
     End Sub
 
+    Public Sub AddRaw(ByVal sRaw As String, Optional bNoCrLF As Boolean = False)
+
+        _guts &= sRaw & IIf(bNoCrLF, "", vbCrLf)
+
+    End Sub
+
     Private Function MakePad(iPadSize As Integer) As String
         Return Space((iPadSize + _rootPad) * indentSize)
     End Function
