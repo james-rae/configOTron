@@ -11,7 +11,9 @@ Public Class ConfigForm
     Dim aCMIP5Var = {"snow", "sith", "sico", "wind"}
     Dim aDailyVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aDCSVar = {"tmean", "tmin", "tmax", "prec"}
+    Dim aMonthlyVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aNormalsVar = {"tmean", "tmin", "tmax", "prec", "stpr", "slpr", "wind", "mgst", "dgst"}
+
     Dim aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
     Dim aSeasonMonth = {"ANN", "MAM", "JJA", "SON", "DJF", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
     Dim aSeasonMonthly = {"ANN", "MAM", "JJA", "SON", "DJF", "MTH"}
@@ -26,6 +28,7 @@ Public Class ConfigForm
     Dim oCMIP5Lang As LangHive
     Dim oDailyLang As LangHive
     Dim oDCSLang As LangHive
+    Dim oMonthlyLang As LangHive
     Dim oNormalsLang As LangHive
 
     Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
@@ -56,6 +59,7 @@ Public Class ConfigForm
         MakeHydroConfigs()
         MakeCanGRIDConfigs()
         MakeDailyConfigs()
+        MakeMonthlyConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
@@ -1031,6 +1035,109 @@ Public Class ConfigForm
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
         With oDailyLang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
+
+    End Function
+
+#End Region
+
+#Region " Monthly "
+
+    ' WFS. No Time.
+
+    ''' <summary>
+    ''' Create set of config files for Monthly
+    ''' </summary>
+    Private Sub MakeMonthlyConfigs()
+        MakeMonthlyLang()
+
+        For Each var As String In aMonthlyVar
+            Dim nugget As New LangNugget
+            For Each lang As String In aLang
+                'derive unique layer id (ramp id)
+                Dim rampID As String = "Monthly_" & var & "_" & lang
+
+                Dim dataLayers = MakeMonthlyDataLayer(var, lang, rampID)
+                Dim legund = MakeMonthlyLegend(var, lang, rampID)
+                Dim support = MakeSupportSet(lang, True, True, True)
+
+                Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
+
+                nugget.setLang(lang, configstruct)
+            Next
+
+            Dim fileguts = MakeLangStructure(nugget)
+            WriteConfig("testMonthly_" & var & ".json", fileguts)
+
+        Next
+    End Sub
+
+    Private Sub MakeMonthlyLang()
+        Dim k As String 'lazy
+
+        oMonthlyLang = New LangHive
+
+        With oMonthlyLang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short Monthly dataset description goes here", "[fr] A short Monthly dataset description goes here")
+
+            k = "tmean"
+            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+
+            k = "tmin"
+            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
+
+            k = "tmax"
+            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
+
+            k = "prec"
+            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
+
+        End With
+
+    End Sub
+
+    Private Function MakeMonthlyDataLayer(variable As String, lang As String, rampId As String) As String
+
+        'TODO need a ruling on the URL.  magic spreadsheet says to focus on a given year/month or do a time slider magic
+        'hardcode for now
+
+        'calculate url (might be a constant)
+        'tmean , tmin , tmax , prec 
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-monthly/items?LOCAL_MONTH=12&LOCAL_YEAR=1981
+
+        'TODO make global to prevent re-creating every iteration?       
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "MEAN_TEMPERATURE"}, {"tmin", "MIN_TEMPERATURE"}, {"tmax", "MAX_TEMPERATURE"}, {"prec", "TOTAL_PRECIPITATION"}}
+
+
+        'calculate wms layer id
+        Dim varCode As String = dVari.Item(variable)
+
+        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-Monthly/items?LOCAL_MONTH=12&LOCAL_YEAR=1981"
+
+        Return MakeWFSLayerConfig(url, rampId, 1, True, varCode, oMonthlyLang.Txt(lang, LAYER_NAME, variable))
+
+    End Function
+
+    Private Function MakeMonthlyLegend(variable As String, lang As String, rampId As String) As String
+
+        Dim sLegend As String = ""
+        Dim sLegendUrl = "" 'TODO needs to be supplied
+
+        Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
+
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+
+        With oMonthlyLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
