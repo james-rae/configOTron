@@ -461,13 +461,20 @@ Public Class ConfigForm
     ''' Create set of config files for DCS
     ''' </summary>
     Private Sub MakeDCSConfigs()
+        MakeDCSLang()
+
         For Each var As String In aDCSVar
             For Each season As String In aSeason
                 For Each rcp As String In aRcp
                     Dim nugget As New LangNugget
                     For Each lang As String In aLang
+
+                        'TODO for now pick the first year and hack the key.  if we need all keys in the legend part, will need to abstract or duplicate the ramp key generator so its accessible to all parts
+                        'derive unique layer id (ramp id)
+                        Dim rampID As String = "DCS_" & var & "_" & season & "_" & rcp & "_" & "2021" & "_" & lang
+
                         Dim dataLayers = MakeDCSYearSet(var, season, rcp, lang)  ' TODO we may need to add a 5th year period for "historical"
-                        Dim legund = MakeDCSLegend(var, season, rcp, lang)
+                        Dim legund = MakeDCSLegend(var, season, rcp, lang, rampID)
                         Dim support = MakeSupportSet(lang, True, True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
@@ -481,6 +488,35 @@ Public Class ConfigForm
                 Next
             Next
         Next
+    End Sub
+
+    Private Sub MakeDCSLang()
+        Dim k As String 'lazy
+
+        oDCSLang = New LangHive
+
+        With oDCSLang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short DCS dataset description goes here", "[fr] A short DCS dataset description goes here")
+
+            k = "tmean"
+            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+
+            k = "tmin"
+            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
+
+            k = "tmax"
+            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
+
+            k = "prec"
+            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
+
+        End With
+
     End Sub
 
     ''' <summary>
@@ -536,13 +572,33 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, "LAYER NAME HERE")
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable))
 
     End Function
 
-    Private Function MakeDCSLegend(variable As String, season As String, rcp As String, lang As String) As String
+    Private Function MakeDCSLegend(variable As String, season As String, rcp As String, lang As String, rampid As String) As String
 
-        Return "{ ""legend"": true }"
+        Dim sLegend As String = ""
+        Dim sLegendUrl As String = ""
+
+        'precip has different legend than temperature ones
+        If variable = "prec" Then
+            sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=DCS.PR.RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
+        Else
+            sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=DCS.TX.RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
+        End If
+
+        Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
+
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+
+        With oDCSLang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
 
     End Function
 
