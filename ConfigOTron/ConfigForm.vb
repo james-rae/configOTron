@@ -3,20 +3,28 @@
 Public Class ConfigForm
 
     ' arrays of domains. global scope for sharing fun
-    Shared aLang = {"en", "fr"}
-    Shared aRcp = {"rcp26", "rcp45", "rcp85"}
-    Shared aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
-    Shared aCanGRIDVar = {"tmean", "prec"} ' "tmin", "tmax",
-    Shared aCAPAVar = {"qp25", "qp10"}
-    Shared aCMIP5Var = {"snow", "sith", "sico", "wind"}
-    Shared aDCSVar = {"tmean", "tmin", "tmax", "prec"}
-    Shared aNormalsVar = {"tmean", "tmin", "tmax", "prec", "stpr", "slpr", "wind", "mgst", "dgst"}
-    Shared aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
-    Shared aSeasonMonth = {"ANN", "MAM", "JJA", "SON", "DJF", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
-    Shared aSeasonMonthly = {"ANN", "MAM", "JJA", "SON", "DJF", "MTH"}
-    Shared aYear = {"2021", "2041", "2061", "2081"}
-    Shared aHour = {"24", "6"} 'want this order on time slider
+    Dim aLang = {"en", "fr"}
+    Dim aRcp = {"rcp26", "rcp45", "rcp85"}
+    Dim aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
+    Dim aCanGRIDVar = {"tmean", "prec"} ' "tmin", "tmax",
+    Dim aCAPAVar = {"qp25", "qp10"}
+    Dim aCMIP5Var = {"snow", "sith", "sico", "wind"}
+    Dim aDCSVar = {"tmean", "tmin", "tmax", "prec"}
+    Dim aNormalsVar = {"tmean", "tmin", "tmax", "prec", "stpr", "slpr", "wind", "mgst", "dgst"}
+    Dim aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
+    Dim aSeasonMonth = {"ANN", "MAM", "JJA", "SON", "DJF", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
+    Dim aSeasonMonthly = {"ANN", "MAM", "JJA", "SON", "DJF", "MTH"}
+    Dim aYear = {"2021", "2041", "2061", "2081"}
+    Dim aHour = {"24", "6"} 'want this order on time slider
 
+    'language hives. global scope for sharing fun
+    Dim oCommonLang As LangHive
+    Dim oAHCCDLang As LangHive
+    Dim oCanGRIDLang As LangHive
+    Dim oCAPALang As LangHive
+    Dim oCMIP5Lang As LangHive
+    Dim oDCSLang As LangHive
+    Dim oNormalsLang As LangHive
 
     Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
     Const PAD1 As String = "    "
@@ -27,9 +35,17 @@ Public Class ConfigForm
     Const PROVINCES_LAYER_ID As String = "provinces"
     Const CITIES_LAYER_ID As String = "cities"
 
+    'common lang keys
+    Const TOP_TITLE As String = "TopTitle"
+    Const TOP_DESC As String = "TopDesc"
+    Const LAYER_NAME As String = "LayerName"
+    Const VAR_DESC As String = "VarDesc"
+    Const COVER_ICON As String = "CovIcon"
+
     Private Sub cmdEnhanceMini_Click(sender As Object, e As EventArgs) Handles cmdEnhanceMini.Click
 
         'MAIN STARTING POINT OF APP.
+        MakeCommonLang()
 
         'MakeCMIP5Configs()
         MakeDCSConfigs()
@@ -39,6 +55,16 @@ Public Class ConfigForm
         MakeCanGRIDConfigs()
 
         MsgBox("DONE THANKS")
+    End Sub
+
+    Private Sub MakeCommonLang()
+        oCommonLang = New LangHive
+        With oCommonLang
+            .AddItem(LAYER_NAME, "Labels", "[fr] Labels", LABELS_LAYER_ID)
+            .AddItem(LAYER_NAME, "Provinces", "[fr] Provinces", PROVINCES_LAYER_ID)
+            .AddItem(LAYER_NAME, "Cities", "[fr] Cities", CITIES_LAYER_ID)
+
+        End With
     End Sub
 
 #Region " General Structure Builders "
@@ -66,7 +92,7 @@ Public Class ConfigForm
     ''' <param name="visible"></param>
     ''' <param name="wmsLayerId"></param>
     ''' <returns></returns>
-    Private Function MakeWMSLayerConfig(url As String, rampId As String, opacity As Double, visible As Boolean, wmsLayerId As String) As String
+    Private Function MakeWMSLayerConfig(url As String, rampId As String, opacity As Double, visible As Boolean, wmsLayerId As String, layerName As String) As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"ogcWMS",
@@ -82,7 +108,6 @@ Public Class ConfigForm
         '  ]
         '}
 
-        'TODO if we need the 'name' element, will need another input param
         'TODO do we need to have a STYLE parameter added?
         'TODO most likely remove data parameter, unless we add in json table, then might need it
 
@@ -92,6 +117,7 @@ Public Class ConfigForm
         nugget.AddLine("""id"": """ & rampId & """,", 1)
         nugget.AddLine("""layerType"": ""ogcWms"",", 1)
         nugget.AddLine("""url"": """ & url & """,", 1)
+        nugget.AddLine("""name"": """ & layerName & """,", 1)
         nugget.AddLine("""state"": {", 1)
         nugget.AddLine("""opacity"": " & opacity & ",", 2)
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
@@ -113,7 +139,7 @@ Public Class ConfigForm
     ''' <param name="opacity"></param>
     ''' <param name="visible"></param>
     ''' <returns></returns>
-    Private Function MakeTileLayerConfig(url As String, id As String, opacity As Double, visible As Boolean) As String
+    Private Function MakeTileLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, layerName As String) As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"esriTile",
@@ -124,7 +150,6 @@ Public Class ConfigForm
         '  }
         '}
 
-        'TODO if we need the 'name' element, will need another input param
         'TODO verify that we can delete the "control" part for tiles.
         'TODO we might also want "controls": ["visibility", "opacity", "reload", "settings"],
 
@@ -134,6 +159,7 @@ Public Class ConfigForm
         nugget.AddLine("""id"": """ & id & """,", 1)
         nugget.AddLine("""layerType"": ""esriTile"",", 1)
         nugget.AddLine("""url"": """ & url & """,", 1)
+        nugget.AddLine("""name"": """ & layerName & """,", 1)
         nugget.AddLine("""state"": {", 1)
         nugget.AddLine("""opacity"": " & opacity & ",", 2)
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
@@ -145,7 +171,7 @@ Public Class ConfigForm
 
     End Function
 
-    Private Function MakeWFSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, nameField As String) As String
+    Private Function MakeWFSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, nameField As String, layerName As String) As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"ogcWfs",
@@ -158,20 +184,19 @@ Public Class ConfigForm
         '  "controls": ["data"]
         '}
 
-        'TODO if we need the 'name' element, will need another input param
-
         Dim nugget As New ConfigNugget(2)
 
         nugget.AddLine("{")
         nugget.AddLine("""id"": """ & id & """,", 1)
         nugget.AddLine("""layerType"": ""ogcWfs"",", 1)
         nugget.AddLine("""url"": """ & url & """,", 1)
+        nugget.AddLine("""name"": """ & layerName & """,", 1)
         nugget.AddLine("""nameField"": """ & nameField & """,", 1)
         nugget.AddLine("""state"": {", 1)
         nugget.AddLine("""opacity"": " & opacity & ",", 2)
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
         nugget.AddLine("},", 1)
-        nugget.AddLine("""controls"": [""data""]", 1)
+        nugget.AddLine("""controls"": [""data"", ""visibility"", ""opacity""]", 1)
         nugget.AddLine("}", 0, True)
 
         Return nugget.Nugget
@@ -323,19 +348,19 @@ Public Class ConfigForm
 
 #Region " Support Layers "
 
-    Private Function MakeSupportSet(city As Boolean, prov As Boolean, labels As Boolean) As String
+    Private Function MakeSupportSet(lang As String, city As Boolean, prov As Boolean, labels As Boolean) As String
         Dim sGuts As String = ""
 
         If city Then
-            sGuts &= MakeCitiesConfig() & "," & vbCrLf
+            sGuts &= MakeCitiesConfig(lang) & "," & vbCrLf
         End If
 
         If labels Then
-            sGuts &= MakeLabelsConfig() & "," & vbCrLf
+            sGuts &= MakeLabelsConfig(lang) & "," & vbCrLf
         End If
 
         If prov Then
-            sGuts &= MakeProvinceConfig() & "," & vbCrLf
+            sGuts &= MakeProvinceConfig(lang) & "," & vbCrLf
         End If
 
         'trim last comma
@@ -343,19 +368,22 @@ Public Class ConfigForm
 
     End Function
 
-    Private Function MakeProvinceConfig() As String
+    Private Function MakeProvinceConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Provinces/MapServer", PROVINCES_LAYER_ID, 1, True)
+        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Provinces/MapServer",
+                                   PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID))
     End Function
 
-    Private Function MakeCitiesConfig() As String
+    Private Function MakeCitiesConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Cities/MapServer", CITIES_LAYER_ID, 1, False)
+        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Cities/MapServer",
+                                   CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID))
     End Function
 
-    Private Function MakeLabelsConfig() As String
+    Private Function MakeLabelsConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("http://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_TXT_3978/MapServer", LABELS_LAYER_ID, 1, True)
+        Return MakeTileLayerConfig("http://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_TXT_3978/MapServer",
+                                   LABELS_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, LABELS_LAYER_ID))
     End Function
 
 #End Region
@@ -372,7 +400,7 @@ Public Class ConfigForm
                     For Each lang As String In aLang
                         Dim dataLayers = MakeCMIP5YearSet(var, season, rcp, lang)
                         Dim legund = MakeCMIP5Legend(var, season, rcp, lang)
-                        Dim support = MakeSupportSet(True, True, True)
+                        Dim support = MakeSupportSet(lang, True, True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -413,7 +441,7 @@ Public Class ConfigForm
         'calculate wms layer id
         'derive unique layer id (ramp id)
 
-        Return MakeWMSLayerConfig("url", "id", 1, True, "wmslayer")
+        Return MakeWMSLayerConfig("url", "id", 1, True, "wmslayer", "layer name")
 
     End Function
 
@@ -440,7 +468,7 @@ Public Class ConfigForm
                     For Each lang As String In aLang
                         Dim dataLayers = MakeDCSYearSet(var, season, rcp, lang)  ' TODO we may need to add a 5th year period for "historical"
                         Dim legund = MakeDCSLegend(var, season, rcp, lang)
-                        Dim support = MakeSupportSet(True, True, True)
+                        Dim support = MakeSupportSet(lang, True, True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -508,7 +536,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, "LAYER NAME HERE")
 
     End Function
 
@@ -528,6 +556,8 @@ Public Class ConfigForm
     ''' Create set of config files for AHCCD
     ''' </summary>
     Private Sub MakeAHCCDConfigs()
+        MakeAHCCDLang()
+
         For Each var As String In aAHCCDVar
             For Each season As String In aSeasonMonth
 
@@ -540,7 +570,7 @@ Public Class ConfigForm
 
                     Dim dataLayers = MakeAHCCDDataLayer(var, season, lang, rampID)
                     Dim legund = MakeAHCCDLegend(var, season, lang, rampID)
-                    Dim support = MakeSupportSet(True, True, True)
+                    Dim support = MakeSupportSet(lang, True, True, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -553,6 +583,46 @@ Public Class ConfigForm
         Next
     End Sub
 
+    Private Sub MakeAHCCDLang()
+        Dim k As String 'lazy
+
+        oAHCCDLang = New LangHive
+
+        With oAHCCDLang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short AHCCD dataset description goes here", "[fr] A short AHCCD dataset description goes here")
+
+            k = "tmean"
+            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+
+            k = "tmin"
+            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
+
+            k = "tmax"
+            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
+
+            k = "prec"
+            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
+
+            k = "supr"
+            .AddItem(VAR_DESC, "A short surface pressure description goes here", "[fr] A short surface pressure description goes here", k)
+            .AddItem(LAYER_NAME, "Surface pressure", "[fr] Surface pressure", k)
+
+            k = "slpr"
+            .AddItem(VAR_DESC, "A short sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
+            .AddItem(LAYER_NAME, "Sea level pressure", "[fr] Sea level pressure", k)
+
+            k = "wind"
+            .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
+            .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
+
+        End With
+
+    End Sub
 
     Private Function MakeAHCCDDataLayer(variable As String, season As String, lang As String, rampId As String) As String
         'TODO attempt to get a URL that works with &lang but without GetCapabilities.
@@ -581,55 +651,24 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "trend_value")
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "trend_value", oAHCCDLang.Txt(lang, LAYER_NAME, variable))
 
     End Function
 
     Private Function MakeAHCCDLegend(variable As String, season As String, lang As String, rampId As String) As String
 
         Dim sLegend As String = ""
-        Dim bEnglish As Boolean = (lang = "en")
-        Dim sTopTitle = IIf(bEnglish, "Data", "[fr] Data")
-        Dim sTopDescription = IIf(bEnglish, "A short AHCCD dataset description goes here", "[fr] A short AHCCD dataset description goes here")
-        Dim sLayerName As String = ""
-        Dim sVarDescription = ""
-        Dim sCoverIcon = ""
         Dim sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=AHCCD.STATIONS&format=image/png&STYLE=default"
 
-        Select Case variable
-            Case "tmean"
-                sVarDescription = IIf(bEnglish, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here")
-                sLayerName = IIf(bEnglish, "Mean temperature", "[fr] Mean temperature")
-                sCoverIcon = "assets/images/tmean.svg"
-            Case "tmin"
-                sVarDescription = IIf(bEnglish, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here")
-                sLayerName = IIf(bEnglish, "Minimum temperature", "[fr] Minimum temperature")
-                sCoverIcon = "assets/images/tmin.svg"
-            Case "tmax"
-                sVarDescription = IIf(bEnglish, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here")
-                sLayerName = IIf(bEnglish, "Maximum temperature", "[fr] Maximum temperature")
-                sCoverIcon = "assets/images/tmax.svg"
-            Case "prec"
-                sVarDescription = IIf(bEnglish, "A short precipitation description goes here", "[fr] A short precipitation description goes here")
-                sLayerName = IIf(bEnglish, "Precipitation", "[fr] Precipitation")
-                sCoverIcon = "assets/images/precip.svg"
-            Case "supr"
-                sVarDescription = IIf(bEnglish, "A short surface pressure description goes here", "[fr] A short surface pressure description goes here")
-                sLayerName = IIf(bEnglish, "Surface pressure", "[fr] Surface pressure")
-                sCoverIcon = "assets/images/stnpress.svg"
-            Case "slpr"
-                sVarDescription = IIf(bEnglish, "A short sea level pressure description goes here", "[fr] A short sea level pressure description goes here")
-                sLayerName = IIf(bEnglish, "Sea level pressure", "[fr] Sea level pressure")
-                sCoverIcon = "assets/images/seapress.svg"
-            Case "wind"
-                sVarDescription = IIf(bEnglish, "A short wind speed description goes here", "[fr] A short wind speed description goes here")
-                sLayerName = IIf(bEnglish, "Wind speed", "[fr] Wind speed")
-                sCoverIcon = "assets/images/wind.svg"
-        End Select
+        Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"supr", "stnpress"}, {"slpr", "seapress"}, {"wind", "sfcwind"}}
 
-        sLegend &= MakeLegendTitleConfig(sTopTitle, sTopDescription) &
-            MakeLayerLegendBlockConfig(sLayerName, rampId, sVarDescription, sCoverIcon, sLegendUrl, "", 2) &
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+
+        With oAHCCDLang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
+        End With
 
         Return sLegend
 
@@ -651,7 +690,7 @@ Public Class ConfigForm
             For Each lang As String In aLang
                 Dim dataLayers = MakeCAPAHourSet(var, lang)
                 Dim legund = MakeCAPALegend(var, lang)
-                Dim support = MakeSupportSet(True, True, True)
+                Dim support = MakeSupportSet(lang, True, True, True)
 
                 Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -707,7 +746,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "CAPA_" & variable & "_" & hour & "_" & lang
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, "LAYER NAME HERE")
 
     End Function
 
@@ -734,7 +773,7 @@ Public Class ConfigForm
         For Each lang As String In aLang
             Dim dataLayers = MakeHydroDataLayer(lang)
             Dim legund = MakeHydroLegend(lang)
-            Dim support = MakeSupportSet(True, True, True)
+            Dim support = MakeSupportSet(lang, True, True, True)
 
             Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -761,7 +800,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "Hydro_" & lang
 
-        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME")
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", "LAYER NAME HERE")
 
     End Function
 
@@ -788,7 +827,7 @@ Public Class ConfigForm
                 For Each lang As String In aLang
                     Dim dataLayers = MakeCanGRIDDataLayer(var, season, lang)
                     Dim legund = MakeCanGRIDLegend(var, season, lang)
-                    Dim support = MakeSupportSet(True, True, True)
+                    Dim support = MakeSupportSet(lang, True, True, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -830,7 +869,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "CanGRID_" & variable & "_" & season & "_" & lang
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode)
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode, "LAYER NAME HERE")
 
     End Function
 
@@ -861,7 +900,7 @@ Public Class ConfigForm
                 For Each lang As String In aLang
                     Dim dataLayers = MakeNormalsDataLayer(var, season, lang)
                     Dim legund = MakeNormalsLegend(var, season, lang)
-                    Dim support = MakeSupportSet(True, True, True)
+                    Dim support = MakeSupportSet(lang, True, True, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -906,7 +945,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "Normals_" & variable & "_" & season & "_" & lang
 
-        Return MakeWFSLayerConfig(url, rampID, 1, True, "station_id")
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "station_id", "LAYER NAME HERE")
 
     End Function
 

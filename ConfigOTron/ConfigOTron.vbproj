@@ -83,6 +83,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ConfigNugget.vb" />
+    <Compile Include="LangHive.vb" />
     <Compile Include="LangNugget.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
