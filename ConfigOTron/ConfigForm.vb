@@ -86,19 +86,21 @@ Public Class ConfigForm
         'TODO do we need to have a STYLE parameter added?
         'TODO most likely remove data parameter, unless we add in json table, then might need it
 
-        Dim json As String = PAD1 & "{" & vbCrLf &
-            PAD2 & """id"": """ & rampId & """," & vbCrLf &
-            PAD2 & """layerType"":  ""ogcWms""," & vbCrLf &
-            PAD2 & """url"": """ & url & """," & vbCrLf &
-            PAD2 & """state"": {" & vbCrLf &
-            PAD3 & """opacity"": " & opacity & "," & vbCrLf &
-            PAD3 & """visibility"": " & BoolToJson(visible) & vbCrLf &
-            PAD2 & "}," & vbCrLf &
-            PAD2 & """layerEntries"": [{""id"": """ & wmsLayerId & """ }]," & vbCrLf &
-            PAD2 & """controls"": [""data""]" & vbCrLf &
-            PAD1 & "}"
+        Dim nugget As New ConfigNugget(2)
 
-        Return json
+        nugget.AddLine("{")
+        nugget.AddLine("""id"": """ & rampId & """,", 1)
+        nugget.AddLine("""layerType"": ""ogcWms"",", 1)
+        nugget.AddLine("""url"": """ & url & """,", 1)
+        nugget.AddLine("""state"": {", 1)
+        nugget.AddLine("""opacity"": " & opacity & ",", 2)
+        nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
+        nugget.AddLine("},", 1)
+        nugget.AddLine("""layerEntries"": [{""id"": """ & wmsLayerId & """ }],", 1)
+        nugget.AddLine("""controls"": [""data""]", 1)
+        nugget.AddLine("}", 0, True)
+
+        Return nugget.Nugget
 
     End Function
 
@@ -360,6 +362,8 @@ Public Class ConfigForm
 
 #Region " CMIP5 "
 
+    'TODO needs revist / fixin
+
     Private Sub MakeCMIP5Configs()
         For Each var As String In aCMIP5Var
             For Each season As String In aSeason
@@ -504,7 +508,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode)
 
     End Function
 
@@ -577,7 +581,7 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "station_id")
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "trend_value")
 
     End Function
 
@@ -703,7 +707,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "CAPA_" & variable & "_" & hour & "_" & lang
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode)
 
     End Function
 
