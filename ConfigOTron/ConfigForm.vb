@@ -9,6 +9,7 @@ Public Class ConfigForm
     Dim aCanGRIDVar = {"tmean", "prec"} ' "tmin", "tmax",
     Dim aCAPAVar = {"qp25", "qp10"}
     Dim aCMIP5Var = {"snow", "sith", "sico", "wind"}
+    Dim aDailyVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aDCSVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aNormalsVar = {"tmean", "tmin", "tmax", "prec", "stpr", "slpr", "wind", "mgst", "dgst"}
     Dim aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
@@ -23,6 +24,7 @@ Public Class ConfigForm
     Dim oCanGRIDLang As LangHive
     Dim oCAPALang As LangHive
     Dim oCMIP5Lang As LangHive
+    Dim oDailyLang As LangHive
     Dim oDCSLang As LangHive
     Dim oNormalsLang As LangHive
 
@@ -53,6 +55,7 @@ Public Class ConfigForm
         MakeCAPAConfigs()
         MakeHydroConfigs()
         MakeCanGRIDConfigs()
+        MakeDailyConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
@@ -932,6 +935,108 @@ Public Class ConfigForm
     Private Function MakeCanGRIDLegend(variable As String, season As String, lang As String) As String
 
         Return "{ ""legend"": true }"
+
+    End Function
+
+#End Region
+
+#Region " Daily "
+
+
+    ' WFS. No Time.
+
+    ''' <summary>
+    ''' Create set of config files for Daily
+    ''' </summary>
+    Private Sub MakeDailyConfigs()
+        MakeDailyLang()
+
+        For Each var As String In aDailyVar
+            Dim nugget As New LangNugget
+            For Each lang As String In aLang
+                'derive unique layer id (ramp id)
+                Dim rampID As String = "Daily_" & var & "_" & lang
+
+                Dim dataLayers = MakeDailyDataLayer(var, lang, rampID)
+                Dim legund = MakeDailyLegend(var, lang, rampID)
+                Dim support = MakeSupportSet(lang, True, True, True)
+
+                Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
+
+                nugget.setLang(lang, configstruct)
+            Next
+
+            Dim fileguts = MakeLangStructure(nugget)
+            WriteConfig("testDaily_" & var & ".json", fileguts)
+
+        Next
+    End Sub
+
+    Private Sub MakeDailyLang()
+        Dim k As String 'lazy
+
+        oDailyLang = New LangHive
+
+        With oDailyLang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short Daily dataset description goes here", "[fr] A short Daily dataset description goes here")
+
+            k = "tmean"
+            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+
+            k = "tmin"
+            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
+
+            k = "tmax"
+            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
+
+            k = "prec"
+            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
+
+        End With
+
+    End Sub
+
+    Private Function MakeDailyDataLayer(variable As String, lang As String, rampId As String) As String
+
+        'calculate url (might be a constant)
+        'tmean , tmin , tmax , prec 
+        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-daily/items?TOTAL_PRECIPITATION_FLAG=T
+
+        'TODO make global to prevent re-creating every iteration?
+        'we encode the value field (used for maptip). layer url adds the "_FLAG" to enhance field name
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "MEAN_TEMPERATURE"}, {"tmin", "MIN_TEMPERATURE"}, {"tmax", "MAX_TEMPERATURE"}, {"prec", "TOTAL_PRECIPITATION"}}
+
+
+        'calculate wms layer id
+        Dim varCode As String = dVari.Item(variable)
+
+        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-daily/items?" & varCode & "_FLAG=T"
+
+        Return MakeWFSLayerConfig(url, rampId, 1, True, varCode, oDailyLang.Txt(lang, LAYER_NAME, variable))
+
+    End Function
+
+    Private Function MakeDailyLegend(variable As String, lang As String, rampId As String) As String
+
+        Dim sLegend As String = ""
+        Dim sLegendUrl = "" 'TODO needs to be supplied
+
+        Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
+
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+
+        With oDailyLang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
 
     End Function
 
