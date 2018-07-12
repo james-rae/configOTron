@@ -69,6 +69,7 @@ Public Class ConfigForm
         MakeCanGRIDConfigs()
         MakeDailyConfigs()
         MakeMonthlyConfigs()
+        MakeNormalsConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
@@ -637,9 +638,6 @@ Public Class ConfigForm
 
         For Each var As String In aAHCCDVar
             For Each season As String In aSeasonMonth
-
-                'TODO there are no differences in service URL for language.
-                '     if we dont need langauge anywhere else, we can simpley do one configstruct then assign to both langs in the nugget
                 Dim nugget As New LangNugget
                 For Each lang As String In aLang
                     'derive unique layer id (ramp id)
@@ -846,8 +844,6 @@ Public Class ConfigForm
 
         MakeHydroLang()
 
-        'TODO there are no differences in service URL for language.
-        '     if we dont need langauge anywhere else, we can simpley do one configstruct then assign to both langs in the nugget
         Dim nugget As New LangNugget
         For Each lang As String In aLang
 
@@ -1197,23 +1193,25 @@ Public Class ConfigForm
 
 #Region " Normals "
 
-    'TODO this section has not been done yet.
-
     ' WFS. No Time.
 
     ''' <summary>
     ''' Create set of config files for Normals
     ''' </summary>
     Private Sub MakeNormalsConfigs()
-        For Each var As String In aNormalsVar
-            For Each season As String In aSeasonMonth
+        MakeNormalsLang()
 
-                'TODO there are no differences in service URL for language.
-                '     if we dont need langauge anywhere else, we can simpley do one configstruct then assign to both langs in the nugget
+        For Each var As String In aNormalsVar
+            For Each season As String In aSeasonMonth 'TODO review that this is accurate array
+
                 Dim nugget As New LangNugget
                 For Each lang As String In aLang
-                    Dim dataLayers = MakeNormalsDataLayer(var, season, lang)
-                    Dim legund = MakeNormalsLegend(var, season, lang)
+
+                    'derive unique layer id (ramp id)
+                    Dim rampID As String = "Normals_" & var & "_" & season & "_" & lang
+
+                    Dim dataLayers = MakeNormalsDataLayer(var, season, lang, rampID)
+                    Dim legund = MakeNormalsLegend(var, season, lang, rampID)
                     Dim support = MakeSupportSet(lang, True, True, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
@@ -1227,45 +1225,91 @@ Public Class ConfigForm
         Next
     End Sub
 
+    Private Sub MakeNormalsLang()
+        Dim k As String 'lazy
 
-    Private Function MakeNormalsDataLayer(variable As String, season As String, lang As String) As String
-        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
-        '     the get capabilities is 8mb on public geomet.
-        '     need aly's CORS patch done before I can test this
-        '     Mike suggestion to duplicate the layer id arg on the main url 
+        oNormalsLang = New LangHive
 
-        'calculate url (might be a constant)
-        'tmean , tmin , tmax , prec , surface pres , sea pres , whind
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=temp_mean&period=\"Ann\"
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=temp_min
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=temp_max
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=total_precip
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=pressure_station
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=pressure_sea_level
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=wind_speed
+        With oNormalsLang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short Normals dataset description goes here", "[fr] A short Normals dataset description goes here")
 
+            k = "tmean"
+            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean daily temperature", "[fr] Mean temperature", k)
+
+            k = "tmin"
+            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean daily minimum temperature", "[fr] Minimum temperature", k)
+
+            k = "tmax"
+            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean daily maximum temperature", "[fr] Maximum temperature", k)
+
+            k = "prec"
+            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Total precipitation", "[fr] Precipitation", k)
+
+            k = "stpr"
+            .AddItem(VAR_DESC, "A short station pressure description goes here", "[fr] A short surface pressure description goes here", k)
+            .AddItem(LAYER_NAME, "Average station pressure", "[fr] Station pressure", k)
+
+            k = "slpr"
+            .AddItem(VAR_DESC, "A short sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
+            .AddItem(LAYER_NAME, "Average sea level pressure", "[fr] Sea level pressure", k)
+
+            k = "wind"
+            .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
+            .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
+
+            k = "mgst"
+            .AddItem(VAR_DESC, "A short Maximum gust speed description goes here", "[fr] A short Maximum Gust Speed description goes here", k)
+            .AddItem(LAYER_NAME, "Maximum gust speed", "[fr] Maximum Gust Speed", k)
+
+            k = "dgst"
+            .AddItem(VAR_DESC, "A short Direction of Maximum Gust description goes here", "[fr] A short Direction of Maximum Gust description goes here", k)
+            .AddItem(LAYER_NAME, "Direction of maximum gust", "[fr] Direction of Maximum Gust", k)
+
+        End With
+
+    End Sub
+
+
+    Private Function MakeNormalsDataLayer(variable As String, season As String, lang As String, rampId As String) As String
+
+        'TODO layer is currently down.  still need to see how data/service is structured
 
         'TODO make global to prevent re-creating every iteration?
-        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "temp_mean"}, {"tmin", "temp_min"}, {"tmax", "temp_max"}, {"prec", "total_precip"}, {"supr", "pressure_station"}, {"slpr", "pressure_sea_level"}, {"wind", "wind_speed"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "temp_mean"}, {"tmin", "temp_min"}, {"tmax", "temp_max"}, {"prec", "total_precip"}, {"stpr", "pressure_station"}, {"slpr", "pressure_sea_level"}, {"wind", "wind_speed"}, {"mgst", "???"}, {"dgst", "???"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "Ann"}, {"MAM", "Spr"}, {"JJA", "Smr"}, {"SON", "Fal"}, {"DJF", "Win"}, {"JAN", "Jan"}, {"FEB", "Feb"}, {"MAR", "Mar"}, {"APR", "Apr"}, {"MAY", "May"}, {"JUN", "Jun"}, {"JUL", "Jul"}, {"AUG", "Aug"}, {"SEP", "Sep"}, {"OCT", "Oct"}, {"NOV", "Nov"}, {"DEC", "Dec"}}
 
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
         Dim seasonCode As String = dSeason.Item(season)
 
-        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
+        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?"
 
-
-        'derive unique layer id (ramp id)
-        Dim rampID As String = "Normals_" & variable & "_" & season & "_" & lang
-
-        Return MakeWFSLayerConfig(url, rampID, 1, True, "station_id", "LAYER NAME HERE")
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "DISPLAY FIELD ???", oNormalsLang.Txt(lang, LAYER_NAME, variable))
 
     End Function
 
-    Private Function MakeNormalsLegend(variable As String, season As String, lang As String) As String
+    Private Function MakeNormalsLegend(variable As String, season As String, lang As String, rampId As String) As String
 
-        Return "{ ""legend"": true }"
+        Dim sLegend As String = ""
+        Dim sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=Normals.STATIONS&format=image/png&STYLE=default"
+
+        'TODO update icons
+        Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"stpr", "stnpress"}, {"slpr", "seapress"}, {"wind", "sfcwind"}, {"mgst", "???"}, {"dgst", "???"}}
+
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+
+        With oNormalsLang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
 
     End Function
 
