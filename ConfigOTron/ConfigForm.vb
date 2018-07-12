@@ -9,6 +9,10 @@
 
 Public Class ConfigForm
 
+    'I'm lazy so make sure you add the appropriate subfolders to your dump folder.  Get a student to do it.
+    Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
+
+
     ' arrays of domains. global scope for sharing fun
     Dim aLang = {"en", "fr"}
     Dim aRcp = {"rcp26", "rcp45", "rcp85"}
@@ -39,11 +43,7 @@ Public Class ConfigForm
     Dim oMonthlyLang As LangHive
     Dim oNormalsLang As LangHive
 
-    Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
-    Const PAD1 As String = "    "
-    Const PAD2 As String = "      "
-    Const PAD3 As String = "        "
-
+    'shared layer ids
     Const LABELS_LAYER_ID As String = "labels"
     Const PROVINCES_LAYER_ID As String = "provinces"
     Const CITIES_LAYER_ID As String = "cities"
@@ -366,6 +366,31 @@ Public Class ConfigForm
 
     End Sub
 
+    Private Function FileSeason(season As String) As String
+
+        Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "annual"}, {"MAM", "spring"}, {"JJA", "summer"}, {"SON", "fall"}, {"DJF", "winter"}, {"JAN", "jan"},
+            {"FEB", "feb"}, {"MAR", "mar"}, {"APR", "apr"}, {"MAY", "may"}, {"JUN", "jun"}, {"JUL", "jul"}, {"AUG", "aug"}, {"SEP", "sep"}, {"OCT", "oct"},
+            {"NOV", "nov"}, {"DEC", "dec"}}
+
+        Return dSeason.Item(season)
+
+    End Function
+
+
+    Private Function FileVar(var As String) As String
+
+        'TODO assuming common keys across similar vars (e.g. tmax is always same key).
+        'restructure if not the case
+
+        '"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"
+        Dim dVar As New Dictionary(Of String, String) From {{"wind", "sfcwind"}, {"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "prec"}, {"supr", "supr"},
+            {"slpr", "slpr"}, {"MAR", "mar"}, {"APR", "apr"}, {"MAY", "may"}, {"JUN", "jun"}, {"JUL", "jul"}, {"AUG", "aug"}, {"SEP", "sep"}, {"OCT", "oct"},
+            {"NOV", "nov"}, {"DEC", "dec"}}
+
+        Return dVar.Item(var)
+
+    End Function
+
 #End Region
 
 #Region " Support Layers "
@@ -653,7 +678,7 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("testAHCCD_" & var & season & ".json", fileguts)
+                WriteConfig("ahccd\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
             Next
         Next
     End Sub
