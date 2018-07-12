@@ -181,7 +181,7 @@ Public Class ConfigForm
         nugget.AddLine("""state"": {", 1)
         nugget.AddLine("""opacity"": " & opacity & ",", 2)
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
-        nugget.AddLine("},", 1)
+        nugget.AddLine("}", 1)
         'nugget.AddLine("""controls"": [""data""]", 1)
         nugget.AddLine("}", 0, True)
 
@@ -383,8 +383,8 @@ Public Class ConfigForm
         'restructure if not the case
 
         '"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"
-        Dim dVar As New Dictionary(Of String, String) From {{"wind", "sfcwind"}, {"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "prec"}, {"supr", "supr"},
-            {"slpr", "slpr"}, {"MAR", "mar"}, {"APR", "apr"}, {"MAY", "may"}, {"JUN", "jun"}, {"JUL", "jul"}, {"AUG", "aug"}, {"SEP", "sep"}, {"OCT", "oct"},
+        Dim dVar As New Dictionary(Of String, String) From {{"wind", "sfcwind"}, {"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"supr", "stnpress"},
+            {"slpr", "seapress"}, {"MAR", "mar"}, {"APR", "apr"}, {"MAY", "may"}, {"JUN", "jun"}, {"JUL", "jul"}, {"AUG", "aug"}, {"SEP", "sep"}, {"OCT", "oct"},
             {"NOV", "nov"}, {"DEC", "dec"}}
 
         Return dVar.Item(var)
@@ -678,7 +678,7 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("ahccd\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
+                WriteConfig("ahccd\1\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
             Next
         Next
     End Sub
