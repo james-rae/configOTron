@@ -307,7 +307,14 @@ Public Class ConfigForm
         Return json
     End Function
 
-
+    ''' <summary>
+    ''' Makes legend block for simple info content
+    ''' </summary>
+    ''' <param name="infoType"></param>
+    ''' <param name="content"></param>
+    ''' <param name="indentLevel"></param>
+    ''' <param name="trailingComma"></param>
+    ''' <returns></returns>
     Private Function MakeSimpleLegendBlockConfig(infoType As String, content As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
 
         Dim nugget As New ConfigNugget(indentLevel)
@@ -321,6 +328,15 @@ Public Class ConfigForm
 
     End Function
 
+    ''' <summary>
+    ''' Makes a legend block for an overlay layer (e.g. tile on the map)
+    ''' </summary>
+    ''' <param name="layerName"></param>
+    ''' <param name="layerId"></param>
+    ''' <param name="icon"></param>
+    ''' <param name="indentLevel"></param>
+    ''' <param name="trailingComma"></param>
+    ''' <returns></returns>
     Private Function MakeOverlayLegendBlockConfig(layerName As String, layerId As String, icon As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
 
         Dim nugget As New ConfigNugget(indentLevel)
@@ -336,6 +352,18 @@ Public Class ConfigForm
 
     End Function
 
+    ''' <summary>
+    ''' Makes legend block for a data layer (tied to map layer)
+    ''' </summary>
+    ''' <param name="layerName"></param>
+    ''' <param name="layerId"></param>
+    ''' <param name="descrip"></param>
+    ''' <param name="icon"></param>
+    ''' <param name="legendImg"></param>
+    ''' <param name="legendText"></param>
+    ''' <param name="indentLevel"></param>
+    ''' <param name="trailingComma"></param>
+    ''' <returns></returns>
     Private Function MakeLayerLegendBlockConfig(layerName As String, layerId As String, descrip As String, icon As String,
           legendImg As String, legendText As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
 
@@ -370,7 +398,14 @@ Public Class ConfigForm
     End Function
 
 
-
+    ''' <summary>
+    ''' Makes the legend structure for the settings block (mainly overlay layers)
+    ''' </summary>
+    ''' <param name="lang"></param>
+    ''' <param name="city"></param>
+    ''' <param name="prov"></param>
+    ''' <param name="labels"></param>
+    ''' <returns></returns>
     Private Function MakeLegendSettingsConfig(lang As String, city As Boolean, prov As Boolean, labels As Boolean) As String
 
         Const padLevel As Integer = 2
@@ -1085,7 +1120,7 @@ Public Class ConfigForm
             Next
 
             Dim fileguts = MakeLangStructure(nugget)
-            WriteConfig("testDaily_" & var & ".json", fileguts)
+            WriteConfig("daily\1\config-" & FileVar(var) & ".json", fileguts)
 
         Next
     End Sub
@@ -1186,7 +1221,7 @@ Public Class ConfigForm
             Next
 
             Dim fileguts = MakeLangStructure(nugget)
-            WriteConfig("testMonthly_" & var & ".json", fileguts)
+            WriteConfig("monthly\1\config-" & FileVar(var) & ".json", fileguts)
 
         Next
     End Sub
