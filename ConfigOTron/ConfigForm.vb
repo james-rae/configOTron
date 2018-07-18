@@ -957,7 +957,7 @@ Public Class ConfigForm
 
         'TODO make global to prevent re-creating every iteration?
         'might need to add _PR to the key
-        Dim dVari As New Dictionary(Of String, String) From {{"qp25", "HRDPA_PR"}, {"qp10", "RDPA_PR"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"qp25", "HRDPA"}, {"qp10", "RDPA"}}
 
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
