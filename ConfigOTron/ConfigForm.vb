@@ -570,7 +570,7 @@ Public Class ConfigForm
                     Next
 
                     Dim fileguts = MakeLangStructure(nugget)
-                    WriteConfig("testdcs_" & var & season & rcp & ".json", fileguts)
+                    WriteConfig("dcs\1\config-" & FileVar(var) & "-" & FileSeason(season) & "-" & rcp & ".json", fileguts)
 
                 Next
             Next
