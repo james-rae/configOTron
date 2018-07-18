@@ -56,6 +56,7 @@ Public Class ConfigForm
     Const VAR_DESC As String = "VarDesc"
     Const COVER_ICON As String = "CovIcon"
     Const SETTINGS_TITLE As String = "SettingsTitle"
+    Const LEGEND_TEXT As String = "LegendText"
 
     Private Sub cmdEnhanceMini_Click(sender As Object, e As EventArgs) Handles cmdEnhanceMini.Click
 
@@ -112,7 +113,7 @@ Public Class ConfigForm
     ''' <param name="wmsLayerId"></param>
     ''' <returns></returns>
     Private Function MakeWMSLayerConfig(url As String, rampId As String, opacity As Double, visible As Boolean, wmsLayerId As String, layerName As String,
-                                        Optional template As String = "", Optional parser As String = "") As String
+                                     Optional mimeType As String = "", Optional template As String = "", Optional parser As String = "", Optional visibleToggle As Boolean = False) As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"ogcWMS",
@@ -147,8 +148,13 @@ Public Class ConfigForm
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
         nugget.AddLine("},", 1)
         nugget.AddLine("""layerEntries"": [{""id"": """ & wmsLayerId & """ }],", 1)
+
+        If mimeType <> "" Then
+            nugget.AddLine("""featureInfoMimeType"": """ & mimeType & """,", 1)
+        End If
+
         InjectTemplate(nugget, 1, template, parser)
-        nugget.AddLine("""controls"": [""data""]", 1)
+        nugget.AddLine("""controls"": [""data""" & IIf(visibleToggle, ", ""visibility""", "") & "]", 1)
         nugget.AddLine("}", 0, True)
 
         Return nugget.Nugget
@@ -695,7 +701,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable))
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "text/plain")
 
     End Function
 
@@ -796,6 +802,15 @@ Public Class ConfigForm
             .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
             .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
 
+            k = "red"
+            .AddItem(LEGEND_TEXT, "Red Circle", "[fr] Red Circle", k)
+
+            k = "green"
+            .AddItem(LEGEND_TEXT, "Green Circle", "[fr] Green Circle", k)
+
+            k = "blue"
+            .AddItem(LEGEND_TEXT, "Blue Circle", "[fr] Blue Circle", k)
+
         End With
 
     End Sub
@@ -840,15 +855,19 @@ Public Class ConfigForm
     Private Function MakeAHCCDLegend(variable As String, season As String, lang As String, rampId As String) As String
 
         Dim sLegend As String = ""
-        Dim sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=AHCCD.STATIONS&format=image/png&STYLE=default"
+
 
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"supr", "stnpress"}, {"slpr", "seapress"}, {"wind", "sfcwind"}}
+        Dim dLegend As New Dictionary(Of String, String) From {{"tmean", "red"}, {"tmin", "red"}, {"tmax", "red"}, {"prec", "blue"}, {"supr", "green"}, {"slpr", "green"}, {"wind", "green"}}
+
+        Dim sColour As String = dLegend.Item(variable)
+        Dim sLegendUrl = "assets/images/" & sColour & "-circle.svg"
 
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
         With oAHCCDLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
-            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, .Txt(lang, LEGEND_TEXT, sColour), 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
         End With
 
@@ -968,7 +987,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = MakeCAPARampID(variable, hour, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable) & " " & hour & "H")
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable) & " " & hour & "H", "text/plain",,, True)
 
     End Function
 
@@ -988,11 +1007,12 @@ Public Class ConfigForm
         'special logic for exclusive visibility
         Dim oConNugget As New ConfigNugget(2)
         With oConNugget
-            .AddLine("""name"": """ & oCAPALang.Txt(lang, "CAPA_SLIDER") & """,")
-            .AddLine("""expanded"": true,")
-            .AddLine("""controls"": [""visibility""],")
-            .AddLine("""children"": [{")
-            .AddLine("""exclusiveVisibility"": [", 1)
+            .AddLine("{")
+            .AddLine("""name"": """ & oCAPALang.Txt(lang, "CAPA_SLIDER") & """,", 1)
+            .AddLine("""expanded"": true,", 1)
+            .AddLine("""controls"": [""visibility""],", 1)
+            .AddLine("""children"": [{", 1)
+            .AddLine("""exclusiveVisibility"": [", 2)
 
             season = "6"
             .AddRaw(MakeLayerLegendBlockConfig(
@@ -1000,7 +1020,7 @@ Public Class ConfigForm
                     MakeCAPARampID(variable, season, lang),
                     oCAPALang.Txt(lang, "CAPA_HOUR_DESC", season),
                     "assets/images/" & dIcon.Item(season) & ".svg",
-                    sLegendUrl, "", 4))
+                    sLegendUrl, "", 5))
 
 
             season = "24"
@@ -1009,10 +1029,11 @@ Public Class ConfigForm
                     MakeCAPARampID(variable, season, lang),
                     oCAPALang.Txt(lang, "CAPA_HOUR_DESC", season),
                     "assets/images/" & dIcon.Item(season) & ".svg",
-                    sLegendUrl, "", 4, False))
+                    sLegendUrl, "", 5, False))
 
-            .AddLine("]", 1)
-            .AddLine("}]")
+            .AddLine("]", 2)
+            .AddLine("}]", 1)
+            .AddLine("},")
         End With
 
         With oDCSLang
