@@ -459,7 +459,7 @@ Public Class ConfigForm
 
         '"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"
         Dim dVar As New Dictionary(Of String, String) From {{"wind", "sfcwind"}, {"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"supr", "stnpress"},
-            {"slpr", "seapress"}, {"MAR", "mar"}, {"APR", "apr"}, {"MAY", "may"}, {"JUN", "jun"}, {"JUL", "jul"}, {"AUG", "aug"}, {"SEP", "sep"}, {"OCT", "oct"},
+            {"slpr", "seapress"}, {"qp25", "hrdpa"}, {"qp10", "rdpa"}, {"MAY", "may"}, {"JUN", "jun"}, {"JUL", "jul"}, {"AUG", "aug"}, {"SEP", "sep"}, {"OCT", "oct"},
             {"NOV", "nov"}, {"DEC", "dec"}}
 
         Return dVar.Item(var)
@@ -865,6 +865,9 @@ Public Class ConfigForm
     ''' Create set of config files for CAPA
     ''' </summary>
     Private Sub MakeCAPAConfigs()
+
+        MakeCAPALang()
+
         For Each var As String In aCAPAVar
 
             Dim nugget As New LangNugget
@@ -879,9 +882,45 @@ Public Class ConfigForm
             Next
 
             Dim fileguts = MakeLangStructure(nugget)
-            WriteConfig("testCAPA_" & var & ".json", fileguts)
+            WriteConfig("capa\1\config-" & FileVar(var) & ".json", fileguts)
 
         Next
+    End Sub
+
+    Private Function MakeCAPARampID(variable As String, hour As String, lang As String) As String
+        ' doing this due to the radio configuration of the legend.
+        ' need to have set of ramp ids, not a singular
+        Return "CAPA_" & variable & "_" & hour & "_" & lang
+    End Function
+
+
+    Private Sub MakeCAPALang()
+        Dim k As String 'lazy
+
+        oCAPALang = New LangHive
+
+        With oCAPALang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short CAPA dataset description goes here", "[fr] A short DCS dataset description goes here")
+
+            k = "qp25"
+            .AddItem(VAR_DESC, "A short Quantity of Precipitation, 2.5KM resolution description goes here", "[fr] A short Quantity of Precipitation, 2.5KM resolution description goes here", k)
+            .AddItem(LAYER_NAME, "Quantity of Precipitation, 2.5KM resolution", "[fr] Quantity of Precipitation, 2.5KM resolution", k)
+
+            k = "qp10"
+            .AddItem(VAR_DESC, "A short Quantity of Precipitation, 10KM resolution description goes here", "[fr] A short Quantity of Precipitation, 10KM resolution description goes here", k)
+            .AddItem(LAYER_NAME, "Quantity of Precipitation, 10KM resolution", "[fr] Quantity of Precipitation, 10KM resolution", k)
+
+            .AddItem("CAPA_SLIDER", "Canadian Precipitation Analysis", "[fr] Canadian Precipitation Analysis")
+
+            k = "24"
+            .AddItem("CAPA_HOUR_DESC", "A short 24 hour description goes here", "[fr] A short 24 hour description goes here", k)
+
+            k = "6"
+            .AddItem("CAPA_HOUR_DESC", "A short 6 hour description goes here", "[fr] A short 6 hour description goes here", k)
+
+        End With
+
     End Sub
 
     ''' <summary>
@@ -923,18 +962,66 @@ Public Class ConfigForm
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
 
-        Dim wmsCode As String = varCode & "." & hour & "F"
+        Dim wmsCode As String = varCode & "." & hour & "F_PR"
 
         'derive unique layer id (ramp id)
-        Dim rampID As String = "CAPA_" & variable & "_" & hour & "_" & lang
+        Dim rampID As String = MakeCAPARampID(variable, hour, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, "LAYER NAME HERE")
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable) & " " & hour & "H")
 
     End Function
 
     Private Function MakeCAPALegend(variable As String, lang As String) As String
 
-        Return "{ ""legend"": true }"
+        Dim sLegend As String = ""
+        Dim sLegendUrl As String = ""
+
+        sLegendUrl = "http://geo.weather.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=HRDPA.6F_PR&format=image/png&STYLE=default"
+
+        Dim dIcon As New Dictionary(Of String, String) From {{"6", "06h"}, {"24", "24h"}}
+
+        Dim season As String
+
+        'this can be cleaned up a lot after demo panic
+
+        'special logic for exclusive visibility
+        Dim oConNugget As New ConfigNugget(2)
+        With oConNugget
+            .AddLine("""name"": """ & oCAPALang.Txt(lang, "CAPA_SLIDER") & """,")
+            .AddLine("""expanded"": true,")
+            .AddLine("""controls"": [""visibility""],")
+            .AddLine("""children"": [{")
+            .AddLine("""exclusiveVisibility"": [", 1)
+
+            season = "6"
+            .AddRaw(MakeLayerLegendBlockConfig(
+                    "",
+                    MakeCAPARampID(variable, season, lang),
+                    oCAPALang.Txt(lang, "CAPA_HOUR_DESC", season),
+                    "assets/images/" & dIcon.Item(season) & ".svg",
+                    sLegendUrl, "", 4))
+
+
+            season = "24"
+            .AddRaw(MakeLayerLegendBlockConfig(
+                    "",
+                    MakeCAPARampID(variable, season, lang),
+                    oCAPALang.Txt(lang, "CAPA_HOUR_DESC", season),
+                    "assets/images/" & dIcon.Item(season) & ".svg",
+                    sLegendUrl, "", 4, False))
+
+            .AddLine("]", 1)
+            .AddLine("}]")
+        End With
+
+        With oDCSLang
+
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            oConNugget.Nugget &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
 
     End Function
 
