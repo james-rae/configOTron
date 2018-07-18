@@ -139,6 +139,7 @@ Public Class ConfigForm
         nugget.AddLine("{")
         nugget.AddLine("""id"": """ & rampId & """,", 1)
         nugget.AddLine("""layerType"": ""ogcWms"",", 1)
+        nugget.AddLine("""suppressGetCapabilities"": true,", 1)
         nugget.AddLine("""url"": """ & url & """,", 1)
         nugget.AddLine("""name"": """ & layerName & """,", 1)
         nugget.AddLine("""state"": {", 1)
