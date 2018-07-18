@@ -3,6 +3,7 @@
 
 'OUTSTANDING THINGS
 ' - adjust urls on WMS layers so they don't hit GetCapabilities
+' - add getFeatureInfo settings to WMS layers
 ' - adjust urls on station layers (daily, monthly, normals(?)) for additional filtering for "one point per station"
 ' - update language strings
 ' - proper image svg for hydro legend
@@ -110,7 +111,8 @@ Public Class ConfigForm
     ''' <param name="visible"></param>
     ''' <param name="wmsLayerId"></param>
     ''' <returns></returns>
-    Private Function MakeWMSLayerConfig(url As String, rampId As String, opacity As Double, visible As Boolean, wmsLayerId As String, layerName As String) As String
+    Private Function MakeWMSLayerConfig(url As String, rampId As String, opacity As Double, visible As Boolean, wmsLayerId As String, layerName As String,
+                                        Optional template As String = "", Optional parser As String = "") As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"ogcWMS",
@@ -131,6 +133,9 @@ Public Class ConfigForm
 
         Dim nugget As New ConfigNugget(2)
 
+        'TODO add something like
+        ' "featureInfoMimeType": "text/plain",
+
         nugget.AddLine("{")
         nugget.AddLine("""id"": """ & rampId & """,", 1)
         nugget.AddLine("""layerType"": ""ogcWms"",", 1)
@@ -141,6 +146,7 @@ Public Class ConfigForm
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
         nugget.AddLine("},", 1)
         nugget.AddLine("""layerEntries"": [{""id"": """ & wmsLayerId & """ }],", 1)
+        InjectTemplate(nugget, 1, template, parser)
         nugget.AddLine("""controls"": [""data""]", 1)
         nugget.AddLine("}", 0, True)
 
@@ -157,7 +163,8 @@ Public Class ConfigForm
     ''' <param name="opacity"></param>
     ''' <param name="visible"></param>
     ''' <returns></returns>
-    Private Function MakeTileLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, layerName As String) As String
+    Private Function MakeTileLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, layerName As String,
+                                          Optional template As String = "", Optional parser As String = "") As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"esriTile",
@@ -178,6 +185,7 @@ Public Class ConfigForm
         nugget.AddLine("""layerType"": ""esriTile"",", 1)
         nugget.AddLine("""url"": """ & url & """,", 1)
         nugget.AddLine("""name"": """ & layerName & """,", 1)
+        InjectTemplate(nugget, 1, template, parser)
         nugget.AddLine("""state"": {", 1)
         nugget.AddLine("""opacity"": " & opacity & ",", 2)
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
@@ -189,7 +197,37 @@ Public Class ConfigForm
 
     End Function
 
-    Private Function MakeWFSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, nameField As String, layerName As String) As String
+    ''' <summary>
+    ''' will insert a template section to a layer config
+    ''' the sourceNugget contents are modified by this function.
+    ''' We assume its not the last item in the layer object, due to lazyness
+    ''' </summary>
+    ''' <param name="sourceNugget"></param>
+    ''' <param name="startingLevel"></param>
+    ''' <param name="template"></param>
+    ''' <param name="parser"></param>
+    Private Sub InjectTemplate(sourceNugget As ConfigNugget, startingLevel As Integer, Optional template As String = "", Optional parser As String = "")
+        Dim bT As Boolean = (template <> "")
+        Dim bP As Boolean = (parser <> "")
+        If (Not bT) And (Not bP) Then
+            Exit Sub
+        End If
+
+        sourceNugget.AddLine("""details"": {", startingLevel)
+        If bT Then
+            sourceNugget.AddLine("""template"": """ & template & """" & IIf(bP, ",", ""), startingLevel + 1)
+        End If
+
+        If bP Then
+            sourceNugget.AddLine("""parser"": """ & parser & """", startingLevel + 1)
+        End If
+
+        sourceNugget.AddLine("},", startingLevel)
+
+    End Sub
+
+    Private Function MakeWFSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, nameField As String, layerName As String, colour As String,
+                                        Optional template As String = "", Optional parser As String = "") As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"ogcWfs",
@@ -214,6 +252,8 @@ Public Class ConfigForm
         nugget.AddLine("""opacity"": " & opacity & ",", 2)
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
         nugget.AddLine("},", 1)
+        InjectTemplate(nugget, 1, template, parser)
+        nugget.AddLine("""colour"": """ & colour & """,", 1)  ' should be #112233 format
         nugget.AddLine("""controls"": [""data"", ""visibility"", ""opacity""]", 1)
         nugget.AddLine("}", 0, True)
 
@@ -743,15 +783,21 @@ Public Class ConfigForm
 
         'TODO make global to prevent re-creating every iteration?
         Dim dVari As New Dictionary(Of String, String) From {{"tmean", "temp_mean"}, {"tmin", "temp_min"}, {"tmax", "temp_max"}, {"prec", "total_precip"}, {"supr", "pressure_station"}, {"slpr", "pressure_sea_level"}, {"wind", "wind_speed"}}
+
+        'temp based ones are red. water based is blue. air based is green
+        Dim dColour As New Dictionary(Of String, String) From {{"tmean", "#f04116"}, {"tmin", "#f04116"}, {"tmax", "#f04116"}, {"prec", "#0ca7f5"}, {"supr", "#0cf03a"}, {"slpr", "#0cf03a"}, {"wind", "#0cf03a"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "Ann"}, {"MAM", "Spr"}, {"JJA", "Smr"}, {"SON", "Fal"}, {"DJF", "Win"}, {"JAN", "Jan"}, {"FEB", "Feb"}, {"MAR", "Mar"}, {"APR", "Apr"}, {"MAY", "May"}, {"JUN", "Jun"}, {"JUL", "Jul"}, {"AUG", "Aug"}, {"SEP", "Sep"}, {"OCT", "Oct"}, {"NOV", "Nov"}, {"DEC", "Dec"}}
 
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
         Dim seasonCode As String = dSeason.Item(season)
+        Dim colourCode As String = dColour.Item(variable)
+        Dim template As String = "assets/templates/ahccd/variables-template.html"
+        Dim parser As String = "assets/templates/ahccd/variables-script.js"
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "trend_value", oAHCCDLang.Txt(lang, LAYER_NAME, variable))
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "trend_value", oAHCCDLang.Txt(lang, LAYER_NAME, variable), colourCode, template, parser)
 
     End Function
 
@@ -836,7 +882,8 @@ Public Class ConfigForm
         Dim url As String = "http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=" & lang
 
         'TODO make global to prevent re-creating every iteration?
-        Dim dVari As New Dictionary(Of String, String) From {{"qp25", "HRDPA"}, {"qp10", "RDPA"}}
+        'might need to add _PR to the key
+        Dim dVari As New Dictionary(Of String, String) From {{"qp25", "HRDPA_PR"}, {"qp10", "RDPA_PR"}}
 
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
@@ -918,7 +965,7 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/items?STATUS_EN=Active"
 
-        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", oHydroLang.Txt(lang, LAYER_NAME))
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", oHydroLang.Txt(lang, LAYER_NAME), "#0cf03a")
 
     End Function
 
@@ -1088,7 +1135,7 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-daily/items?" & varCode & "_FLAG=T"
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, varCode, oDailyLang.Txt(lang, LAYER_NAME, variable))
+        Return MakeWFSLayerConfig(url, rampId, 1, True, varCode, oDailyLang.Txt(lang, LAYER_NAME, variable), "#0cf03a")
 
     End Function
 
@@ -1191,7 +1238,7 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-Monthly/items?LOCAL_MONTH=12&LOCAL_YEAR=1981"
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, varCode, oMonthlyLang.Txt(lang, LAYER_NAME, variable))
+        Return MakeWFSLayerConfig(url, rampId, 1, True, varCode, oMonthlyLang.Txt(lang, LAYER_NAME, variable), "#0cf03a")
 
     End Function
 
@@ -1314,7 +1361,7 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?"
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "DISPLAY FIELD ???", oNormalsLang.Txt(lang, LAYER_NAME, variable))
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "DISPLAY FIELD ???", oNormalsLang.Txt(lang, LAYER_NAME, variable), "#0cf03a")
 
     End Function
 
