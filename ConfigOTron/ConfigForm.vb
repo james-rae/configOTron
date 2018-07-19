@@ -372,7 +372,8 @@ Public Class ConfigForm
     ''' <param name="trailingComma"></param>
     ''' <returns></returns>
     Private Function MakeLayerLegendBlockConfig(layerName As String, layerId As String, descrip As String, icon As String,
-          legendImg As String, legendText As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
+          legendImg As String, legendText As String, indentLevel As Integer, Optional trailingComma As Boolean = True,
+          Optional symbolStyle As String = "images") As String
 
 
         Dim nugget As New ConfigNugget(indentLevel)
@@ -388,7 +389,7 @@ Public Class ConfigForm
         nugget.AddLine("""text"": """ & legendText & """", 3)
         nugget.AddLine("}", 2)
         nugget.AddLine("],", 1)
-        nugget.AddLine("""symbologyRenderStyle"": ""images""", 1)
+        nugget.AddLine("""symbologyRenderStyle"": """ & symbolStyle & """", 1)
         nugget.AddLine("}" & IIf(trailingComma, ",", ""))
 
         Return nugget.Nugget
@@ -838,6 +839,9 @@ Public Class ConfigForm
             k = "blue"
             .AddItem(LEGEND_TEXT, "Blue Circle", "[fr] Blue Circle", k)
 
+            'general non-colour one
+            .AddItem(LEGEND_TEXT, "AHCCD Station", "[fr] AHCCD Station")
+
         End With
 
     End Sub
@@ -894,7 +898,7 @@ Public Class ConfigForm
 
         With oAHCCDLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
-            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, .Txt(lang, LEGEND_TEXT, sColour), 2) &
+            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, .Txt(lang, LEGEND_TEXT), 2,, "icons") &
             MakeLegendSettingsConfig(lang, True, True, True)
         End With
 
