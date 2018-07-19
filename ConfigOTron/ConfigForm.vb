@@ -395,6 +395,31 @@ Public Class ConfigForm
 
     End Function
 
+    Private Function MakeUnboundLayerLegendBlockConfig(layerName As String, descrip As String, icon As String,
+          legendImg As String, legendText As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
+
+        'TODO we really want a cover icon.... wait until that gets added
+
+        Dim nugget As New ConfigNugget(indentLevel)
+
+        nugget.AddLine("{")
+        nugget.AddLine("""infoType"": ""unboundLayer"",", 1)
+        nugget.AddLine("""layerName"": """ & layerName & """,", 1)
+        nugget.AddLine("""description"": """ & descrip & """,", 1)
+        'nugget.AddLine("""coverIcon"": """ & icon & """,", 1)
+        nugget.AddLine("""symbologyStack"": [", 1)
+        nugget.AddLine("{", 2)
+        nugget.AddLine("""image"": """ & legendImg & """,", 3)
+        nugget.AddLine("""text"": """ & legendText & """", 3)
+        nugget.AddLine("}", 2)
+        nugget.AddLine("],", 1)
+        nugget.AddLine("""symbologyRenderStyle"": ""images""", 1)
+        nugget.AddLine("}" & IIf(trailingComma, ",", ""))
+
+        Return nugget.Nugget
+
+    End Function
+
     Private Function MakeLegendTitleConfig(titleText As String, descText As String) As String
 
         Dim json As String = MakeSimpleLegendBlockConfig("title", titleText, 2) &
@@ -695,13 +720,15 @@ Public Class ConfigForm
         Dim seasonCode As String = dSeason.Item(season)
         Dim yearCode As String = year & "-" & CStr(CInt(year) + 19)
         Dim rcpCode As String = rcp.ToUpper()
+        Dim template As String = "assets/templates/dcs/variables-template.html"
+        Dim parser As String = "assets/templates/dcs/variables-script.js"
 
         Dim wmsCode As String = "DCS." & varCode & "." & rcpCode & "." & seasonCode & "." & yearCode & "_PCTL50"
 
         'derive unique layer id (ramp id)
         Dim rampID As String = "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "text/plain")
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser)
 
     End Function
 
