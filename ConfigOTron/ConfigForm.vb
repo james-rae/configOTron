@@ -171,7 +171,7 @@ Public Class ConfigForm
     ''' <param name="visible"></param>
     ''' <returns></returns>
     Private Function MakeTileLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, layerName As String,
-                                          Optional template As String = "", Optional parser As String = "") As String
+                                          Optional template As String = "", Optional parser As String = "", Optional toastTime As String = "4000") As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"esriTile",
@@ -192,6 +192,7 @@ Public Class ConfigForm
         nugget.AddLine("""layerType"": ""esriTile"",", 1)
         nugget.AddLine("""url"": """ & url & """,", 1)
         nugget.AddLine("""name"": """ & layerName & """,", 1)
+        nugget.AddLine("""expectedResponseTime"": " & toastTime & ",", 1)
         InjectTemplate(nugget, 1, template, parser)
         nugget.AddLine("""state"": {", 1)
         nugget.AddLine("""opacity"": " & opacity & ",", 2)
@@ -526,19 +527,19 @@ Public Class ConfigForm
     Private Function MakeProvinceConfig(lang As String) As String
 
         Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Provinces/MapServer",
-                                   PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID))
+                                   PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID),,, "10000")
     End Function
 
     Private Function MakeCitiesConfig(lang As String) As String
 
         Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Cities/MapServer",
-                                   CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID))
+                                   CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID),,, "10000")
     End Function
 
     Private Function MakeLabelsConfig(lang As String) As String
 
         Return MakeTileLayerConfig("http://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_TXT_3978/MapServer",
-                                   LABELS_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, LABELS_LAYER_ID))
+                                   LABELS_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, LABELS_LAYER_ID),,, "10000")
     End Function
 
 #End Region
