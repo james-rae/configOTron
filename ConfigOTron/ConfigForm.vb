@@ -1018,8 +1018,10 @@ Public Class ConfigForm
 
         'derive unique layer id (ramp id)
         Dim rampID As String = MakeCAPARampID(variable, hour, lang)
+        Dim template As String = "assets/templates/capa/variables-template.html"
+        Dim parser As String = "assets/templates/capa/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable) & " " & hour & "H", "text/plain",,, True)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable) & " " & hour & "H", "text/plain", template, parser, True)
 
     End Function
 
@@ -1108,7 +1110,7 @@ Public Class ConfigForm
         Next
 
         Dim fileguts = MakeLangStructure(nugget)
-        WriteConfig("hydro\1\config.json", fileguts)
+        WriteConfig("hydro\1\config-hydro.json", fileguts)
     End Sub
 
     Private Sub MakeHydroLang()
@@ -1123,6 +1125,8 @@ Public Class ConfigForm
 
             .AddItem(VAR_DESC, "A short hydro description goes here (maybe)", "[fr] A short hydro description goes here (maybe)")
             .AddItem(LAYER_NAME, "Hydrometric stations", "[fr] Hydrometric stations")
+
+            .AddItem(LEGEND_TEXT, "Hydrometric Station", "[fr] Hydrometric Station")
 
         End With
 
@@ -1141,7 +1145,10 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/items?STATUS_EN=Active"
 
-        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", oHydroLang.Txt(lang, LAYER_NAME), "#0cf03a")
+        Dim template As String = "assets/templates/hydro/stations-template.html"
+        Dim parser As String = "assets/templates/hydro/stations-script.js"
+
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", oHydroLang.Txt(lang, LAYER_NAME), "#0cf03a", template, parser)
 
     End Function
 
@@ -1151,11 +1158,11 @@ Public Class ConfigForm
         Dim sLegendUrl = "" 'TODO needs to be supplied
 
         'TODO need a proper image
-        Dim sCoverIcon = "assets/images/happy.svg"
+        Dim sCoverIcon = "assets/images/green-circle.svg"
 
         With oHydroLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
-            MakeLayerLegendBlockConfig("", rampID, .Txt(lang, VAR_DESC), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLayerLegendBlockConfig("", rampID, .Txt(lang, VAR_DESC), sCoverIcon, sLegendUrl, .Txt(lang, LEGEND_TEXT), 2,, "icons") &
             MakeLegendSettingsConfig(lang, True, True, True)
         End With
 
