@@ -953,7 +953,7 @@ Public Class ConfigForm
 
         With oCAPALang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "A short CAPA dataset description goes here", "[fr] A short DCS dataset description goes here")
+            .AddItem(TOP_DESC, "A short CAPA dataset description goes here", "[fr] A short CAPA dataset description goes here")
 
             k = "qp25"
             .AddItem(VAR_DESC, "A short Quantity of Precipitation, 2.5KM resolution description goes here", "[fr] A short Quantity of Precipitation, 2.5KM resolution description goes here", k)
@@ -1108,7 +1108,7 @@ Public Class ConfigForm
         Next
 
         Dim fileguts = MakeLangStructure(nugget)
-        WriteConfig("testHydro.json", fileguts)
+        WriteConfig("hydro\1\config.json", fileguts)
     End Sub
 
     Private Sub MakeHydroLang()
