@@ -398,9 +398,8 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeUnboundLayerLegendBlockConfig(layerName As String, descrip As String, icon As String,
-          legendImg As String, legendText As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
-
-        'TODO we really want a cover icon.... wait until that gets added
+          legendImg As String, legendText As String, indentLevel As Integer, Optional trailingComma As Boolean = True,
+          Optional symbolStyle As String = "images") As String
 
         Dim nugget As New ConfigNugget(indentLevel)
 
@@ -408,14 +407,14 @@ Public Class ConfigForm
         nugget.AddLine("""infoType"": ""unboundLayer"",", 1)
         nugget.AddLine("""layerName"": """ & layerName & """,", 1)
         nugget.AddLine("""description"": """ & descrip & """,", 1)
-        'nugget.AddLine("""coverIcon"": """ & icon & """,", 1)
+        nugget.AddLine("""coverIcon"": """ & icon & """,", 1)
         nugget.AddLine("""symbologyStack"": [", 1)
         nugget.AddLine("{", 2)
         nugget.AddLine("""image"": """ & legendImg & """,", 3)
         nugget.AddLine("""text"": """ & legendText & """", 3)
         nugget.AddLine("}", 2)
         nugget.AddLine("],", 1)
-        nugget.AddLine("""symbologyRenderStyle"": ""images""", 1)
+        nugget.AddLine("""symbologyRenderStyle"": """ & symbolStyle & """", 1)
         nugget.AddLine("}" & IIf(trailingComma, ",", ""))
 
         Return nugget.Nugget
@@ -650,8 +649,8 @@ Public Class ConfigForm
         Dim seasonCode As String = dSeason.Item(season)
         Dim yearCode As String = year & "-" & CStr(CInt(year) + 19)
         Dim rcpCode As String = rcp.ToUpper()
-        Dim template As String = "" ' "assets/templates/CMIP5/variables-template.html"
-        Dim parser As String = "" ' "assets/templates/CMIP5/variables-script.js"
+        Dim template As String = "assets/templates/cmip5/variables-template.html"
+        Dim parser As String = "assets/templates/cmip5/variables-script.js"
 
         Dim wmsCode As String = "CMIP5." & varCode & "." & rcpCode & "." & seasonCode & "." & yearCode & "_PCTL50"
 
@@ -678,6 +677,8 @@ Public Class ConfigForm
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
+
+            ' MakeUnboundLayerLegendBlockConfig(.Txt(lang, LAYER_NAME, variable), .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
         End With
 
         Return sLegend
@@ -832,6 +833,8 @@ Public Class ConfigForm
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
+
+            'MakeUnboundLayerLegendBlockConfig(.Txt(lang, LAYER_NAME, variable), .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
         End With
 
         Return sLegend
