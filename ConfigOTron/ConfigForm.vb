@@ -63,7 +63,7 @@ Public Class ConfigForm
         'MAIN STARTING POINT OF APP.
         MakeCommonLang()
 
-        'MakeCMIP5Configs()
+        MakeCMIP5Configs()
         MakeDCSConfigs()
         MakeAHCCDConfigs()
         MakeCAPAConfigs()
@@ -493,8 +493,7 @@ Public Class ConfigForm
 
         '"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"
         Dim dVar As New Dictionary(Of String, String) From {{"wind", "sfcwind"}, {"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"supr", "stnpress"},
-            {"slpr", "seapress"}, {"qp25", "hrdpa"}, {"qp10", "rdpa"}, {"MAY", "may"}, {"JUN", "jun"}, {"JUL", "jul"}, {"AUG", "aug"}, {"SEP", "sep"}, {"OCT", "oct"},
-            {"NOV", "nov"}, {"DEC", "dec"}}
+            {"slpr", "seapress"}, {"qp25", "hrdpa"}, {"qp10", "rdpa"}, {"snow", "snd"}, {"sith", "sit"}, {"sico", "sic"}}
 
         Return dVar.Item(var)
 
@@ -546,30 +545,70 @@ Public Class ConfigForm
 
 #Region " CMIP5 "
 
-    'TODO needs revist / fixin
 
+    ' WMS. Time (by year).
+
+    ''' <summary>
+    ''' Create set of config files for CMIP5
+    ''' </summary>
     Private Sub MakeCMIP5Configs()
+        MakeCMIP5Lang()
+
         For Each var As String In aCMIP5Var
             For Each season As String In aSeason
                 For Each rcp As String In aRcp
                     Dim nugget As New LangNugget
                     For Each lang As String In aLang
+
+                        'TODO for now pick the first year and hack the key.  if we need all keys in the legend part, will need to abstract or duplicate the ramp key generator so its accessible to all parts
+                        'derive unique layer id (ramp id)
+                        'ideally we have unbound legend after covericon support is added
+                        Dim rampID As String = "CMIP5_" & var & "_" & season & "_" & rcp & "_" & "2021" & "_" & lang
+
                         Dim dataLayers = MakeCMIP5YearSet(var, season, rcp, lang)
-                        Dim legund = MakeCMIP5Legend(var, season, rcp, lang)
+                        Dim legund = MakeCMIP5Legend(var, season, rcp, lang, rampID)
                         Dim support = MakeSupportSet(lang, True, True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
                         nugget.setLang(lang, configstruct)
-
                     Next
 
                     Dim fileguts = MakeLangStructure(nugget)
-                    WriteConfig("testcmip5_" & var & season & rcp & ".json", fileguts)
+                    WriteConfig("CMIP5\1\config-" & FileVar(var) & "-" & FileSeason(season) & "-" & rcp & ".json", fileguts)
 
                 Next
             Next
         Next
+    End Sub
+
+    Private Sub MakeCMIP5Lang()
+        Dim k As String 'lazy
+
+        oCMIP5Lang = New LangHive
+
+        With oCMIP5Lang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short CMIP5 dataset description goes here", "[fr] A short CMIP5 dataset description goes here")
+
+            k = "snow"
+            .AddItem(VAR_DESC, "A short snow depth description goes here", "[fr] A short snow depth description goes here", k)
+            .AddItem(LAYER_NAME, "Snow depth", "[fr] Snow depth", k)
+
+            k = "sith"
+            .AddItem(VAR_DESC, "A short sea ice thickness description goes here", "[fr] A short sea ice thickness description goes here", k)
+            .AddItem(LAYER_NAME, "Sea ice thickness", "[fr] Sea ice thickness", k)
+
+            k = "sico"
+            .AddItem(VAR_DESC, "A short sea ice concentration description goes here", "[fr] A short sea ice concentration description goes here", k)
+            .AddItem(LAYER_NAME, "Sea ice concentration", "[fr] Sea ice concentration", k)
+
+            k = "wind"
+            .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
+            .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
+
+        End With
+
     End Sub
 
     ''' <summary>
@@ -584,7 +623,7 @@ Public Class ConfigForm
         Dim lset As String = ""
 
         For Each year As String In aYear
-            lset = lset & MakeCMIP5DataLayer(variable, season, rcp, year, lang) & IIf(year <> "2081", ",", "") & vbCrLf
+            lset = lset & MakeCMIP5DataLayer(variable, season, rcp, year, lang) & IIf(year <> "2081", "," & vbCrLf, "")
         Next
 
         Return lset
@@ -592,20 +631,59 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeCMIP5DataLayer(variable As String, season As String, rcp As String, year As String, lang As String) As String
+        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
+        '     the get capabilities is 8mb on public geomet.
+        '     need aly's CORS patch done before I can test this
+        '     Mike suggestion to duplicate the layer id arg on the main url 
 
         'calculate url (might be a constant)
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=CMIP5.SND.RCP26.ANNUAL.2081-2100_PCTL50
+
+        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
+
+        'TODO make global to prevent re-creating every iteration?
+        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}}
+        Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "YEAR"}, {"MAM", "SPRING"}, {"JJA", "SUMMER"}, {"SON", "FALL"}, {"DJF", "WINTER"}}
+
         'calculate wms layer id
+        Dim varCode As String = dVari.Item(variable)
+        Dim seasonCode As String = dSeason.Item(season)
+        Dim yearCode As String = year & "-" & CStr(CInt(year) + 19)
+        Dim rcpCode As String = rcp.ToUpper()
+        Dim template As String = "" ' "assets/templates/CMIP5/variables-template.html"
+        Dim parser As String = "" ' "assets/templates/CMIP5/variables-script.js"
+
+        Dim wmsCode As String = "CMIP5." & varCode & "." & rcpCode & "." & seasonCode & "." & yearCode & "_PCTL50"
+
         'derive unique layer id (ramp id)
+        Dim rampID As String = "CMIP5_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
 
-        Return MakeWMSLayerConfig("url", "id", 1, True, "wmslayer", "layer name")
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser)
+
+    End Function
+
+    Private Function MakeCMIP5Legend(variable As String, season As String, rcp As String, lang As String, rampid As String) As String
+
+        Dim sLegend As String = ""
+        Dim sLegendUrl As String = ""
+
+        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}}
+
+        sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CMIP5." & dVari.Item(variable) &
+            ".RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
+
+        Dim sCoverIcon = "assets/images/" & dVari.Item(variable).ToLower() & ".svg"
+
+        With oCMIP5Lang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
 
     End Function
 
-    Private Function MakeCMIP5Legend(variable As String, season As String, rcp As String, lang As String) As String
-
-        Return "{ ""legend"": true }"
-
-    End Function
 
 #End Region
 
