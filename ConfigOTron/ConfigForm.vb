@@ -478,7 +478,7 @@ Public Class ConfigForm
 
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "annual"}, {"MAM", "spring"}, {"JJA", "summer"}, {"SON", "fall"}, {"DJF", "winter"}, {"JAN", "jan"},
             {"FEB", "feb"}, {"MAR", "mar"}, {"APR", "apr"}, {"MAY", "may"}, {"JUN", "jun"}, {"JUL", "jul"}, {"AUG", "aug"}, {"SEP", "sep"}, {"OCT", "oct"},
-            {"NOV", "nov"}, {"DEC", "dec"}}
+            {"NOV", "nov"}, {"DEC", "dec"}, {"MTH", "monthly"}}
 
         Return dSeason.Item(season)
 
@@ -1270,13 +1270,19 @@ Public Class ConfigForm
     ''' Create set of config files for CanGRID
     ''' </summary>
     Private Sub MakeCanGRIDConfigs()
+
+        MakeCanGRIDLang()
+
         For Each var As String In aCanGRIDVar
             For Each season As String In aSeasonMonthly 'note different than SeasonMonth
 
                 Dim nugget As New LangNugget
                 For Each lang As String In aLang
-                    Dim dataLayers = MakeCanGRIDDataLayer(var, season, lang)
-                    Dim legund = MakeCanGRIDLegend(var, season, lang)
+                    'derive unique layer id (ramp id)
+                    Dim rampID As String = "CanGRID_" & var & "_" & season & "_" & lang
+
+                    Dim dataLayers = MakeCanGRIDDataLayer(var, season, lang, rampID)
+                    Dim legund = MakeCanGRIDLegend(var, season, lang, rampID)
                     Dim support = MakeSupportSet(lang, True, True, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
@@ -1285,13 +1291,41 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("testCanGRID_" & var & season & ".json", fileguts)
+                WriteConfig("CanGRD\1\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
             Next
         Next
     End Sub
 
+    Private Sub MakeCanGRIDLang()
+        Dim k As String 'lazy
 
-    Private Function MakeCanGRIDDataLayer(variable As String, season As String, lang As String) As String
+        oCanGRIDLang = New LangHive
+
+        With oCanGRIDLang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short CanGRID dataset description goes here", "[fr] A short CanGRID dataset description goes here")
+
+            k = "tmean"
+            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+
+            k = "tmin"
+            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
+
+            k = "tmax"
+            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
+
+            k = "prec"
+            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
+
+        End With
+
+    End Sub
+
+    Private Function MakeCanGRIDDataLayer(variable As String, season As String, lang As String, rampID As String) As String
         'TODO attempt to get a URL that works with &lang but without GetCapabilities.
         '     the get capabilities is 8mb on public geomet.
         '     need aly's CORS patch done before I can test this
@@ -1304,28 +1338,44 @@ Public Class ConfigForm
 
         'TODO make global to prevent re-creating every iteration?
         'NOTE layer spreadsheet only indicates tmean and precip. will include other two codes if we add them.
-        '     and ??? at why TX is min and TM is max
-        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "TN"}, {"tmin", "TX"}, {"tmax", "TM"}, {"prec", "PR"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "TM"}, {"tmin", "TN"}, {"tmax", "TX"}, {"prec", "PR"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "ANNUAL"}, {"MAM", "SPRING"}, {"JJA", "SUMMER"}, {"SON", "FALL"}, {"DJF", "WINTER"}, {"MTH", "MONTHLY"}}
 
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
         Dim seasonCode As String = dSeason.Item(season)
 
-        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=" & lang
+        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
 
         Dim wmsCode As String = "CANGRID.TREND." & varCode & "_" & seasonCode
 
-        'derive unique layer id (ramp id)
-        Dim rampID As String = "CanGRID_" & variable & "_" & season & "_" & lang
-
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode, "LAYER NAME HERE")
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode, oCanGRIDLang.Txt(lang, LAYER_NAME, variable), "text/plain")
 
     End Function
 
-    Private Function MakeCanGRIDLegend(variable As String, season As String, lang As String) As String
+    Private Function MakeCanGRIDLegend(variable As String, season As String, lang As String, rampid As String) As String
 
-        Return "{ ""legend"": true }"
+        Dim sLegend As String = ""
+        Dim sLegendUrl As String = ""
+
+        'precip has different legend than temperature ones
+        If variable = "prec" Then
+            sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRID.TREND.PR_ANNUAL&format=image/png&STYLE=default"
+        Else
+            sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRID.TREND.TM_ANNUAL&format=image/png&STYLE=default"
+        End If
+
+        Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
+
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+
+        With oCanGRIDLang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
 
     End Function
 
