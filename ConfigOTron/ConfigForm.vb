@@ -20,7 +20,7 @@ Public Class ConfigForm
     Dim aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
     Dim aCanGRIDVar = {"tmean", "prec"} ' "tmin", "tmax",
     Dim aCAPAVar = {"qp25", "qp10"}
-    Dim aCMIP5Var = {"snow", "sith", "sico", "wind"}
+    Dim aCMIP5Var = {"snow", "sith", "sico", "wind", "tmean", "prec"}
     Dim aDailyVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aDCSVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aMonthlyVar = {"tmean", "tmin", "tmax", "prec"}
@@ -606,6 +606,14 @@ Public Class ConfigForm
             .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
             .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
 
+            k = "tmean"
+            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+
+            k = "prec"
+            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Total precipitation", "[fr] Total precipitation", k)
+
         End With
 
     End Sub
@@ -641,7 +649,7 @@ Public Class ConfigForm
         Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
 
         'TODO make global to prevent re-creating every iteration?
-        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}, {"tmean", "TM"}, {"prec", "PR"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "YEAR"}, {"MAM", "SPRING"}, {"JJA", "SUMMER"}, {"SON", "FALL"}, {"DJF", "WINTER"}}
 
         'calculate wms layer id
@@ -666,12 +674,13 @@ Public Class ConfigForm
         Dim sLegend As String = ""
         Dim sLegendUrl As String = ""
 
-        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}, {"tmean", "TM"}, {"prec", "PR"}}
+        Dim dIcon As New Dictionary(Of String, String) From {{"snow", "snd"}, {"sith", "sit"}, {"sico", "sic"}, {"wind", "sfcwind"}, {"tmean", "tmean"}, {"prec", "precip"}}
 
         sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CMIP5." & dVari.Item(variable) &
             ".RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
 
-        Dim sCoverIcon = "assets/images/" & dVari.Item(variable).ToLower() & ".svg"
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
         With oCMIP5Lang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
