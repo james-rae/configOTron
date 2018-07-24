@@ -19,6 +19,7 @@ Public Class ConfigForm
     Dim aRcp = {"rcp26", "rcp45", "rcp85"}
     Dim aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
     Dim aCanGRIDVar = {"tmean", "prec"} ' "tmin", "tmax",
+    Dim aCanSIPSVar = {"slpr", "itpr", "stpr", "wtpr", "gh5m", "ta8m", "wd2m", "wd8m"}
     Dim aCAPAVar = {"qp10"} ' {"qp25", "qp10"}
     Dim aCMIP5Var = {"snow", "sith", "sico", "wind", "tmean", "prec"}
     Dim aDailyVar = {"tmean", "tmin", "tmax", "prec"}
@@ -36,6 +37,7 @@ Public Class ConfigForm
     Dim oCommonLang As LangHive
     Dim oAHCCDLang As LangHive
     Dim oCanGRIDLang As LangHive
+    Dim oCanSIPSLang As LangHive
     Dim oCAPALang As LangHive
     Dim oCMIP5Lang As LangHive
     Dim oDailyLang As LangHive
@@ -72,6 +74,7 @@ Public Class ConfigForm
         MakeDailyConfigs()
         MakeMonthlyConfigs()
         MakeNormalsConfigs()
+        MakeCanSIPSConfigs()
 
         MsgBox("DONE THANKS")
     End Sub
@@ -492,7 +495,8 @@ Public Class ConfigForm
 
         '"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"
         Dim dVar As New Dictionary(Of String, String) From {{"wind", "sfcwind"}, {"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"supr", "stnpress"},
-            {"slpr", "seapress"}, {"qp25", "hrdpa"}, {"qp10", "rdpa"}, {"snow", "snd"}, {"sith", "sit"}, {"sico", "sic"}}
+            {"slpr", "seapress"}, {"qp25", "hrdpa"}, {"qp10", "rdpa"}, {"snow", "snd"}, {"sith", "sit"}, {"sico", "sic"}, {"itpr", "xxxxitpr"}, {"stpr", "xxxxstpr"},
+            {"wtpr", "xxxxwtpr"}, {"gh5m", "xxxxgh5m"}, {"ta8m", "xxxxta8m"}, {"wd2m", "xxxxwd2m"}, {"wd8m", "xxxxwd8m"}}
 
         Return dVar.Item(var)
 
@@ -638,10 +642,6 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeCMIP5DataLayer(variable As String, season As String, rcp As String, year As String, lang As String) As String
-        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
-        '     the get capabilities is 8mb on public geomet.
-        '     need aly's CORS patch done before I can test this
-        '     Mike suggestion to duplicate the layer id arg on the main url 
 
         'calculate url (might be a constant)
         'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=CMIP5.SND.RCP26.ANNUAL.2081-2100_PCTL50
@@ -783,10 +783,6 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeDCSDataLayer(variable As String, season As String, rcp As String, year As String, lang As String) As String
-        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
-        '     the get capabilities is 8mb on public geomet.
-        '     need aly's CORS patch done before I can test this
-        '     Mike suggestion to duplicate the layer id arg on the main url 
 
         'calculate url (might be a constant)
         'tmean en/fr , tmin en/fr  , tmax en/fr  , prec en/fr
@@ -799,7 +795,7 @@ Public Class ConfigForm
         'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.PR.RCP85.FALL.2021-2040_PCTL50
         'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.PR.RCP85.FALL.2021-2040_PCTL50
 
-        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=" & lang
+        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
 
         'TODO make global to prevent re-creating every iteration?
         Dim dVari As New Dictionary(Of String, String) From {{"tmean", "TX"}, {"tmin", "TN"}, {"tmax", "TM"}, {"prec", "PR"}}
@@ -938,10 +934,6 @@ Public Class ConfigForm
     End Sub
 
     Private Function MakeAHCCDDataLayer(variable As String, season As String, lang As String, rampId As String) As String
-        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
-        '     the get capabilities is 8mb on public geomet.
-        '     need aly's CORS patch done before I can test this
-        '     Mike suggestion to duplicate the layer id arg on the main url 
 
         'calculate url (might be a constant)
         'tmean , tmin , tmax , prec , surface pres , sea pres , whind
@@ -1084,10 +1076,6 @@ Public Class ConfigForm
     End Function
 
     Private Function MakeCAPADataLayer(variable As String, hour As String, lang As String) As String
-        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
-        '     the get capabilities is 8mb on public geomet.
-        '     need aly's CORS patch done before I can test this
-        '     Mike suggestion to duplicate the layer id arg on the main url 
 
         'calculate url (might be a constant)
         'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=HRDPA.6F 
@@ -1095,7 +1083,7 @@ Public Class ConfigForm
         'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=RDPA.6F 
         'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=RDPA.24F
 
-        Dim url As String = "http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=" & lang
+        Dim url As String = "http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"
 
         'TODO make global to prevent re-creating every iteration?
         'might need to add _PR to the key
@@ -1224,10 +1212,6 @@ Public Class ConfigForm
 
 
     Private Function MakeHydroDataLayer(lang As String, rampID As String) As String
-        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
-        '     the get capabilities is 8mb on public geomet.
-        '     need aly's CORS patch done before I can test this
-        '     Mike suggestion to duplicate the layer id arg on the main url 
 
         'calculate url (might be a constant)
         'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/items?STATUS_EN=\%22Active\%22
@@ -1326,10 +1310,6 @@ Public Class ConfigForm
     End Sub
 
     Private Function MakeCanGRIDDataLayer(variable As String, season As String, lang As String, rampID As String) As String
-        'TODO attempt to get a URL that works with &lang but without GetCapabilities.
-        '     the get capabilities is 8mb on public geomet.
-        '     need aly's CORS patch done before I can test this
-        '     Mike suggestion to duplicate the layer id arg on the main url 
 
         'calculate url (might be a constant)
         'tmean , tmin , tmax , prec , surface pres , sea pres , whind
@@ -1370,6 +1350,136 @@ Public Class ConfigForm
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
         With oCanGRIDLang
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLegendSettingsConfig(lang, True, True, True)
+        End With
+
+        Return sLegend
+
+    End Function
+
+#End Region
+
+#Region " CanSIPS "
+
+    ' WMS. No Time.
+
+    ''' <summary>
+    ''' Create set of config files for CanSIPS
+    ''' </summary>
+    Private Sub MakeCanSIPSConfigs()
+
+        MakeCanSIPSLang()
+
+        Dim dVari As New Dictionary(Of String, String) From {{"slpr", "HIND.MEM.ETA_PN-SLP.10"}, {"itpr", "MEM.ETA_RT.10"}, {"stpr", "MEM.ETA_TT.10"},
+            {"wtpr", "MEM.ETA_WTMP.10"}, {"gh5m", "PRES_GZ.500.10"}, {"ta8m", "PRES_TT.850.10"}, {"wd2m", "MEM.PRES_UU.200.10"},
+            {"wd8m", "PRES_UU.850.10"}}
+
+        For Each var As String In aCanSIPSVar
+
+            Dim nugget As New LangNugget
+            For Each lang As String In aLang
+                'derive unique layer id (ramp id)
+                Dim rampID As String = "CanSIPS_" & var & "_" & "_" & lang
+
+
+
+                'calculate wms layer id.  easier to do it here
+                Dim wmsCode As String = "CANSIPS." & dVari.Item(var)
+
+                Dim dataLayers = MakeCanSIPSDataLayer(var, lang, rampID, wmsCode)
+                Dim legund = MakeCanSIPSLegend(var, lang, rampID, wmsCode)
+                Dim support = MakeSupportSet(lang, True, True, True)
+
+                Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
+
+                nugget.setLang(lang, configstruct)
+            Next
+
+            Dim fileguts = MakeLangStructure(nugget)
+            WriteConfig("cansips\1\config-" & FileVar(var) & ".json", fileguts)
+
+        Next
+    End Sub
+
+    Private Sub MakeCanSIPSLang()
+        Dim k As String 'lazy
+
+        oCanSIPSLang = New LangHive
+
+        With oCanSIPSLang
+            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_DESC, "A short CanSIPS dataset description goes here", "[fr] A short CanSIPS dataset description goes here")
+
+            k = "slpr"
+            .AddItem(VAR_DESC, "A short sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
+            .AddItem(LAYER_NAME, "Sea level pressure", "[fr] Sea level pressure", k)
+
+            k = "itpr"
+            .AddItem(VAR_DESC, "A short instantaneous precipitation rate description goes here", "[fr] A short instantaneous precipitation rate description goes here", k)
+            .AddItem(LAYER_NAME, "Instantaneous precipitation rate", "[fr] Instantaneous precipitation rate", k)
+
+            k = "stpr"
+            .AddItem(VAR_DESC, "A short surface temperature description goes here", "[fr] A short surface temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Surface temperature", "[fr] Surface temperature", k)
+
+            k = "wtpr"
+            .AddItem(VAR_DESC, "A short water temperature description goes here", "[fr] A short water temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Water temperature", "[fr] Water temperature", k)
+
+            k = "gh5m"
+            .AddItem(VAR_DESC, "A short geopotential height at 500mb description goes here", "[fr] A short geopotential height at 500mb description goes here", k)
+            .AddItem(LAYER_NAME, "Geopotential height at 500mb", "[fr] Geopotential height at 500mb", k)
+
+            k = "ta8m"
+            .AddItem(VAR_DESC, "A short temperature at 850mb description goes here", "[fr] A short temperature at 850mb description goes here", k)
+            .AddItem(LAYER_NAME, "Temperature at 850mb", "[fr] Temperature at 850mb", k)
+
+            k = "wd2m"
+            .AddItem(VAR_DESC, "A short wind direction at 200mb description goes here", "[fr] A short wind direction at 200mb description goes here", k)
+            .AddItem(LAYER_NAME, "Wind direction at 200mb", "[fr] Wind direction at 200mb", k)
+
+            k = "wd8m"
+            .AddItem(VAR_DESC, "A short wind direction at 850mb description goes here", "[fr] A short wind direction at 850mb description goes here", k)
+            .AddItem(LAYER_NAME, "Wind direction at 850mb", "[fr] Wind direction at 850mb", k)
+
+        End With
+
+    End Sub
+
+    Private Function MakeCanSIPSDataLayer(variable As String, lang As String, rampID As String, wmsID As String) As String
+
+        'calculate url (might be a constant)
+        'tmean , tmin , tmax , prec , surface pres , sea pres , whind
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en
+
+        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"
+
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsID, oCanSIPSLang.Txt(lang, LAYER_NAME, variable), "text/plain")
+
+    End Function
+
+    Private Function MakeCanSIPSLegend(variable As String, lang As String, rampid As String, wmsID As String) As String
+
+        Dim sLegend As String = ""
+        Dim sLegendUrl As String = ""
+
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CANSIPS.HIND.MEM.ETA_PN-SLP.10&format=image/png&STYLE=default
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CANSIPS.MEM.ETA_RT.10&format=image/png&STYLE=default
+
+        'precip has different legend than temperature ones
+
+        sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=" & wmsID & "&format=image/png&STYLE=default"
+
+        'TODO need proper icons
+        Dim dIcon As New Dictionary(Of String, String) From {{"slpr", "HIND.MEM.ETA_PN-SLP.10"}, {"itpr", "MEM.ETA_RT.10"}, {"stpr", "MEM.ETA_TT.10"},
+            {"wtpr", "MEM.ETA_WTMP.10"}, {"gh5m", "PRES_GZ.500.10"}, {"ta8m", "PRES_TT.850.10"}, {"wd2m", "MEM.PRES_UU.200.10"},
+            {"wd8m", "PRES_UU.850.10"}}
+
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+
+        With oCanSIPSLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
@@ -1710,216 +1820,5 @@ Public Class ConfigForm
 
 #End Region
 
-#Region " Legacy Code "
-
-    Function MagicIndex(rcp As String, subPeroid As String, year As String) As String
-        Dim yearI, periodI, rcpI As Integer
-
-        Select Case rcp
-            Case "rcp26"
-                rcpI = 0
-            Case "rcp45"
-                rcpI = 26
-            Case "rcp85"
-                rcpI = 52
-        End Select
-
-        Select Case subPeroid
-            Case "DJF"
-                periodI = 21
-            Case "JJA"
-                periodI = 11
-            Case "MAM"
-                periodI = 6
-            Case "SON"
-                periodI = 16
-            Case "ANN"
-                periodI = 1
-        End Select
-
-        Select Case year
-            Case "2021"
-                yearI = 1
-            Case "2041"
-                yearI = 2
-            Case "2061"
-                yearI = 3
-            Case "2081"
-                yearI = 4
-        End Select
-
-        Return periodI + yearI + rcpI
-
-    End Function
-
-    Private Sub cmdEnhance_Click(sender As Object, e As EventArgs)
-
-        'load the two template files
-        Dim oSrcEn As New StreamReader("c:\git\configotron\configotron\template.en.json")
-        Dim oSrcFr As New StreamReader("c:\git\configotron\configotron\template.fr.json")
-
-        Dim sSrcEn As String = oSrcEn.ReadToEnd()
-        oSrcEn.Close()
-
-        Dim sSrcFr As String = oSrcFr.ReadToEnd()
-        oSrcFr.Close()
-
-        Dim sSrc As String
-
-        'param arrays
-        Dim aRcp = {"rcp26", "rcp45", "rcp85"}
-        Dim aVar = {"snow", "sith", "sico", "wind"}
-        Dim aSub = {"ANN", "MAM", "JJA", "SON", "DJF"}
-        Dim aLang = {"en", "fr"}
-
-        For Each lang As String In aLang
-            If lang = "en" Then
-                sSrc = sSrcEn
-            Else
-                sSrc = sSrcFr
-            End If
-
-            For Each var As String In aVar
-                For Each subp As String In aSub
-                    For Each rcp As String In aRcp
-                        MakeConfig(sSrc, var, subp, rcp, lang)
-                    Next
-                Next
-            Next
-
-        Next
-
-
-        MsgBox("DONE THANKS")
-
-    End Sub
-
-    Private Function MakeFileName(variable As String, subPeroid As String, rcp As String, lang As String) As String
-        Return "config-cmip5-" & variable & "-" & subPeroid & "-" & rcp & "-" & lang & "-CA.json"
-    End Function
-
-    Private Sub MakeConfig(template As String, variable As String, subPeroid As String, rcp As String, lang As String)
-        ' this makes a full on config file
-        Dim oFile As StreamWriter = New StreamWriter("c:\git\configotron\configotron\dump\" & MakeFileName(variable, subPeroid, rcp, lang), False)
-
-        Dim sLayerSet = MakeLayerSet(variable, subPeroid, rcp)
-        oFile.Write(template.Replace("LAYERS_SPOT", sLayerSet))
-        oFile.Close()
-
-    End Sub
-
-    Private Sub MakeMiniConfig(template As String, variable As String, subPeroid As String, rcp As String)
-        ' this just makes a small config with layer snippets for one set. it doesn't have the full config contents
-        Dim oFile As StreamWriter = New StreamWriter("c:\git\configotron\configotron\dump\" & MakeMiniFileName(variable, subPeroid, rcp), False)
-
-        Dim sLayerSet = MakeLayerSet(variable, subPeroid, rcp)
-        oFile.Write(template.Replace("LAYERS_SPOT", sLayerSet))
-        oFile.Close()
-
-    End Sub
-
-    Private Function MakeLayerSet(variable As String, subPeroid As String, rcp As String) As String
-
-        Dim lset As String = ""
-
-        For Each year As String In aYear
-            lset = lset & MakeLayerSnippet(variable, subPeroid, rcp, year, year <> "2081")
-        Next
-
-        Return lset
-
-    End Function
-
-    Private Function MakeLayerSnippet(variable As String, subPeroid As String, rcp As String, year As String, trailingComma As Boolean) As String
-        '{
-        '  "id":"canadaElevation",
-        '  "name": "Canada Elevation",
-        '  "layerType":"esriTile",
-        '  "url":"http://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer",
-        '  "state": {
-        '    "opacity": 0.5,
-        '    "visibility": false
-        '  }
-        '}
-
-        'TODO if we need the 'name' element, will need some translations and the lang param coming in
-        Const pad As String = "      "
-        Const pad2 As String = "        "
-        Const pad3 As String = "          "
-
-        Dim url = MakeLayerURL(variable, subPeroid, rcp, year)
-        Dim magic = MagicIndex(rcp, subPeroid, year)
-
-        Dim json As String = pad & "{" & vbCrLf &
-            pad2 & """id"": """ & variable & "_" & magic & """," & vbCrLf &
-            pad2 & """layerType"": ""esriDynamic""," & vbCrLf &
-            pad2 & """url"": """ & url & """," & vbCrLf &
-            pad2 & """state"": {" & vbCrLf &
-            pad3 & """opacity"": 0.85," & vbCrLf &
-            pad3 & """visibility"": false" & vbCrLf &
-            pad2 & "}," & vbCrLf &
-            pad2 & """layerEntries"": [{""index"": " & magic & " }]," & vbCrLf &
-            pad2 & """controls"": [""data""]" & vbCrLf &
-            pad & "}" & IIf(trailingComma, ",", "") & vbCrLf
-
-        Return json
-
-    End Function
-
-
-    Private Function MakeMiniFileName(variable As String, subPeroid As String, rcp As String) As String
-
-        Dim badAlyVar As String = ""
-        Dim badAlyPeriod As String = ""
-
-        Select Case subPeroid
-            Case "DJF"
-                badAlyPeriod = "winter"
-            Case "JJA"
-                badAlyPeriod = "summer"
-            Case "MAM"
-                badAlyPeriod = "spring"
-            Case "SON"
-                badAlyPeriod = "fall"
-            Case "ANN"
-                badAlyPeriod = "annual"
-        End Select
-
-        Select Case variable
-            Case "snow"
-                badAlyVar = "snd"
-            Case "sith"
-                badAlyVar = "sit"
-            Case "sico"
-                badAlyVar = "sic"
-            Case "wind"
-                badAlyVar = "sfcwind"
-        End Select
-
-        Return "cmip5-layer-configs-" & badAlyVar & "-" & badAlyPeriod & "-" & rcp & ".json"
-    End Function
-
-
-    Private Function MakeLayerURL(variable As String, subPeroid As String, rcp As String, year As String) As String
-        ' e.g. http://cipgis.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5_SeaIceThickness/SeaIceThickness_2061_20yr_SON_rcp45/MapServer
-
-        Dim roooot As String = "http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/CMIP5/"
-
-        'Dim varfancy As String = ""
-        'Select Case variable
-        '    Case "snow"
-        '        varfancy = "SNOW"
-        '    Case "sith"
-        '        varfancy = "SeaIceThickness"
-        '    Case "sico"
-        '        varfancy = "SeaIceConcentration"
-        '    Case "wind"
-        '        varfancy = "WindSpeed"
-        'End Select
-
-        Return roooot & "CMIP5_" & UCase(variable) & "/MapServer"
-    End Function
-
-#End Region
 
 End Class
