@@ -19,7 +19,7 @@ Public Class ConfigForm
     Dim aRcp = {"rcp26", "rcp45", "rcp85"}
     Dim aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
     Dim aCanGRIDVar = {"tmean", "prec"} ' "tmin", "tmax",
-    Dim aCAPAVar = {"qp25", "qp10"}
+    Dim aCAPAVar = {"qp10"} ' {"qp25", "qp10"}
     Dim aCMIP5Var = {"snow", "sith", "sico", "wind", "tmean", "prec"}
     Dim aDailyVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aDCSVar = {"tmean", "tmin", "tmax", "prec"}
@@ -1043,7 +1043,7 @@ Public Class ConfigForm
 
         With oCAPALang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "A short CAPA dataset description goes here", "[fr] A short CAPA dataset description goes here")
+            .AddItem(TOP_DESC, "A short RDPA dataset description goes here", "[fr] A short RDPA dataset description goes here")
 
             k = "qp25"
             .AddItem(VAR_DESC, "A short Quantity of Precipitation, 2.5KM resolution description goes here", "[fr] A short Quantity of Precipitation, 2.5KM resolution description goes here", k)
