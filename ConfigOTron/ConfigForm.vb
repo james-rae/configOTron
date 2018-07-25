@@ -867,7 +867,7 @@ Public Class ConfigForm
 
                     Dim dataLayers = MakeAHCCDDataLayer(var, season, lang, rampID)
                     Dim legund = MakeAHCCDLegend(var, season, lang, rampID)
-                    Dim support = MakeSupportSet(lang, True, True, True)
+                    Dim support = MakeSupportSet(lang, True, False, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -962,7 +962,7 @@ Public Class ConfigForm
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "trend_value", oAHCCDLang.Txt(lang, LAYER_NAME, variable), colourCode, template, parser)
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "station_name", oAHCCDLang.Txt(lang, LAYER_NAME, variable), colourCode, template, parser)
 
     End Function
 
@@ -982,7 +982,7 @@ Public Class ConfigForm
         With oAHCCDLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, .Txt(lang, LEGEND_TEXT), 2,, "icons") &
-            MakeLegendSettingsConfig(lang, True, True, True)
+            MakeLegendSettingsConfig(lang, True, False, True)
         End With
 
         Return sLegend
@@ -1180,7 +1180,7 @@ Public Class ConfigForm
 
             Dim dataLayers = MakeHydroDataLayer(lang, rampID)
             Dim legund = MakeHydroLegend(lang, rampID)
-            Dim support = MakeSupportSet(lang, True, True, True)
+            Dim support = MakeSupportSet(lang, True, False, True)
 
             Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -1237,7 +1237,7 @@ Public Class ConfigForm
         With oHydroLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampID, .Txt(lang, VAR_DESC), sCoverIcon, sLegendUrl, .Txt(lang, LEGEND_TEXT), 2,, "icons") &
-            MakeLegendSettingsConfig(lang, True, True, True)
+            MakeLegendSettingsConfig(lang, True, False, True)
         End With
 
         Return sLegend
@@ -1510,7 +1510,7 @@ Public Class ConfigForm
 
                 Dim dataLayers = MakeDailyDataLayer(var, lang, rampID)
                 Dim legund = MakeDailyLegend(var, lang, rampID)
-                Dim support = MakeSupportSet(lang, True, True, True)
+                Dim support = MakeSupportSet(lang, True, False, True)
 
                 Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -1584,7 +1584,7 @@ Public Class ConfigForm
         With oDailyLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
-            MakeLegendSettingsConfig(lang, True, True, True)
+            MakeLegendSettingsConfig(lang, True, False, True)
         End With
 
         Return sLegend
@@ -1611,7 +1611,7 @@ Public Class ConfigForm
 
                 Dim dataLayers = MakeMonthlyDataLayer(var, lang, rampID)
                 Dim legund = MakeMonthlyLegend(var, lang, rampID)
-                Dim support = MakeSupportSet(lang, True, True, True)
+                Dim support = MakeSupportSet(lang, True, False, True)
 
                 Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -1687,7 +1687,7 @@ Public Class ConfigForm
         With oMonthlyLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
-            MakeLegendSettingsConfig(lang, True, True, True)
+            MakeLegendSettingsConfig(lang, True, False, True)
         End With
 
         Return sLegend
@@ -1717,7 +1717,7 @@ Public Class ConfigForm
 
                     Dim dataLayers = MakeNormalsDataLayer(var, season, lang, rampID)
                     Dim legund = MakeNormalsLegend(var, season, lang, rampID)
-                    Dim support = MakeSupportSet(lang, True, True, True)
+                    Dim support = MakeSupportSet(lang, True, False, True)
 
                     Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
 
@@ -1811,7 +1811,7 @@ Public Class ConfigForm
         With oNormalsLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
             MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
-            MakeLegendSettingsConfig(lang, True, True, True)
+            MakeLegendSettingsConfig(lang, True, False, True)
         End With
 
         Return sLegend
