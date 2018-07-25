@@ -20,7 +20,7 @@ Public Class ConfigForm
     Dim aAHCCDVar = {"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"}
     Dim aCanGRIDVar = {"tmean", "prec"} ' "tmin", "tmax",
     Dim aCanSIPSVar = {"slpr", "itpr", "stpr", "wtpr", "gh5m", "ta8m", "wd2m", "wd8m"}
-    Dim aCAPAVar = {"qp10"} ' {"qp25", "qp10"}
+    Dim aCAPAVar = {"qp25", "qp10"}
     Dim aCMIP5Var = {"snow", "sith", "sico", "wind", "tmean", "prec"}
     Dim aDailyVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aDCSVar = {"tmean", "tmin", "tmax", "prec"}
@@ -1258,7 +1258,7 @@ Public Class ConfigForm
         MakeCanGRIDLang()
 
         For Each var As String In aCanGRIDVar
-            For Each season As String In aSeasonMonthly 'note different than SeasonMonth
+            For Each season As String In aSeason ' aSeasonMonthly 'note different than SeasonMonth 'note asked to remove the "MONTHLY" part for now
 
                 Dim nugget As New LangNugget
                 For Each lang As String In aLang
@@ -1326,10 +1326,11 @@ Public Class ConfigForm
         Dim seasonCode As String = dSeason.Item(season)
 
         Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
-
         Dim wmsCode As String = "CANGRID.TREND." & varCode & "_" & seasonCode
+        Dim template As String = "assets/templates/cangrd/variables-template.html"
+        Dim parser As String = "assets/templates/cangrd/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode, oCanGRIDLang.Txt(lang, LAYER_NAME, variable), "text/plain")
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode, oCanGRIDLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser)
 
     End Function
 
