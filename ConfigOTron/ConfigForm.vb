@@ -1789,24 +1789,31 @@ Public Class ConfigForm
         'TODO make global to prevent re-creating every iteration?
         Dim dVari As New Dictionary(Of String, String) From {{"tmean", "1"}, {"tmin", "8"}, {"tmax", "5"}, {"prec", "56"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "13"}, {"JAN", "1"}, {"FEB", "2"}, {"MAR", "3"}, {"APR", "4"}, {"MAY", "5"}, {"JUN", "6"}, {"JUL", "7"}, {"AUG", "8"}, {"SEP", "9"}, {"OCT", "10"}, {"NOV", "11"}, {"DEC", "12"}}
+        Dim dColour As New Dictionary(Of String, String) From {{"tmean", "#f04116"}, {"tmin", "#f04116"}, {"tmax", "#f04116"}, {"prec", "#0ca7f5"}}
 
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
         Dim seasonCode As String = dSeason.Item(season)
+        Dim template As String = "assets/templates/normal/variables-template.html"
+        Dim parser As String = "assets/templates/normal/variables-script.js"
+
 
         Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-normals/items?NORMAL_ID=" & varCode & "&MONTH=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "ID", oNormalsLang.Txt(lang, LAYER_NAME, variable), "#0cf03a")
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "ID", oNormalsLang.Txt(lang, LAYER_NAME, variable), dColour.Item(variable), template, parser)
 
     End Function
 
     Private Function MakeNormalsLegend(variable As String, season As String, lang As String, rampId As String) As String
 
         Dim sLegend As String = ""
-        Dim sLegendUrl = ""
 
         'TODO update icons
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
+        Dim dLegend As New Dictionary(Of String, String) From {{"tmean", "red"}, {"tmin", "red"}, {"tmax", "red"}, {"prec", "blue"}}
+
+        Dim sColour As String = dLegend.Item(variable)
+        Dim sLegendUrl = "assets/images/" & sColour & "-circle.svg"
 
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
