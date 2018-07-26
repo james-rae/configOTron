@@ -25,10 +25,11 @@ Public Class ConfigForm
     Dim aDailyVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aDCSVar = {"tmean", "tmin", "tmax", "prec"}
     Dim aMonthlyVar = {"tmean", "tmin", "tmax", "prec"}
-    Dim aNormalsVar = {"tmean", "tmin", "tmax", "prec", "stpr", "slpr", "wind", "mgst", "dgst"}
+    Dim aNormalsVar = {"tmean", "tmin", "tmax", "prec"} ' , "stpr", "slpr", "wind", "mgst", "dgst"}
 
     Dim aSeason = {"ANN", "MAM", "JJA", "SON", "DJF"}
     Dim aSeasonMonth = {"ANN", "MAM", "JJA", "SON", "DJF", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
+    Dim aSeasonMonthOnly = {"ANN", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
     Dim aSeasonMonthly = {"ANN", "MAM", "JJA", "SON", "DJF", "MTH"}
     Dim aYear = {"2021", "2041", "2061", "2081"}
     Dim aHour = {"24", "6"} 'want this order on time slider
@@ -1708,7 +1709,7 @@ Public Class ConfigForm
         MakeNormalsLang()
 
         For Each var As String In aNormalsVar
-            For Each season As String In aSeasonMonth 'TODO review that this is accurate array
+            For Each season As String In aSeasonMonthOnly
 
                 Dim nugget As New LangNugget
                 For Each lang As String In aLang
@@ -1726,7 +1727,7 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("testNormals_" & var & season & ".json", fileguts)
+                WriteConfig("normal\1\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
             Next
         Next
     End Sub
@@ -1756,25 +1757,25 @@ Public Class ConfigForm
             .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
             .AddItem(LAYER_NAME, "Total precipitation", "[fr] Precipitation", k)
 
-            k = "stpr"
-            .AddItem(VAR_DESC, "A short station pressure description goes here", "[fr] A short surface pressure description goes here", k)
-            .AddItem(LAYER_NAME, "Average station pressure", "[fr] Station pressure", k)
+            'k = "stpr"
+            '.AddItem(VAR_DESC, "A short station pressure description goes here", "[fr] A short surface pressure description goes here", k)
+            '.AddItem(LAYER_NAME, "Average station pressure", "[fr] Station pressure", k)
 
-            k = "slpr"
-            .AddItem(VAR_DESC, "A short sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
-            .AddItem(LAYER_NAME, "Average sea level pressure", "[fr] Sea level pressure", k)
+            'k = "slpr"
+            '.AddItem(VAR_DESC, "A short sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
+            '.AddItem(LAYER_NAME, "Average sea level pressure", "[fr] Sea level pressure", k)
 
-            k = "wind"
-            .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
-            .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
+            'k = "wind"
+            '.AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
+            '.AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
 
-            k = "mgst"
-            .AddItem(VAR_DESC, "A short Maximum gust speed description goes here", "[fr] A short Maximum Gust Speed description goes here", k)
-            .AddItem(LAYER_NAME, "Maximum gust speed", "[fr] Maximum Gust Speed", k)
+            'k = "mgst"
+            '.AddItem(VAR_DESC, "A short Maximum gust speed description goes here", "[fr] A short Maximum Gust Speed description goes here", k)
+            '.AddItem(LAYER_NAME, "Maximum gust speed", "[fr] Maximum Gust Speed", k)
 
-            k = "dgst"
-            .AddItem(VAR_DESC, "A short Direction of Maximum Gust description goes here", "[fr] A short Direction of Maximum Gust description goes here", k)
-            .AddItem(LAYER_NAME, "Direction of maximum gust", "[fr] Direction of Maximum Gust", k)
+            'k = "dgst"
+            '.AddItem(VAR_DESC, "A short Direction of Maximum Gust description goes here", "[fr] A short Direction of Maximum Gust description goes here", k)
+            '.AddItem(LAYER_NAME, "Direction of maximum gust", "[fr] Direction of Maximum Gust", k)
 
         End With
 
@@ -1786,26 +1787,26 @@ Public Class ConfigForm
         'TODO layer is currently down.  still need to see how data/service is structured
 
         'TODO make global to prevent re-creating every iteration?
-        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "temp_mean"}, {"tmin", "temp_min"}, {"tmax", "temp_max"}, {"prec", "total_precip"}, {"stpr", "pressure_station"}, {"slpr", "pressure_sea_level"}, {"wind", "wind_speed"}, {"mgst", "???"}, {"dgst", "???"}}
-        Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "Ann"}, {"MAM", "Spr"}, {"JJA", "Smr"}, {"SON", "Fal"}, {"DJF", "Win"}, {"JAN", "Jan"}, {"FEB", "Feb"}, {"MAR", "Mar"}, {"APR", "Apr"}, {"MAY", "May"}, {"JUN", "Jun"}, {"JUL", "Jul"}, {"AUG", "Aug"}, {"SEP", "Sep"}, {"OCT", "Oct"}, {"NOV", "Nov"}, {"DEC", "Dec"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "1"}, {"tmin", "8"}, {"tmax", "5"}, {"prec", "56"}}
+        Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "13"}, {"JAN", "1"}, {"FEB", "2"}, {"MAR", "3"}, {"APR", "4"}, {"MAY", "5"}, {"JUN", "6"}, {"JUL", "7"}, {"AUG", "8"}, {"SEP", "9"}, {"OCT", "10"}, {"NOV", "11"}, {"DEC", "12"}}
 
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
         Dim seasonCode As String = dSeason.Item(season)
 
-        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/Normals-trends/items?"
+        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-normals/items?NORMAL_ID=" & varCode & "&MONTH=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "DISPLAY FIELD ???", oNormalsLang.Txt(lang, LAYER_NAME, variable), "#0cf03a")
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "ID", oNormalsLang.Txt(lang, LAYER_NAME, variable), "#0cf03a")
 
     End Function
 
     Private Function MakeNormalsLegend(variable As String, season As String, lang As String, rampId As String) As String
 
         Dim sLegend As String = ""
-        Dim sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=Normals.STATIONS&format=image/png&STYLE=default"
+        Dim sLegendUrl = ""
 
         'TODO update icons
-        Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"stpr", "stnpress"}, {"slpr", "seapress"}, {"wind", "sfcwind"}, {"mgst", "???"}, {"dgst", "???"}}
+        Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
 
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
