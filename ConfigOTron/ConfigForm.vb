@@ -496,8 +496,8 @@ Public Class ConfigForm
 
         '"tmean", "tmin", "tmax", "prec", "supr", "slpr", "wind"
         Dim dVar As New Dictionary(Of String, String) From {{"wind", "sfcwind"}, {"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}, {"supr", "stnpress"},
-            {"slpr", "seapress"}, {"qp25", "hrdpa"}, {"qp10", "rdpa"}, {"snow", "snd"}, {"sith", "sit"}, {"sico", "sic"}, {"itpr", "xxxxitpr"}, {"stpr", "xxxxstpr"},
-            {"wtpr", "xxxxwtpr"}, {"gh5m", "xxxxgh5m"}, {"ta8m", "xxxxta8m"}, {"wd2m", "xxxxwd2m"}, {"wd8m", "xxxxwd8m"}}
+            {"slpr", "seapress"}, {"qp25", "hrdpa"}, {"qp10", "rdpa"}, {"snow", "snd"}, {"sith", "sit"}, {"sico", "sic"}, {"itpr", "precip"}, {"stpr", "tsurface"},
+            {"wtpr", "twater"}, {"gh5m", "geopotential"}, {"ta8m", "tmean"}, {"wd2m", "gustdir"}, {"wd8m", "gustdir850"}}
 
         Return dVar.Item(var)
 
@@ -1375,8 +1375,8 @@ Public Class ConfigForm
         MakeCanSIPSLang()
 
         Dim dVari As New Dictionary(Of String, String) From {{"slpr", "HIND.MEM.ETA_PN-SLP.10"}, {"itpr", "MEM.ETA_RT.10"}, {"stpr", "MEM.ETA_TT.10"},
-            {"wtpr", "MEM.ETA_WTMP.10"}, {"gh5m", "PRES_GZ.500.10"}, {"ta8m", "PRES_TT.850.10"}, {"wd2m", "MEM.PRES_UU.200.10"},
-            {"wd8m", "PRES_UU.850.10"}}
+            {"wtpr", "MEM.ETA_WTMP.10"}, {"gh5m", "HIND.MEM.PRES_GZ.500.10"}, {"ta8m", "HIND.MEM.PRES_TT.850.10"}, {"wd2m", "MEM.PRES_UU.200.10"},
+            {"wd8m", "HIND.MEM.PRES_UU.850.10"}}
 
         For Each var As String In aCanSIPSVar
 
@@ -1457,8 +1457,10 @@ Public Class ConfigForm
         'http://geomet2-nightly.cmc.ec.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en
 
         Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"
+        Dim template As String = "assets/templates/cansips/variables-template.html"
+        Dim parser As String = "assets/templates/cansips/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsID, oCanSIPSLang.Txt(lang, LAYER_NAME, variable), "text/plain")
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsID, oCanSIPSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser)
 
     End Function
 
@@ -1479,7 +1481,7 @@ Public Class ConfigForm
             {"wtpr", "MEM.ETA_WTMP.10"}, {"gh5m", "PRES_GZ.500.10"}, {"ta8m", "PRES_TT.850.10"}, {"wd2m", "MEM.PRES_UU.200.10"},
             {"wd8m", "PRES_UU.850.10"}}
 
-        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & FileVar(variable) & ".svg"
 
         With oCanSIPSLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
