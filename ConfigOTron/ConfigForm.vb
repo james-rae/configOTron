@@ -158,7 +158,7 @@ Public Class ConfigForm
         End If
 
         InjectTemplate(nugget, 1, template, parser)
-        nugget.AddLine("""controls"": [""data""" & IIf(visibleToggle, ", ""visibility""", "") & "]", 1)
+        nugget.AddLine("""controls"": [""data""" & IIf(visibleToggle, ", ""visibility"", ""opacity"", ""settings""", "") & "]", 1)
         nugget.AddLine("}", 0, True)
 
         Return nugget.Nugget
@@ -401,6 +401,26 @@ Public Class ConfigForm
 
     End Function
 
+    Private Function MakeHiddenExclusiveLegendBlockConfig(children As String, indentLevel As Integer) As String
+
+        'special logic for exclusive visibility
+        Dim oConNugget As New ConfigNugget(indentLevel)
+        With oConNugget
+            .AddLine("{")
+
+            .AddLine("""collapse"": true,", 1)
+            .AddLine("""exclusiveVisibility"": [", 1)
+
+            .AddRaw(children)
+
+            .AddLine("]", 1)
+            .AddLine("},")
+        End With
+
+        Return oConNugget.Nugget
+
+    End Function
+
     Private Function MakeUnboundLayerLegendBlockConfig(layerName As String, descrip As String, icon As String,
           legendImg As String, legendText As String, indentLevel As Integer, Optional trailingComma As Boolean = True,
           Optional symbolStyle As String = "images") As String
@@ -564,13 +584,9 @@ Public Class ConfigForm
                     Dim nugget As New LangNugget
                     For Each lang As String In aLang
 
-                        'TODO for now pick the first year and hack the key.  if we need all keys in the legend part, will need to abstract or duplicate the ramp key generator so its accessible to all parts
-                        'derive unique layer id (ramp id)
-                        'ideally we have unbound legend after covericon support is added
-                        Dim rampID As String = "CMIP5_" & var & "_" & season & "_" & rcp & "_" & "2021" & "_" & lang
 
                         Dim dataLayers = MakeCMIP5YearSet(var, season, rcp, lang)
-                        Dim legund = MakeCMIP5Legend(var, season, rcp, lang, rampID)
+                        Dim legund = MakeCMIP5Legend(var, season, rcp, lang)
                         Dim support = MakeSupportSet(lang, True, True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
@@ -623,6 +639,10 @@ Public Class ConfigForm
 
     End Sub
 
+    Private Function MakeCMIP5RampId(variable As String, season As String, rcp As String, year As String, lang As String) As String
+        Return "CMIP5_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
+    End Function
+
     ''' <summary>
     ''' Makes the Data Layer array for CMIP5 "set of four time periods"
     ''' </summary>
@@ -664,13 +684,13 @@ Public Class ConfigForm
         Dim wmsCode As String = "CMIP5." & varCode & "." & rcpCode & "." & seasonCode & "." & yearCode & "_PCTL50"
 
         'derive unique layer id (ramp id)
-        Dim rampID As String = "CMIP5_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
+        Dim rampID As String = MakeCMIP5RampId(variable, season, rcp, year, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser, True)
 
     End Function
 
-    Private Function MakeCMIP5Legend(variable As String, season As String, rcp As String, lang As String, rampid As String) As String
+    Private Function MakeCMIP5Legend(variable As String, season As String, rcp As String, lang As String) As String
 
         Dim sLegend As String = ""
         Dim sLegendUrl As String = ""
@@ -683,12 +703,19 @@ Public Class ConfigForm
 
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
+
         With oCMIP5Lang
+            Dim lset As String = ""
+
+            For Each year As String In aYear
+                Dim rampId As String = MakeCMIP5RampId(variable, season, rcp, year, lang)
+                lset &= MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2, year <> "2081")
+            Next
+
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
-            MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeHiddenExclusiveLegendBlockConfig(lset, 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
 
-            ' MakeUnboundLayerLegendBlockConfig(.Txt(lang, LAYER_NAME, variable), .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
         End With
 
         Return sLegend
@@ -714,12 +741,8 @@ Public Class ConfigForm
                     Dim nugget As New LangNugget
                     For Each lang As String In aLang
 
-                        'TODO for now pick the first year and hack the key.  if we need all keys in the legend part, will need to abstract or duplicate the ramp key generator so its accessible to all parts
-                        'derive unique layer id (ramp id)
-                        Dim rampID As String = "DCS_" & var & "_" & season & "_" & rcp & "_" & "2021" & "_" & lang
-
                         Dim dataLayers = MakeDCSYearSet(var, season, rcp, lang)  ' TODO we may need to add a 5th year period for "historical"
-                        Dim legund = MakeDCSLegend(var, season, rcp, lang, rampID)
+                        Dim legund = MakeDCSLegend(var, season, rcp, lang)
                         Dim support = MakeSupportSet(lang, True, True, True)
 
                         Dim configstruct = MakeConfigStructure(legund, support, dataLayers)
@@ -763,6 +786,11 @@ Public Class ConfigForm
         End With
 
     End Sub
+
+    Private Function MakeDCSRampId(variable As String, season As String, rcp As String, year As String, lang As String) As String
+
+        Return "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
+    End Function
 
     ''' <summary>
     ''' Makes the Data Layer array for DCS "set of four time periods"
@@ -813,13 +841,13 @@ Public Class ConfigForm
         Dim wmsCode As String = "DCS." & varCode & "." & rcpCode & "." & seasonCode & "." & yearCode & "_PCTL50"
 
         'derive unique layer id (ramp id)
-        Dim rampID As String = "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
+        Dim rampID As String = MakeDCSRampId(variable, season, rcp, year, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser, True)
 
     End Function
 
-    Private Function MakeDCSLegend(variable As String, season As String, rcp As String, lang As String, rampid As String) As String
+    Private Function MakeDCSLegend(variable As String, season As String, rcp As String, lang As String) As String
 
         Dim sLegend As String = ""
         Dim sLegendUrl As String = ""
@@ -836,8 +864,18 @@ Public Class ConfigForm
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
         With oDCSLang
+
+            'first collate the layers over the years
+            Dim lset As String = ""
+
+            For Each year As String In aYear
+                Dim rampId As String = MakeDCSRampId(variable, season, rcp, year, lang)
+                lset &= MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 4, year <> "2081")
+
+            Next
+
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
-            MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeHiddenExclusiveLegendBlockConfig(lset, 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
 
             'MakeUnboundLayerLegendBlockConfig(.Txt(lang, LAYER_NAME, variable), .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
