@@ -1,6 +1,7 @@
 ﻿Imports System.IO
 
 
+
 'OUTSTANDING THINGS
 ' - adjust urls on WMS layers so they don't hit GetCapabilities
 ' - add getFeatureInfo settings to WMS layers
@@ -12,7 +13,7 @@ Public Class ConfigForm
 
     'I'm lazy so make sure you add the appropriate subfolders to your dump folder.  Get a student to do it.
     Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
-
+    Const MINIFY As Boolean = True
 
     ' arrays of domains. global scope for sharing fun
     Dim aLang = {"en", "fr"}
