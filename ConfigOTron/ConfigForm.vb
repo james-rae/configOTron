@@ -66,16 +66,16 @@ Public Class ConfigForm
         'MAIN STARTING POINT OF APP.
         MakeCommonLang()
 
-        MakeCMIP5Configs()
-        MakeDCSConfigs()
-        MakeAHCCDConfigs()
-        MakeCAPAConfigs()
-        MakeHydroConfigs()
-        MakeCanGRIDConfigs()
-        MakeDailyConfigs()
-        MakeMonthlyConfigs()
-        MakeNormalsConfigs()
-        MakeCanSIPSConfigs()
+        MakeCMIP5Configs()     'M WMS Time Slider
+        MakeDCSConfigs()       'M WMS Time Slider
+        MakeAHCCDConfigs()     'F WFS
+        MakeCAPAConfigs()      'M WMS Time Radio
+        MakeHydroConfigs()     'F WFS
+        MakeCanGRIDConfigs()   'M WMS
+        MakeDailyConfigs()     'F WFS
+        MakeMonthlyConfigs()   'F WFS
+        MakeNormalsConfigs()   'F WFS
+        MakeCanSIPSConfigs()   'M WMS Fancy Slider
 
         MsgBox("DONE THANKS")
     End Sub
@@ -158,7 +158,7 @@ Public Class ConfigForm
         End If
 
         InjectTemplate(nugget, 1, template, parser)
-        nugget.AddLine("""controls"": [""data""" & IIf(visibleToggle, ", ""visibility"", ""opacity"", ""settings""", "") & "]", 1)
+        nugget.AddLine("""controls"": [" & IIf(visibleToggle, """visibility"", ""opacity"", ""settings""", "") & "]", 1)
         nugget.AddLine("}", 0, True)
 
         Return nugget.Nugget
@@ -686,7 +686,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = MakeCMIP5RampId(variable, season, rcp, year, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "application/json ", template, parser, True)
 
     End Function
 
@@ -843,7 +843,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = MakeDCSRampId(variable, season, rcp, year, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "application/json", template, parser, True)
 
     End Function
 
@@ -1369,7 +1369,7 @@ Public Class ConfigForm
         Dim template As String = "assets/templates/cangrd/variables-template.html"
         Dim parser As String = "assets/templates/cangrd/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode, oCanGRIDLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser)
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode, oCanGRIDLang.Txt(lang, LAYER_NAME, variable), "application/json", template, parser, True)
 
     End Function
 
@@ -1498,7 +1498,7 @@ Public Class ConfigForm
         Dim template As String = "assets/templates/cansips/variables-template.html"
         Dim parser As String = "assets/templates/cansips/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsID, oCanSIPSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser)
+        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsID, oCanSIPSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser, True)
 
     End Function
 
