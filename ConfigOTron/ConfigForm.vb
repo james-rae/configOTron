@@ -550,13 +550,13 @@ Public Class ConfigForm
 
     Private Function MakeProvinceConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Provinces/MapServer",
+        Return MakeTileLayerConfig("http://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer",
                                    PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID),,, "10000")
     End Function
 
     Private Function MakeCitiesConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("http://vmarcgisdev01.canadaeast.cloudapp.azure.com/arcgis/rest/services/Overlays/Cities/MapServer",
+        Return MakeTileLayerConfig("http://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer",
                                    CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID),,, "10000")
     End Function
 
