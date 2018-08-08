@@ -770,19 +770,19 @@ Public Class ConfigForm
             .AddItem(TOP_DESC, "A short DCS dataset description goes here", "[fr] A short DCS dataset description goes here")
 
             k = "tmean"
-            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in statistically downscaled mean temperature (°C) are with respect to the reference period of 1986-2005.", "[fr] A short mean temperature description goes here", k)
             .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
 
             k = "tmin"
-            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in statistically downscaled minimum temperature (°C) are with respect to the reference period of 1986-2005.", "[fr] A short minimum temperature description goes here", k)
             .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
 
             k = "tmax"
-            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in statistically downscaled maximum temperature (°C) are with respect to the reference period of 1986-2005.", "[fr] A short maximum temperature description goes here", k)
             .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(VAR_DESC, "Projected relative changes in statistically downscaled total precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).", "[fr] A short precipitation description goes here", k)
             .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
 
         End With
@@ -872,11 +872,12 @@ Public Class ConfigForm
 
             For Each year As String In aYear
                 Dim rampId As String = MakeDCSRampId(variable, season, rcp, year, lang)
-                lset &= MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 4, year <> "2081")
+                lset &= MakeLayerLegendBlockConfig("", rampId, "", sCoverIcon, sLegendUrl, "", 4, year <> "2081")
 
             Next
 
-            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            'note using variable description as dataset description
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, VAR_DESC, variable)) &
             MakeHiddenExclusiveLegendBlockConfig(lset, 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
 
@@ -1240,7 +1241,7 @@ Public Class ConfigForm
 
         With oHydroLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "A short Hydro dataset description goes here", "[fr] A short Hydro dataset description goes here")
+            .AddItem(TOP_DESC, "This map indicates the location of over 1800 locations where hydro metric data is collected across Canada.", "[fr] A short Hydro dataset description goes here")
 
             .AddItem(VAR_DESC, "A short hydro description goes here (maybe)", "[fr] A short hydro description goes here (maybe)")
             .AddItem(LAYER_NAME, "Hydrometric stations", "[fr] Hydrometric stations")
@@ -1291,6 +1292,8 @@ Public Class ConfigForm
 
     ' WMS. No Time.
 
+    ' NOTE: while there are references to tmin and tmax, we are currently not using them.
+
     ''' <summary>
     ''' Create set of config files for CanGRID
     ''' </summary>
@@ -1331,8 +1334,12 @@ Public Class ConfigForm
             .AddItem(TOP_DESC, "A short CanGRID dataset description goes here", "[fr] A short CanGRID dataset description goes here")
 
             k = "tmean"
-            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(VAR_DESC, "CANGRD trends of temperature change (°C) over 1948-2016 represent the departure from the 1961-1990 reference period.", "[fr] A short mean temperature description goes here", k)
             .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+
+            k = "prec"
+            .AddItem(VAR_DESC, "CANGRD trends of relative total precipitation change (%) over 1948-2012 reflect the percentage change in total precipitation over the 1961-1990 reference period.", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
 
             k = "tmin"
             .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
@@ -1341,10 +1348,6 @@ Public Class ConfigForm
             k = "tmax"
             .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
             .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
-
-            k = "prec"
-            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
-            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
 
         End With
 
@@ -1392,8 +1395,8 @@ Public Class ConfigForm
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
         With oCanGRIDLang
-            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
-            MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, VAR_DESC, variable)) &
+            MakeLayerLegendBlockConfig("", rampid, "", sCoverIcon, sLegendUrl, "", 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
         End With
 
