@@ -613,28 +613,28 @@ Public Class ConfigForm
             .AddItem(TOP_DESC, "A short CMIP5 dataset description goes here", "[fr] A short CMIP5 dataset description goes here")
 
             k = "snow"
-            .AddItem(VAR_DESC, "A short snow depth description goes here", "[fr] A short snow depth description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in snow depth are with respect to the reference period of 1986-2005 and expressed as percentage chance (%).", "[fr] A short snow depth description goes here", k)
             .AddItem(LAYER_NAME, "Snow depth", "[fr] Snow depth", k)
 
             k = "sith"
-            .AddItem(VAR_DESC, "A short sea ice thickness description goes here", "[fr] A short sea ice thickness description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in sea ice thickness are with respect to the reference period of 1986-2006 and expressed as percentage change (%).", "[fr] A short sea ice thickness description goes here", k)
             .AddItem(LAYER_NAME, "Sea ice thickness", "[fr] Sea ice thickness", k)
 
             k = "sico"
-            .AddItem(VAR_DESC, "A short sea ice concentration description goes here", "[fr] A short sea ice concentration description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in sea ice concentration are with respect to the reference period of 1986-2005 and expressed as percentage change (%). Sea ice concentration is represented as the percentage (%) of grid cell area.", "[fr] A short sea ice concentration description goes here", k)
             .AddItem(LAYER_NAME, "Sea ice concentration", "[fr] Sea ice concentration", k)
 
             k = "wind"
-            .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in wind speed are with respect to the reference period of 1986-2005 and expressed as percentage change (%).", "[fr] A short wind speed description goes here", k)
             .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
 
             k = "tmean"
-            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in mean temperature (°C) are with respect to the reference period of 1986-2005.", "[fr] A short mean temperature description goes here", k)
             .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
-            .AddItem(LAYER_NAME, "Total precipitation", "[fr] Total precipitation", k)
+            .AddItem(VAR_DESC, "Projected relative changes in mean precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Mean precipitation", "[fr] Mean precipitation", k)
 
         End With
 
@@ -687,7 +687,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = MakeCMIP5RampId(variable, season, rcp, year, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "application/json ", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampID, 0.85, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "application/json ", template, parser, True)
 
     End Function
 
@@ -710,10 +710,11 @@ Public Class ConfigForm
 
             For Each year As String In aYear
                 Dim rampId As String = MakeCMIP5RampId(variable, season, rcp, year, lang)
-                lset &= MakeLayerLegendBlockConfig("", rampid, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2, year <> "2081")
+                lset &= MakeLayerLegendBlockConfig("", rampId, "", sCoverIcon, sLegendUrl, "", 2, year <> "2081")
             Next
 
-            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
+            'note: putting variable text in the data block instead of in lower legend
+            sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, VAR_DESC, variable)) &
             MakeHiddenExclusiveLegendBlockConfig(lset, 2) &
             MakeLegendSettingsConfig(lang, True, True, True)
 
@@ -844,7 +845,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = MakeDCSRampId(variable, season, rcp, year, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "application/json", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampID, 0.85, False, wmsCode, oDCSLang.Txt(lang, LAYER_NAME, variable), "application/json", template, parser, True)
 
     End Function
 
@@ -927,31 +928,31 @@ Public Class ConfigForm
 
         With oAHCCDLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "A short AHCCD dataset description goes here", "[fr] A short AHCCD dataset description goes here")
+            .AddItem(TOP_DESC, "Adjusted and homogenized station data incorporate adjustments to the original station data to account for discontinuities from non-climatic factors.", "[fr] A short AHCCD dataset description goes here")
 
             k = "tmean"
-            .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+            .AddItem(VAR_DESC, "A short homogenized mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Homogenized mean temperature", "[fr] Mean temperature", k)
 
             k = "tmin"
-            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
+            .AddItem(VAR_DESC, "A short homogenized minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Homogenized minimum temperature", "[fr] Minimum temperature", k)
 
             k = "tmax"
-            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
+            .AddItem(VAR_DESC, "A short homogenized maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(LAYER_NAME, "Homogenized maximum temperature", "[fr] Maximum temperature", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "A short precipitation description goes here", "[fr] A short precipitation description goes here", k)
-            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
+            .AddItem(VAR_DESC, "A short adjusted total precipitation description goes here", "[fr] A short precipitation description goes here", k)
+            .AddItem(LAYER_NAME, "Adjusted total precipitation", "[fr] Precipitation", k)
 
             k = "supr"
-            .AddItem(VAR_DESC, "A short surface pressure description goes here", "[fr] A short surface pressure description goes here", k)
-            .AddItem(LAYER_NAME, "Surface pressure", "[fr] Surface pressure", k)
+            .AddItem(VAR_DESC, "A short homogenized station pressure description goes here", "[fr] A short surface pressure description goes here", k)
+            .AddItem(LAYER_NAME, "Homogenized station pressure", "[fr] Surface pressure", k)
 
             k = "slpr"
-            .AddItem(VAR_DESC, "A short sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
-            .AddItem(LAYER_NAME, "Sea level pressure", "[fr] Sea level pressure", k)
+            .AddItem(VAR_DESC, "A short homogenized sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
+            .AddItem(LAYER_NAME, "Homogenized sea level pressure", "[fr] Sea level pressure", k)
 
             k = "wind"
             .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
@@ -1139,7 +1140,7 @@ Public Class ConfigForm
         Dim template As String = "assets/templates/capa/variables-template.html"
         Dim parser As String = "assets/templates/capa/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampID, 1, False, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable) & " " & hour & "H", "text/plain", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampID, 0.85, False, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable) & " " & hour & "H", "text/plain", template, parser, True)
 
     End Function
 
@@ -1370,7 +1371,7 @@ Public Class ConfigForm
         Dim template As String = "assets/templates/cangrd/variables-template.html"
         Dim parser As String = "assets/templates/cangrd/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsCode, oCanGRIDLang.Txt(lang, LAYER_NAME, variable), "application/json", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampID, 0.85, True, wmsCode, oCanGRIDLang.Txt(lang, LAYER_NAME, variable), "application/json", template, parser, True)
 
     End Function
 
@@ -1499,7 +1500,7 @@ Public Class ConfigForm
         Dim template As String = "assets/templates/cansips/variables-template.html"
         Dim parser As String = "assets/templates/cansips/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampID, 1, True, wmsID, oCanSIPSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampID, 0.85, True, wmsID, oCanSIPSLang.Txt(lang, LAYER_NAME, variable), "text/plain", template, parser, True)
 
     End Function
 
@@ -1780,7 +1781,7 @@ Public Class ConfigForm
 
         With oNormalsLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "A short Normals dataset description goes here", "[fr] A short Normals dataset description goes here")
+            .AddItem(TOP_DESC, "These are Canadian climate stations during the Normals period (1981-2010) that either have records of 25 years or better during that period, or have shorter records but are needed to represent several major centres.", "[fr] A short Normals dataset description goes here")
 
             k = "tmean"
             .AddItem(VAR_DESC, "A short mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
