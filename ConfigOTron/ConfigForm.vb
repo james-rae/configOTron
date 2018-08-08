@@ -62,6 +62,8 @@ Public Class ConfigForm
     Const SETTINGS_TITLE As String = "SettingsTitle"
     Const LEGEND_TEXT As String = "LegendText"
 
+    Dim oLangParty As New List(Of String)
+
     Private Sub cmdEnhanceMini_Click(sender As Object, e As EventArgs) Handles cmdEnhanceMini.Click
 
         'MAIN STARTING POINT OF APP.
@@ -82,7 +84,7 @@ Public Class ConfigForm
     End Sub
 
     Private Sub MakeCommonLang()
-        oCommonLang = New LangHive
+        oCommonLang = New LangHive("COMMON", oLangParty)
         With oCommonLang
             'support layer names
             .AddItem(LAYER_NAME, "Labels", "[fr] Labels", LABELS_LAYER_ID)
@@ -606,7 +608,7 @@ Public Class ConfigForm
     Private Sub MakeCMIP5Lang()
         Dim k As String 'lazy
 
-        oCMIP5Lang = New LangHive
+        oCMIP5Lang = New LangHive("CMIP5", oLangParty)
 
         With oCMIP5Lang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -763,7 +765,7 @@ Public Class ConfigForm
     Private Sub MakeDCSLang()
         Dim k As String 'lazy
 
-        oDCSLang = New LangHive
+        oDCSLang = New LangHive("DCS", oLangParty)
 
         With oDCSLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -925,7 +927,7 @@ Public Class ConfigForm
     Private Sub MakeAHCCDLang()
         Dim k As String 'lazy
 
-        oAHCCDLang = New LangHive
+        oAHCCDLang = New LangHive("AHCCD", oLangParty)
 
         With oAHCCDLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -1073,7 +1075,7 @@ Public Class ConfigForm
     Private Sub MakeCAPALang()
         Dim k As String 'lazy
 
-        oCAPALang = New LangHive
+        oCAPALang = New LangHive("CAPA", oLangParty)
 
         With oCAPALang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -1235,7 +1237,7 @@ Public Class ConfigForm
 
     Private Sub MakeHydroLang()
 
-        oHydroLang = New LangHive
+        oHydroLang = New LangHive("HYDRO", oLangParty)
 
         'we only have one layer. so VAR_DESC might be redundant?
 
@@ -1327,7 +1329,7 @@ Public Class ConfigForm
     Private Sub MakeCanGRIDLang()
         Dim k As String 'lazy
 
-        oCanGRIDLang = New LangHive
+        oCanGRIDLang = New LangHive("CANGRID", oLangParty)
 
         With oCanGRIDLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -1451,7 +1453,7 @@ Public Class ConfigForm
     Private Sub MakeCanSIPSLang()
         Dim k As String 'lazy
 
-        oCanSIPSLang = New LangHive
+        oCanSIPSLang = New LangHive("CANSIPS", oLangParty)
 
         With oCanSIPSLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -1573,7 +1575,7 @@ Public Class ConfigForm
     Private Sub MakeDailyLang()
         Dim k As String 'lazy
 
-        oDailyLang = New LangHive
+        oDailyLang = New LangHive("DAILY", oLangParty)
 
         With oDailyLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -1674,7 +1676,7 @@ Public Class ConfigForm
     Private Sub MakeMonthlyLang()
         Dim k As String 'lazy
 
-        oMonthlyLang = New LangHive
+        oMonthlyLang = New LangHive("MONTHLY", oLangParty)
 
         With oMonthlyLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -1780,7 +1782,7 @@ Public Class ConfigForm
     Private Sub MakeNormalsLang()
         Dim k As String 'lazy
 
-        oNormalsLang = New LangHive
+        oNormalsLang = New LangHive("NORMALS", oLangParty)
 
         With oNormalsLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
@@ -1872,7 +1874,54 @@ Public Class ConfigForm
 
     End Function
 
+
+
+
 #End Region
 
+
+#Region " Fancy Extra Buttons "
+
+    Private Sub cmdCopy_Click(sender As Object, e As EventArgs) Handles cmdCopy.Click
+        Const APP_CONFIGS As String = "C:\Git\CCCS_Viewer\assets\configs\"
+        Const VER As String = "1"
+        Dim aDatasets = {"ahccd", "cangrd", "capa", "cmip5", "dcs", "hydro", "normal"}
+
+
+        ' DUMP_FOLDER
+
+        For Each ds In aDatasets
+            Dim sPathNugget As String = ds & "\" & VER & "\"
+            Dim sSourceDir As String = DUMP_FOLDER & sPathNugget
+            Dim sTargetDir As String = APP_CONFIGS & sPathNugget
+
+            Dim oSrcDir As New DirectoryInfo(sSourceDir)
+            Dim aFiles = oSrcDir.GetFiles()
+
+            For Each oFile In aFiles
+                File.Copy(sSourceDir & oFile.Name, sTargetDir & oFile.Name, True)
+            Next
+
+        Next
+
+        MsgBox("copied, thanks")
+
+    End Sub
+
+    Private Sub cmdLang_Click(sender As Object, e As EventArgs) Handles cmdLang.Click
+        If oLangParty.Count = 0 Then
+            MsgBox("Run the main grinder first.")
+        Else
+            Dim oFile As StreamWriter = New StreamWriter(DUMP_FOLDER & "langdump.txt", False)
+            For Each oL In oLangParty
+                oFile.WriteLine(oL)
+            Next
+            oFile.Close()
+            MsgBox("Lang dumped done thanks")
+        End If
+    End Sub
+
+
+#End Region
 
 End Class

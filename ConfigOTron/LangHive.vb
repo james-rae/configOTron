@@ -1,9 +1,15 @@
 ﻿Public Class LangHive
 
+
+    Private _subject As String
+    Private _ll As List(Of String)
+
     Private _en As Dictionary(Of String, String)
     Private _fr As Dictionary(Of String, String)
 
-    Public Sub New()
+    Public Sub New(sSubject As String, oLangList As List(Of String))
+        _subject = sSubject
+        _ll = oLangList
         _en = New Dictionary(Of String, String)
         _fr = New Dictionary(Of String, String)
     End Sub
@@ -29,6 +35,9 @@
         Dim kkey = EKey(key, key2)
         _en.Add(kkey, enText)
         _fr.Add(kkey, frText)
+
+        'record entry in our list for quick dump
+        _ll.Add(_subject & vbTab & key & vbTab & key2 & vbTab & enText & vbTab & frText & vbTab)
     End Sub
 
     Public Function Txt(lang As String, key As String, Optional key2 As String = "") As String
