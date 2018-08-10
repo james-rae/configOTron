@@ -205,6 +205,7 @@ Public Class ConfigForm
         nugget.AddLine("""name"": """ & layerName & """,", 1)
         nugget.AddLine("""expectedResponseTime"": " & toastTime & ",", 1)
         InjectTemplate(nugget, 1, template, parser)
+        nugget.AddLine("""controls"": [""visibility"", ""opacity"", ""settings""],", 1)
         nugget.AddLine("""state"": {", 1)
         nugget.AddLine("""opacity"": " & opacity & ",", 2)
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
