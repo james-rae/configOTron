@@ -557,19 +557,19 @@ Public Class ConfigForm
 
     Private Function MakeProvinceConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("http://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer",
+        Return MakeTileLayerConfig("https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer",
                                    PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID),,, "10000")
     End Function
 
     Private Function MakeCitiesConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("http://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer",
+        Return MakeTileLayerConfig("https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer",
                                    CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID),,, "10000")
     End Function
 
     Private Function MakeLabelsConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("http://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_TXT_3978/MapServer",
+        Return MakeTileLayerConfig("https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_TXT_3978/MapServer",
                                    LABELS_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, LABELS_LAYER_ID),,, "10000")
     End Function
 
