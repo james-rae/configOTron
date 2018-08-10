@@ -693,7 +693,7 @@ Public Class ConfigForm
         'derive unique layer id (ramp id)
         Dim rampID As String = MakeCMIP5RampId(variable, season, rcp, year, lang)
 
-        Return MakeWMSLayerConfig(url, rampID, 0.85, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "application/json ", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampID, 0.85, False, wmsCode, oCMIP5Lang.Txt(lang, LAYER_NAME, variable), "application/json", template, parser, True)
 
     End Function
 
