@@ -620,27 +620,33 @@ Public Class ConfigForm
             ' .AddItem(TOP_DESC, "A short CMIP5 dataset description goes here", "[fr] A short CMIP5 dataset description goes here")
 
             k = "snow"
-            .AddItem(VAR_DESC, "Projected changes in snow depth are with respect to the reference period of 1986-2005 and expressed as percentage chance (%).", "[fr] A short snow depth description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in snow depth are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
+                     "[fr] A short snow depth description goes here", k)
             .AddItem(LAYER_NAME, "Snow depth", "[fr] Snow depth", k)
 
             k = "sith"
-            .AddItem(VAR_DESC, "Projected changes in sea ice thickness are with respect to the reference period of 1986-2006 and expressed as percentage change (%).", "[fr] A short sea ice thickness description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in sea ice thickness are with respect to the reference period of 1986-2006 and expressed as percentage change (%).",
+                     "[fr] A short sea ice thickness description goes here", k)
             .AddItem(LAYER_NAME, "Sea ice thickness", "[fr] Sea ice thickness", k)
 
             k = "sico"
-            .AddItem(VAR_DESC, "Projected changes in sea ice concentration are with respect to the reference period of 1986-2005 and expressed as percentage change (%). Sea ice concentration is represented as the percentage (%) of grid cell area.", "[fr] A short sea ice concentration description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in sea ice concentration are with respect to the reference period of 1986-2005 and expressed as percentage change (%). Sea ice concentration is represented as the percentage (%) of grid cell area.",
+                     "[fr] A short sea ice concentration description goes here", k)
             .AddItem(LAYER_NAME, "Sea ice concentration", "[fr] Sea ice concentration", k)
 
             k = "wind"
-            .AddItem(VAR_DESC, "Projected changes in wind speed are with respect to the reference period of 1986-2005 and expressed as percentage change (%).", "[fr] A short wind speed description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in wind speed are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
+                     "[fr] A short wind speed description goes here", k)
             .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
 
             k = "tmean"
-            .AddItem(VAR_DESC, "Projected changes in mean temperature (°C) are with respect to the reference period of 1986-2005.", "[fr] A short mean temperature description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in mean temperature (°C) are with respect to the reference period of 1986-2005.",
+                     "[fr] A short mean temperature description goes here", k)
             .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "Projected relative changes in mean precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).", "[fr] A short precipitation description goes here", k)
+            .AddItem(VAR_DESC, "Projected relative changes in mean precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
+                     "[fr] A short precipitation description goes here", k)
             .AddItem(LAYER_NAME, "Mean precipitation", "[fr] Mean precipitation", k)
 
         End With
@@ -673,7 +679,7 @@ Public Class ConfigForm
     Private Function MakeCMIP5DataLayer(variable As String, season As String, rcp As String, year As String, lang As String) As String
 
         'calculate url (might be a constant)
-        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=CMIP5.SND.RCP26.ANNUAL.2081-2100_PCTL50
+        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&lang=en&LAYERS=CMIP5.SND.RCP26.ANNUAL.2081-2100_PCTL50
 
         Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
 
@@ -777,19 +783,23 @@ Public Class ConfigForm
             '  .AddItem(TOP_DESC, "A short DCS dataset description goes here", "[fr] A short DCS dataset description goes here")
 
             k = "tmean"
-            .AddItem(VAR_DESC, "Projected changes in statistically downscaled mean temperature (°C) are with respect to the reference period of 1986-2005.", "[fr] A short mean temperature description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in statistically downscaled mean temperature (°C) are with respect to the reference period of 1986-2005.",
+                     "[fr] A short mean temperature description goes here", k)
             .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
 
             k = "tmin"
-            .AddItem(VAR_DESC, "Projected changes in statistically downscaled minimum temperature (°C) are with respect to the reference period of 1986-2005.", "[fr] A short minimum temperature description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in statistically downscaled minimum temperature (°C) are with respect to the reference period of 1986-2005.",
+                     "[fr] A short minimum temperature description goes here", k)
             .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
 
             k = "tmax"
-            .AddItem(VAR_DESC, "Projected changes in statistically downscaled maximum temperature (°C) are with respect to the reference period of 1986-2005.", "[fr] A short maximum temperature description goes here", k)
+            .AddItem(VAR_DESC, "Projected changes in statistically downscaled maximum temperature (°C) are with respect to the reference period of 1986-2005.",
+                     "[fr] A short maximum temperature description goes here", k)
             .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "Projected relative changes in statistically downscaled total precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).", "[fr] A short precipitation description goes here", k)
+            .AddItem(VAR_DESC, "Projected relative changes in statistically downscaled total precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
+                     "[fr] A short precipitation description goes here", k)
             .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
 
         End With
@@ -936,7 +946,8 @@ Public Class ConfigForm
 
         With oAHCCDLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "Adjusted and homogenized station data incorporate adjustments to the original station data to account for discontinuities from non-climatic factors.", "[fr] A short AHCCD dataset description goes here")
+            .AddItem(TOP_DESC, "Adjusted and homogenized station data incorporate adjustments to the original station data to account for discontinuities from non-climatic factors.",
+                     "[fr] A short AHCCD dataset description goes here")
 
             k = "tmean"
             ' .AddItem(VAR_DESC, "A short homogenized mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
@@ -1084,23 +1095,28 @@ Public Class ConfigForm
 
         With oCAPALang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "A short RDPA dataset description goes here", "[fr] A short RDPA dataset description goes here")
+            .AddItem(TOP_DESC, "A short RDPA dataset description goes here",
+                     "[fr] A short RDPA dataset description goes here")
 
             k = "qp25"
-            .AddItem(VAR_DESC, "A short Quantity of Precipitation, 2.5KM resolution description goes here", "[fr] A short Quantity of Precipitation, 2.5KM resolution description goes here", k)
+            .AddItem(VAR_DESC, "A short Quantity of Precipitation, 2.5KM resolution description goes here",
+                     "[fr] A short Quantity of Precipitation, 2.5KM resolution description goes here", k)
             .AddItem(LAYER_NAME, "Quantity of Precipitation, 2.5KM resolution", "[fr] Quantity of Precipitation, 2.5KM resolution", k)
 
             k = "qp10"
-            .AddItem(VAR_DESC, "A short Quantity of Precipitation, 10KM resolution description goes here", "[fr] A short Quantity of Precipitation, 10KM resolution description goes here", k)
+            .AddItem(VAR_DESC, "A short Quantity of Precipitation, 10KM resolution description goes here",
+                     "[fr] A short Quantity of Precipitation, 10KM resolution description goes here", k)
             .AddItem(LAYER_NAME, "Quantity of Precipitation, 10KM resolution", "[fr] Quantity of Precipitation, 10KM resolution", k)
 
             .AddItem("CAPA_SLIDER", "Canadian Precipitation Analysis", "[fr] Canadian Precipitation Analysis")
 
             k = "24"
-            .AddItem("CAPA_HOUR_DESC", "A short 24 hour description goes here", "[fr] A short 24 hour description goes here", k)
+            .AddItem("CAPA_HOUR_DESC", "A short 24 hour description goes here",
+                     "[fr] A short 24 hour description goes here", k)
 
             k = "6"
-            .AddItem("CAPA_HOUR_DESC", "A short 6 hour description goes here", "[fr] A short 6 hour description goes here", k)
+            .AddItem("CAPA_HOUR_DESC", "A short 6 hour description goes here",
+                     "[fr] A short 6 hour description goes here", k)
 
         End With
 
@@ -1248,7 +1264,8 @@ Public Class ConfigForm
 
         With oHydroLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "This map indicates the location of over 1800 locations where hydro metric data is collected across Canada.", "[fr] A short Hydro dataset description goes here")
+            .AddItem(TOP_DESC, "This map indicates the location of over 1800 locations where hydro metric data is collected across Canada.",
+                     "[fr] A short Hydro dataset description goes here")
 
             ' .AddItem(VAR_DESC, "A short hydro description goes here (maybe)", "[fr] A short hydro description goes here (maybe)")
             .AddItem(LAYER_NAME, "Hydrometric stations", "[fr] Hydrometric stations")
@@ -1341,20 +1358,22 @@ Public Class ConfigForm
             '  .AddItem(TOP_DESC, "A short CanGRID dataset description goes here", "[fr] A short CanGRID dataset description goes here")
 
             k = "tmean"
-            .AddItem(VAR_DESC, "CANGRD trends of temperature change (°C) over 1948-2016 represent the departure from the 1961-1990 reference period.", "[fr] A short mean temperature description goes here", k)
+            .AddItem(VAR_DESC, "CANGRD trends of temperature change (°C) over 1948-2016 represent the departure from the 1961-1990 reference period.",
+                     "[fr] A short mean temperature description goes here", k)
             .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "CANGRD trends of relative total precipitation change (%) over 1948-2012 reflect the percentage change in total precipitation over the 1961-1990 reference period.", "[fr] A short precipitation description goes here", k)
+            .AddItem(VAR_DESC, "CANGRD trends of relative total precipitation change (%) over 1948-2012 reflect the percentage change in total precipitation over the 1961-1990 reference period.",
+                     "[fr] A short precipitation description goes here", k)
             .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
 
-            k = "tmin"
-            .AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
+            'k = "tmin"
+            '.AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
+            '.AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
 
-            k = "tmax"
-            .AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
+            'k = "tmax"
+            '.AddItem(VAR_DESC, "A short maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
+            '.AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
 
         End With
 
@@ -1791,22 +1810,27 @@ Public Class ConfigForm
 
         With oNormalsLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "Climate Normals and Averages are used to summarize or describe the average climatic conditions of a particular location.\n\nAt the completion of each decade, Environment and Climate Change Canada updates its Climate Normals for as many locations and as many climatic characteristics as possible. The Climate Normals, Averages and Extremes offered here are based on Canadian climate stations with at least 15 years of data between 1981 to 2010.", "Les normales et moyennes climatiques servent à résumer ou à décrire les conditions climatiques moyennes d'un endroit donné.\n\nÀ la fin de chaque décennie, Environnement et Changement climatique Canada met à jour ses normales climatiques pour le plus grand nombre possible de stations et de caractéristiques climatiques. Les normales climatiques, moyennes et extrêmes climatiques, offertes ici reposent sur les stations climatologiques canadiennes ayant au moins 15 années de données entre 1981 à 2010.")
+            .AddItem(TOP_DESC, "Climate Normals and Averages are used to summarize or describe the average climatic conditions of a particular location.\n\nAt the completion of each decade, Environment and Climate Change Canada updates its Climate Normals for as many locations and as many climatic characteristics as possible. The Climate Normals, Averages and Extremes offered here are based on Canadian climate stations with at least 15 years of data between 1981 to 2010.",
+                     "Les normales et moyennes climatiques servent à résumer ou à décrire les conditions climatiques moyennes d'un endroit donné.\n\nÀ la fin de chaque décennie, Environnement et Changement climatique Canada met à jour ses normales climatiques pour le plus grand nombre possible de stations et de caractéristiques climatiques. Les normales climatiques, moyennes et extrêmes climatiques, offertes ici reposent sur les stations climatologiques canadiennes ayant au moins 15 années de données entre 1981 à 2010.")
 
             k = "tmean"
-            .AddItem(VAR_DESC, "The mean temperature in degrees Celsius (°C) is defined as the average of the maximum and minimum temperature at a location for a specified time interval.", "Température moyenne en degrés Celsius (°C) définie comme moyenne de la température maximale et de la température minimale à un endroit donné au cours d'un intervalle de temps déterminé.", k)
+            .AddItem(VAR_DESC, "The mean temperature in degrees Celsius (°C) is defined as the average of the maximum and minimum temperature at a location for a specified time interval.",
+                     "Température moyenne en degrés Celsius (°C) définie comme moyenne de la température maximale et de la température minimale à un endroit donné au cours d'un intervalle de temps déterminé.", k)
             .AddItem(LAYER_NAME, "Mean daily temperature", "Température moyenne", k)
 
             k = "tmin"
-            .AddItem(VAR_DESC, "The average of the minimum temperature in degrees Celsius (°C) observed at the location for that month.", "Moyenne de la température minimale en degrés Celsius (°C) observée à un endroit donné au cours du mois.", k)
+            .AddItem(VAR_DESC, "The average of the minimum temperature in degrees Celsius (°C) observed at the location for that month.",
+                     "Moyenne de la température minimale en degrés Celsius (°C) observée à un endroit donné au cours du mois.", k)
             .AddItem(LAYER_NAME, "Mean daily minimum temperature", "Température minimale moyenne", k)
 
             k = "tmax"
-            .AddItem(VAR_DESC, "The average of the maximum temperature in degrees Celsius (°C) observed at the location for that month.", "Moyenne de la température maximale en degrés Celsius (°C) observée à un endroit donné au cours du mois.", k)
+            .AddItem(VAR_DESC, "The average of the maximum temperature in degrees Celsius (°C) observed at the location for that month.",
+                     "Moyenne de la température maximale en degrés Celsius (°C) observée à un endroit donné au cours du mois.", k)
             .AddItem(LAYER_NAME, "Mean daily maximum temperature", "Température maximale moyenne", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "The sum of the total rainfall and the water equivalent of the total snowfall in millimetres (mm), observed at the location during a specified time interval.", "Somme de la pluie totale et de l'équivalent en eau de la neige totale en millimètres (mm), observée à un endroit donné au cours d'un intervalle de temps déterminé.", k)
+            .AddItem(VAR_DESC, "The sum of the total rainfall and the water equivalent of the total snowfall in millimetres (mm), observed at the location during a specified time interval.",
+                     "Somme de la pluie totale et de l'équivalent en eau de la neige totale en millimètres (mm), observée à un endroit donné au cours d'un intervalle de temps déterminé.", k)
             .AddItem(LAYER_NAME, "Total precipitation", "Précipitations totales", k)
 
             'k = "stpr"
@@ -1891,9 +1915,6 @@ Public Class ConfigForm
         Const APP_CONFIGS As String = "C:\Git\CCCS_Viewer\assets\configs\"
         Const VER As String = "1"
         Dim aDatasets = {"ahccd", "cangrd", "capa", "cmip5", "dcs", "hydro", "normal"}
-
-
-        ' DUMP_FOLDER
 
         For Each ds In aDatasets
             Dim sPathNugget As String = ds & "\" & VER & "\"
