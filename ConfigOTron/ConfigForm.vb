@@ -265,6 +265,7 @@ Public Class ConfigForm
         nugget.AddLine("{")
         nugget.AddLine("""id"": """ & id & """,", 1)
         nugget.AddLine("""layerType"": ""ogcWfs"",", 1)
+        nugget.AddLine("""xyInAttribs"": true,", 1)
         nugget.AddLine("""url"": """ & url & """,", 1)
         nugget.AddLine("""name"": """ & layerName & """,", 1)
         nugget.AddLine("""nameField"": """ & nameField & """,", 1)
