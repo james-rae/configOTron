@@ -15,6 +15,8 @@ Public Class ConfigForm
     Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
     Const MINIFY As Boolean = True
 
+    Dim ENV As String = "DEV"
+
     ' arrays of domains. global scope for sharing fun
     Dim aLang = {"en", "fr"}
     Dim aRcp = {"rcp26", "rcp45", "rcp85"}
@@ -657,6 +659,15 @@ Public Class ConfigForm
         Return "CMIP5_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
     End Function
 
+    Private Function MakeCMIP5DataUrl() As String
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"},
+            {"PROD", "xxx"}}
+
+        Return dUrl.Item(ENV)
+
+    End Function
+
     ''' <summary>
     ''' Makes the Data Layer array for CMIP5 "set of four time periods"
     ''' </summary>
@@ -681,7 +692,7 @@ Public Class ConfigForm
         'calculate url (might be a constant)
         'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&lang=en&LAYERS=CMIP5.SND.RCP26.ANNUAL.2081-2100_PCTL50
 
-        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
+        Dim url As String = MakeCMIP5DataUrl()
 
         'TODO make global to prevent re-creating every iteration?
         Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}, {"tmean", "TM"}, {"prec", "PR"}}
@@ -712,8 +723,7 @@ Public Class ConfigForm
         Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}, {"tmean", "TM"}, {"prec", "PR"}}
         Dim dIcon As New Dictionary(Of String, String) From {{"snow", "snd"}, {"sith", "sit"}, {"sico", "sic"}, {"wind", "sfcwind"}, {"tmean", "tmean"}, {"prec", "precip"}}
 
-        sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CMIP5." & dVari.Item(variable) &
-            ".RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
+        sLegendUrl = MakeCMIP5DataUrl() & "&request=GetLegendGraphic&sld_version=1.1.0&layer=CMIP5." & dVari.Item(variable) & ".RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
 
         Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
 
@@ -806,6 +816,15 @@ Public Class ConfigForm
 
     End Sub
 
+    Private Function MakeDCSDataUrl() As String
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"},
+            {"PROD", "xxx"}}
+
+        Return dUrl.Item(ENV)
+
+    End Function
+
     Private Function MakeDCSRampId(variable As String, season As String, rcp As String, year As String, lang As String) As String
 
         Return "DCS_" & variable & "_" & season & "_" & rcp & "_" & year & "_" & lang
@@ -835,15 +854,9 @@ Public Class ConfigForm
         'calculate url (might be a constant)
         'tmean en/fr , tmin en/fr  , tmax en/fr  , prec en/fr
         'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.TX.RCP85.FALL.2021-2040_PCTL50
-        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.TX.RCP85.FALL.2021-2040_PCTL50
-        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.TN.RCP85.FALL.2021-2040_PCTL50
-        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.TN.RCP85.FALL.2021-2040_PCTL50
-        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.TM.RCP85.FALL.2021-2040_PCTL50
-        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.TM.RCP85.FALL.2021-2040_PCTL50
-        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=DCS.PR.RCP85.FALL.2021-2040_PCTL50
-        'http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=fr&LAYERS=DCS.PR.RCP85.FALL.2021-2040_PCTL50
 
-        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
+
+        Dim url As String = MakeDCSDataUrl()
 
         'TODO make global to prevent re-creating every iteration?
         Dim dVari As New Dictionary(Of String, String) From {{"tmean", "TX"}, {"tmin", "TN"}, {"tmax", "TM"}, {"prec", "PR"}}
@@ -869,13 +882,13 @@ Public Class ConfigForm
     Private Function MakeDCSLegend(variable As String, season As String, rcp As String, lang As String) As String
 
         Dim sLegend As String = ""
-        Dim sLegendUrl As String = ""
+        Dim sLegendUrl As String = MakeDCSDataUrl()
 
         'precip has different legend than temperature ones
         If variable = "prec" Then
-            sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=DCS.PR.RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
+            sLegendUrl &= "&request=GetLegendGraphic&sld_version=1.1.0&layer=DCS.PR.RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
         Else
-            sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=DCS.TX.RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
+            sLegendUrl &= "&request=GetLegendGraphic&sld_version=1.1.0&layer=DCS.TX.RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
         End If
 
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
@@ -993,18 +1006,20 @@ Public Class ConfigForm
 
     End Sub
 
+    Private Function MakeAHCCDDataUrl() As String
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/"},
+            {"PROD", "xxx"}}
+
+        Return dUrl.Item(ENV)
+
+    End Function
+
     Private Function MakeAHCCDDataLayer(variable As String, season As String, lang As String, rampId As String) As String
 
         'calculate url (might be a constant)
         'tmean , tmin , tmax , prec , surface pres , sea pres , whind
         'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=temp_mean&period=\"Ann\"
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=temp_min
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=temp_max
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=total_precip
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=pressure_station
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=pressure_sea_level
-        'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=wind_speed
-
 
         'TODO make global to prevent re-creating every iteration?
         Dim dVari As New Dictionary(Of String, String) From {{"tmean", "temp_mean"}, {"tmin", "temp_min"}, {"tmax", "temp_max"}, {"prec", "total_precip"}, {"supr", "pressure_station"}, {"slpr", "pressure_sea_level"}, {"wind", "wind_speed"}}
@@ -1020,7 +1035,7 @@ Public Class ConfigForm
         Dim template As String = "assets/templates/ahccd/variables-template.html"
         Dim parser As String = "assets/templates/ahccd/variables-script.js"
 
-        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/items?measurement_type=" & varCode & "&period=" & seasonCode
+        Dim url As String = MakeAHCCDDataUrl() & "items?measurement_type=" & varCode & "&period=" & seasonCode
 
         Return MakeWFSLayerConfig(url, rampId, 1, True, "station_name", oAHCCDLang.Txt(lang, LAYER_NAME, variable), colourCode, template, parser)
 
@@ -1088,6 +1103,15 @@ Public Class ConfigForm
         Next
     End Sub
 
+    Private Function MakeCAPADataUrl() As String
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"},
+            {"PROD", "https://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"}}
+
+        Return dUrl.Item(ENV)
+
+    End Function
+
     Private Function MakeCAPARampID(variable As String, hour As String, lang As String) As String
         ' doing this due to the radio configuration of the legend.
         ' need to have set of ramp ids, not a singular
@@ -1152,12 +1176,9 @@ Public Class ConfigForm
     Private Function MakeCAPADataLayer(variable As String, hour As String, lang As String, rampId As String) As String
 
         'calculate url (might be a constant)
-        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=HRDPA.6F 
-        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=HRDPA.24F
-        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=RDPA.6F 
-        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=RDPA.24F
+        'http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en&LAYERS=HRDPA.6F     
 
-        Dim url As String = "http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"
+        Dim url As String = MakeCAPADataUrl()
 
         'TODO make global to prevent re-creating every iteration?
         'might need to add _PR to the key
@@ -1182,7 +1203,7 @@ Public Class ConfigForm
         Dim sLegend As String = ""
         Dim sLegendUrl As String = ""
 
-        sLegendUrl = "http://geo.weather.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=RDPA.6F_PR&format=image/png&STYLE=default"
+        sLegendUrl = MakeCAPADataUrl() & "&request=GetLegendGraphic&sld_version=1.1.0&layer=RDPA.6F_PR&format=image/png&STYLE=default"
 
         Dim dIcon As New Dictionary(Of String, String) From {{"6", "06h"}, {"24", "24h"}}
 
@@ -1309,6 +1330,14 @@ Public Class ConfigForm
 
     End Sub
 
+    Private Function MakeHydroDataUrl() As String
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/"},
+            {"PROD", "xxx"}}
+
+        Return dUrl.Item(ENV)
+
+    End Function
 
     Private Function MakeHydroDataLayer(lang As String, rampID As String) As String
 
@@ -1316,7 +1345,7 @@ Public Class ConfigForm
         'http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/items?STATUS_EN=\%22Active\%22
 
 
-        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/items?STATUS_EN=Active"
+        Dim url As String = MakeHydroDataUrl() & "items?STATUS_EN=Active"
 
         Dim template As String = "assets/templates/hydro/stations-template.html"
         Dim parser As String = "assets/templates/hydro/stations-script.js"
@@ -1412,6 +1441,15 @@ Public Class ConfigForm
 
     End Sub
 
+    Private Function MakCanGRIDDataUrl() As String
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"},
+            {"PROD", "xxx"}}
+
+        Return dUrl.Item(ENV)
+
+    End Function
+
     Private Function MakeCanGRIDDataLayer(variable As String, season As String, lang As String, rampID As String) As String
 
         'calculate url (might be a constant)
@@ -1428,7 +1466,7 @@ Public Class ConfigForm
         Dim varCode As String = dVari.Item(variable)
         Dim seasonCode As String = dSeason.Item(season)
 
-        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"
+        Dim url As String = MakCanGRIDDataUrl()
         Dim wmsCode As String = "CANGRID.TREND." & varCode & "_" & seasonCode
         Dim template As String = "assets/templates/cangrd/variables-template.html"
         Dim parser As String = "assets/templates/cangrd/variables-script.js"
@@ -1440,13 +1478,13 @@ Public Class ConfigForm
     Private Function MakeCanGRIDLegend(variable As String, season As String, lang As String, rampid As String) As String
 
         Dim sLegend As String = ""
-        Dim sLegendUrl As String = ""
+        Dim sLegendUrl As String = MakCanGRIDDataUrl()
 
         'precip has different legend than temperature ones
         If variable = "prec" Then
-            sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRID.TREND.PR_ANNUAL&format=image/png&STYLE=default"
+            sLegendUrl &= "&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRID.TREND.PR_ANNUAL&format=image/png&STYLE=default"
         Else
-            sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRID.TREND.TM_ANNUAL&format=image/png&STYLE=default"
+            sLegendUrl &= "&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRID.TREND.TM_ANNUAL&format=image/png&STYLE=default"
         End If
 
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
@@ -1552,13 +1590,22 @@ Public Class ConfigForm
 
     End Sub
 
+    Private Function MakeCanSIPSDataUrl() As String
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "http://geomet2-nightly.cmc.ec.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"},
+            {"PROD", "xxx"}}
+
+        Return dUrl.Item(ENV)
+
+    End Function
+
     Private Function MakeCanSIPSDataLayer(variable As String, lang As String, rampID As String, wmsID As String) As String
 
         'calculate url (might be a constant)
         'tmean , tmin , tmax , prec , surface pres , sea pres , whind
         'http://geomet2-nightly.cmc.ec.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities&lang=en
 
-        Dim url As String = "http://geomet2-nightly.cmc.ec.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"
+        Dim url As String = MakeCanSIPSDataUrl()
         Dim template As String = "assets/templates/cansips/variables-template.html"
         Dim parser As String = "assets/templates/cansips/variables-script.js"
 
@@ -1576,7 +1623,7 @@ Public Class ConfigForm
 
         'precip has different legend than temperature ones
 
-        sLegendUrl = "http://geomet2-nightly.cmc.ec.gc.ca/geomet?version=1.3.0&service=WMS&request=GetLegendGraphic&sld_version=1.1.0&layer=" & wmsID & "&format=image/png&STYLE=default"
+        sLegendUrl = MakeCanSIPSDataUrl() & "&request=GetLegendGraphic&sld_version=1.1.0&layer=" & wmsID & "&format=image/png&STYLE=default"
 
         'TODO need proper icons
         Dim dIcon As New Dictionary(Of String, String) From {{"slpr", "HIND.MEM.ETA_PN-SLP.10"}, {"itpr", "MEM.ETA_RT.10"}, {"stpr", "MEM.ETA_TT.10"},
@@ -1599,6 +1646,7 @@ Public Class ConfigForm
 
 #Region " Daily "
 
+    'this block is obsolete / out of date / we've just been using a static file in the main app
 
     ' WFS. No Time.
 
@@ -1700,6 +1748,8 @@ Public Class ConfigForm
 #End Region
 
 #Region " Monthly "
+
+    'this block is obsolete / out of date / we've just been using a static file in the main app
 
     ' WFS. No Time.
 
@@ -1890,6 +1940,14 @@ Public Class ConfigForm
 
     End Sub
 
+    Private Function MakeNormalsDataUrl() As String
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-normals/"},
+            {"PROD", "xxx"}}
+
+        Return dUrl.Item(ENV)
+
+    End Function
 
     Private Function MakeNormalsDataLayer(variable As String, season As String, lang As String, rampId As String) As String
 
@@ -1907,9 +1965,9 @@ Public Class ConfigForm
         Dim parser As String = "assets/templates/normal/variables-script.js"
 
 
-        Dim url As String = "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-normals/items?NORMAL_ID=" & varCode & "&MONTH=" & seasonCode
+        Dim url As String = MakeNormalsDataUrl() & "items?NORMAL_ID=" & varCode & "&MONTH=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "ID", oNormalsLang.Txt(lang, LAYER_NAME, variable), dColour.Item(variable), template, parser)
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "STN_ID", oNormalsLang.Txt(lang, LAYER_NAME, variable), dColour.Item(variable), template, parser)
 
     End Function
 
