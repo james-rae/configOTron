@@ -1010,7 +1010,7 @@ Public Class ConfigForm
         Dim dVari As New Dictionary(Of String, String) From {{"tmean", "temp_mean"}, {"tmin", "temp_min"}, {"tmax", "temp_max"}, {"prec", "total_precip"}, {"supr", "pressure_station"}, {"slpr", "pressure_sea_level"}, {"wind", "wind_speed"}}
 
         'temp based ones are red. water based is blue. air based is green
-        Dim dColour As New Dictionary(Of String, String) From {{"tmean", "#f04116"}, {"tmin", "#f04116"}, {"tmax", "#f04116"}, {"prec", "#0ca7f5"}, {"supr", "#0cf03a"}, {"slpr", "#0cf03a"}, {"wind", "#0cf03a"}}
+        Dim dColour As New Dictionary(Of String, String) From {{"tmean", "#f04116"}, {"tmin", "#f04116"}, {"tmax", "#f04116"}, {"prec", "#0cb8f0"}, {"supr", "#0cf03a"}, {"slpr", "#0cf03a"}, {"wind", "#0cf03a"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "Ann"}, {"MAM", "Spr"}, {"JJA", "Smr"}, {"SON", "Fal"}, {"DJF", "Win"}, {"JAN", "Jan"}, {"FEB", "Feb"}, {"MAR", "Mar"}, {"APR", "Apr"}, {"MAY", "May"}, {"JUN", "Jun"}, {"JUL", "Jul"}, {"AUG", "Aug"}, {"SEP", "Sep"}, {"OCT", "Oct"}, {"NOV", "Nov"}, {"DEC", "Dec"}}
 
         'calculate wms layer id
@@ -1331,7 +1331,7 @@ Public Class ConfigForm
         Dim sLegendUrl = "" 'TODO needs to be supplied
 
         'TODO need a proper image
-        Dim sCoverIcon = "assets/images/green-circle.svg"
+        Dim sCoverIcon = "assets/images/blue-circle.svg"
 
         With oHydroLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
@@ -1898,7 +1898,7 @@ Public Class ConfigForm
         'TODO make global to prevent re-creating every iteration?
         Dim dVari As New Dictionary(Of String, String) From {{"tmean", "1"}, {"tmin", "8"}, {"tmax", "5"}, {"prec", "56"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "13"}, {"JAN", "1"}, {"FEB", "2"}, {"MAR", "3"}, {"APR", "4"}, {"MAY", "5"}, {"JUN", "6"}, {"JUL", "7"}, {"AUG", "8"}, {"SEP", "9"}, {"OCT", "10"}, {"NOV", "11"}, {"DEC", "12"}}
-        Dim dColour As New Dictionary(Of String, String) From {{"tmean", "#f04116"}, {"tmin", "#f04116"}, {"tmax", "#f04116"}, {"prec", "#0ca7f5"}}
+        Dim dColour As New Dictionary(Of String, String) From {{"tmean", "#f04116"}, {"tmin", "#f04116"}, {"tmax", "#f04116"}, {"prec", "#0cb8f0"}}
 
         'calculate wms layer id
         Dim varCode As String = dVari.Item(variable)
