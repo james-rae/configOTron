@@ -1986,7 +1986,7 @@ Public Class ConfigForm
 
         With oNormalsLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
-            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2) &
+            MakeLayerLegendBlockConfig("", rampId, .Txt(lang, VAR_DESC, variable), sCoverIcon, sLegendUrl, "", 2,, "icons") &
             MakeLegendSettingsConfig(lang, True, False, True)
         End With
 
