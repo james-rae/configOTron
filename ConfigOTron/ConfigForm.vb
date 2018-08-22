@@ -1,14 +1,6 @@
 ﻿Imports System.IO
 
 
-
-'OUTSTANDING THINGS
-' - adjust urls on WMS layers so they don't hit GetCapabilities
-' - add getFeatureInfo settings to WMS layers
-' - adjust urls on station layers (daily, monthly, normals(?)) for additional filtering for "one point per station"
-' - update language strings
-' - proper image svg for hydro legend
-
 Public Class ConfigForm
 
     'I'm lazy so make sure you add the appropriate subfolders to your dump folder.  Get a student to do it.
@@ -481,15 +473,15 @@ Public Class ConfigForm
         Dim json As String = MakeSimpleLegendBlockConfig("title", oCommonLang.Txt(lang, SETTINGS_TITLE), padLevel)
 
         If city Then
-            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID), CITIES_LAYER_ID, "assets/images/cities.svg", padLevel, (prov Or labels))
+            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID), CITIES_LAYER_ID, "assets/images/cities.png", padLevel, (prov Or labels))
         End If
 
         If labels Then
-            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, LABELS_LAYER_ID), LABELS_LAYER_ID, "assets/images/labels.svg", padLevel, prov)
+            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, LABELS_LAYER_ID), LABELS_LAYER_ID, "assets/images/labels.png", padLevel, prov)
         End If
 
         If prov Then
-            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID), PROVINCES_LAYER_ID, "assets/images/provinces.svg", padLevel, False)
+            json &= MakeOverlayLegendBlockConfig(oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID), PROVINCES_LAYER_ID, "assets/images/provinces.png", padLevel, False)
         End If
 
         Return json
@@ -725,7 +717,7 @@ Public Class ConfigForm
 
         sLegendUrl = MakeCMIP5DataUrl() & "&request=GetLegendGraphic&sld_version=1.1.0&layer=CMIP5." & dVari.Item(variable) & ".RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
 
-        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".png"
 
 
         With oCMIP5Lang
@@ -893,7 +885,7 @@ Public Class ConfigForm
 
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
 
-        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".png"
 
         With oDCSLang
 
@@ -1050,9 +1042,9 @@ Public Class ConfigForm
         Dim dLegend As New Dictionary(Of String, String) From {{"tmean", "red"}, {"tmin", "red"}, {"tmax", "red"}, {"prec", "blue"}, {"supr", "green"}, {"slpr", "green"}, {"wind", "green"}}
 
         Dim sColour As String = dLegend.Item(variable)
-        Dim sLegendUrl = "assets/images/" & sColour & "-circle.svg"
+        Dim sLegendUrl = "assets/images/" & sColour & "-circle.png"
 
-        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".png"
 
         With oAHCCDLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
@@ -1207,7 +1199,7 @@ Public Class ConfigForm
 
         Dim dIcon As New Dictionary(Of String, String) From {{"6", "06h"}, {"24", "24h"}}
 
-        Dim sCoverIcon As String = "assets/images/" & dIcon.Item(hour) & ".svg"
+        Dim sCoverIcon As String = "assets/images/" & dIcon.Item(hour) & ".png"
 
         With oCAPALang
 
@@ -1357,10 +1349,10 @@ Public Class ConfigForm
     Private Function MakeHydroLegend(lang As String, rampID As String) As String
 
         Dim sLegend As String = ""
-        Dim sLegendUrl = "" 'TODO needs to be supplied
+        Dim sLegendUrl = "assets/images/blue-circle.png"
 
         'TODO need a proper image
-        Dim sCoverIcon = "assets/images/blue-circle.svg"
+        Dim sCoverIcon = "assets/images/blue-circle.png"
 
         With oHydroLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
@@ -1489,7 +1481,7 @@ Public Class ConfigForm
 
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
 
-        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".png"
 
         With oCanGRIDLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, VAR_DESC, variable)) &
@@ -1630,7 +1622,7 @@ Public Class ConfigForm
             {"wtpr", "MEM.ETA_WTMP.10"}, {"gh5m", "PRES_GZ.500.10"}, {"ta8m", "PRES_TT.850.10"}, {"wd2m", "MEM.PRES_UU.200.10"},
             {"wd8m", "PRES_UU.850.10"}}
 
-        Dim sCoverIcon = "assets/images/" & FileVar(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & FileVar(variable) & ".png"
 
         With oCanSIPSLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
@@ -1733,7 +1725,7 @@ Public Class ConfigForm
 
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
 
-        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".png"
 
         With oDailyLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
@@ -1838,7 +1830,7 @@ Public Class ConfigForm
 
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
 
-        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".png"
 
         With oMonthlyLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
@@ -1980,9 +1972,9 @@ Public Class ConfigForm
         Dim dLegend As New Dictionary(Of String, String) From {{"tmean", "red"}, {"tmin", "red"}, {"tmax", "red"}, {"prec", "blue"}}
 
         Dim sColour As String = dLegend.Item(variable)
-        Dim sLegendUrl = "assets/images/" & sColour & "-circle.svg"
+        Dim sLegendUrl = "assets/images/" & sColour & "-circle.png"
 
-        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".svg"
+        Dim sCoverIcon = "assets/images/" & dIcon.Item(variable) & ".png"
 
         With oNormalsLang
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
