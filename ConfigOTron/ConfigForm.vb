@@ -1088,7 +1088,7 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("capa\1\config-" & FileVar(var) & "-" & hour & ".json", fileguts)
+                WriteConfig("capa\1\config-" & FileVar(var) & hour & ".json", fileguts)
 
             Next
 
@@ -1459,7 +1459,7 @@ Public Class ConfigForm
         Dim seasonCode As String = dSeason.Item(season)
 
         Dim url As String = MakCanGRIDDataUrl()
-        Dim wmsCode As String = "CANGRID.TREND." & varCode & "_" & seasonCode
+        Dim wmsCode As String = "CANGRD.TREND." & varCode & "_" & seasonCode
         Dim template As String = "assets/templates/cangrd/variables-template.html"
         Dim parser As String = "assets/templates/cangrd/variables-script.js"
 
@@ -1474,9 +1474,9 @@ Public Class ConfigForm
 
         'precip has different legend than temperature ones
         If variable = "prec" Then
-            sLegendUrl &= "&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRID.TREND.PR_ANNUAL&format=image/png&STYLE=default"
+            sLegendUrl &= "&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRD.TREND.PR_ANNUAL&format=image/png&STYLE=default"
         Else
-            sLegendUrl &= "&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRID.TREND.TM_ANNUAL&format=image/png&STYLE=default"
+            sLegendUrl &= "&request=GetLegendGraphic&sld_version=1.1.0&layer=CANGRD.TREND.TM_ANNUAL&format=image/png&STYLE=default"
         End If
 
         Dim dIcon As New Dictionary(Of String, String) From {{"tmean", "tmean"}, {"tmin", "tmin"}, {"tmax", "tmax"}, {"prec", "precip"}}
