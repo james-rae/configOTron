@@ -1412,12 +1412,12 @@ Public Class ConfigForm
             '  .AddItem(TOP_DESC, "A short CanGRID dataset description goes here", "[fr] A short CanGRID dataset description goes here")
 
             k = "tmean"
-            .AddItem(VAR_DESC, "CANGRD trends of temperature change (°C) over 1948-2016 represent the departure from the 1961-1990 reference period.",
+            .AddItem(VAR_DESC, "Trend of mean temperature change (°C)",
                      "[fr] A short mean temperature description goes here", k)
             .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "CANGRD trends of relative total precipitation change (%) over 1948-2012 reflect the percentage change in total precipitation over the 1961-1990 reference period.",
+            .AddItem(VAR_DESC, "Trend of relative total precipitation change (%)",
                      "[fr] A short precipitation description goes here", k)
             .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
 
