@@ -597,7 +597,7 @@ Public Class ConfigForm
                     Next
 
                     Dim fileguts = MakeLangStructure(nugget)
-                    WriteConfig("CMIP5\1\config-" & FileVar(var) & "-" & FileSeason(season) & "-" & rcp & ".json", fileguts)
+                    WriteConfig("CMIP5\config-" & FileVar(var) & "-" & FileSeason(season) & "-" & rcp & ".json", fileguts)
 
                 Next
             Next
@@ -768,7 +768,7 @@ Public Class ConfigForm
                     Next
 
                     Dim fileguts = MakeLangStructure(nugget)
-                    WriteConfig("dcs\1\config-" & FileVar(var) & "-" & FileSeason(season) & "-" & rcp & ".json", fileguts)
+                    WriteConfig("dcs\config-" & FileVar(var) & "-" & FileSeason(season) & "-" & rcp & ".json", fileguts)
 
                 Next
             Next
@@ -939,7 +939,7 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("ahccd\1\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
+                WriteConfig("ahccd\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
             Next
         Next
     End Sub
@@ -1088,7 +1088,7 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("capa\1\config-" & FileVar(var) & hour & ".json", fileguts)
+                WriteConfig("capa\config-" & FileVar(var) & hour & ".json", fileguts)
 
             Next
 
@@ -1299,7 +1299,7 @@ Public Class ConfigForm
         Next
 
         Dim fileguts = MakeLangStructure(nugget)
-        WriteConfig("hydro\1\config-hydro.json", fileguts)
+        WriteConfig("hydro\config-hydro.json", fileguts)
     End Sub
 
     Private Sub MakeHydroLang()
@@ -1397,7 +1397,7 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("CanGRD\1\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
+                WriteConfig("CanGRD\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
             Next
         Next
     End Sub
@@ -1532,7 +1532,7 @@ Public Class ConfigForm
             Next
 
             Dim fileguts = MakeLangStructure(nugget)
-            WriteConfig("cansips\1\config-" & FileVar(var) & ".json", fileguts)
+            WriteConfig("cansips\config-" & FileVar(var) & ".json", fileguts)
 
         Next
     End Sub
@@ -1664,7 +1664,7 @@ Public Class ConfigForm
             Next
 
             Dim fileguts = MakeLangStructure(nugget)
-            WriteConfig("daily\1\config-" & FileVar(var) & ".json", fileguts)
+            WriteConfig("daily\config-" & FileVar(var) & ".json", fileguts)
 
         Next
     End Sub
@@ -1767,7 +1767,7 @@ Public Class ConfigForm
             Next
 
             Dim fileguts = MakeLangStructure(nugget)
-            WriteConfig("monthly\1\config-" & FileVar(var) & ".json", fileguts)
+            WriteConfig("monthly\config-" & FileVar(var) & ".json", fileguts)
 
         Next
     End Sub
@@ -1873,7 +1873,7 @@ Public Class ConfigForm
                 Next
 
                 Dim fileguts = MakeLangStructure(nugget)
-                WriteConfig("normal\1\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
+                WriteConfig("normal\config-" & FileVar(var) & "-" & FileSeason(season) & ".json", fileguts)
             Next
         Next
     End Sub
@@ -1996,11 +1996,11 @@ Public Class ConfigForm
 
     Private Sub cmdCopy_Click(sender As Object, e As EventArgs) Handles cmdCopy.Click
         Const APP_CONFIGS As String = "C:\Git\CCCS_Viewer\assets\configs\"
-        Const VER As String = "1"
+        'Const VER As String = "1"
         Dim aDatasets = {"ahccd", "cangrd", "capa", "cmip5", "dcs", "hydro", "normal"}
 
         For Each ds In aDatasets
-            Dim sPathNugget As String = ds & "\" & VER & "\"
+            Dim sPathNugget As String = ds & "\" ' & VER & "\"
             Dim sSourceDir As String = DUMP_FOLDER & sPathNugget
             Dim sTargetDir As String = APP_CONFIGS & sPathNugget
 
