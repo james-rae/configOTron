@@ -687,7 +687,7 @@ Public Class ConfigForm
         Dim url As String = MakeCMIP5DataUrl()
 
         'TODO make global to prevent re-creating every iteration?
-        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}, {"tmean", "TM"}, {"prec", "PR"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}, {"tmean", "TT"}, {"prec", "PR"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "YEAR"}, {"MAM", "SPRING"}, {"JJA", "SUMMER"}, {"SON", "FALL"}, {"DJF", "WINTER"}}
 
         'calculate wms layer id
@@ -712,7 +712,7 @@ Public Class ConfigForm
         Dim sLegend As String = ""
         Dim sLegendUrl As String = ""
 
-        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}, {"tmean", "TM"}, {"prec", "PR"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"snow", "SND"}, {"sith", "SIT"}, {"sico", "SIC"}, {"wind", "SFCWIND"}, {"tmean", "TT"}, {"prec", "PR"}}
         Dim dIcon As New Dictionary(Of String, String) From {{"snow", "snd"}, {"sith", "sit"}, {"sico", "sic"}, {"wind", "sfcwind"}, {"tmean", "tmean"}, {"prec", "precip"}}
 
         sLegendUrl = MakeCMIP5DataUrl() & "&request=GetLegendGraphic&sld_version=1.1.0&layer=CMIP5." & dVari.Item(variable) & ".RCP85.FALL.2021-2040_PCTL50&format=image/png&STYLE=default"
@@ -851,7 +851,7 @@ Public Class ConfigForm
         Dim url As String = MakeDCSDataUrl()
 
         'TODO make global to prevent re-creating every iteration?
-        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "TX"}, {"tmin", "TN"}, {"tmax", "TM"}, {"prec", "PR"}}
+        Dim dVari As New Dictionary(Of String, String) From {{"tmean", "TM"}, {"tmin", "TN"}, {"tmax", "TX"}, {"prec", "PR"}}
         Dim dSeason As New Dictionary(Of String, String) From {{"ANN", "YEAR"}, {"MAM", "SPRING"}, {"JJA", "SUMMER"}, {"SON", "FALL"}, {"DJF", "WINTER"}}
 
         'calculate wms layer id
