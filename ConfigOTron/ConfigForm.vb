@@ -3,7 +3,26 @@
 
 Public Class ConfigForm
 
-    'I'm lazy so make sure you add the appropriate subfolders to your dump folder.  Get a student to do it.
+    'Config-o-tron for dummies:
+
+    'SETUP
+    'Check the DUMP_FOLDER variable, point it where you want output to go.
+    'I'm lazy so make sure you add the appropriate subfolders to your dump folder.  Get a student to do it. Or copy the config directory from CCP viewer, as it has matching folders.
+    'The MINIFY var will eliminate most of the padding spaces and a good chunk of hard returns. It's not perfect but for lazy effort it gets most of the way there.
+    'The APP_CONFIGS var (near bottom of file, use Ctrl-F to find) will set the copybot target location.
+
+    'USAGE
+    'The main Enhance button will generate configs in the dump directory. Say "enhance" when you press it, this will help avoid errors.
+    'The Copybot button will copy stuff from the dump folder to wherever your CCP viewer configs are lurking. Use this if you don't want to do it by hand.
+    'The Language Dump will take all the language strings being used and export them to a tab delimited text file in the DUMP_FOLDER.
+
+    'NOTES
+    'Lots of cut & paste, boilerplate, redundant code structures here. While it looks messy, it's done on purpose.
+    'The amount of pivots and special requests to configs means having a very nice code-reuse structure is at risk of being ruined by one change request.
+    'Having individual functions for every variable means we can adjust one without impacting the others. 
+    'Some very inefficient code (e.g. re-creating lookup dictionaries for every file), but since this runs in 1 second, it's fairly irrelevant.
+    'Note that Daily/Monthly/Stations configs are not being maintained in this project. They are managed by hand in the main CCP viewer project.
+
     Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
     Const MINIFY As Boolean = True
 
@@ -59,6 +78,8 @@ Public Class ConfigForm
     Dim oLangParty As New List(Of String)
 
     Private Sub cmdEnhanceMini_Click(sender As Object, e As EventArgs) Handles cmdEnhanceMini.Click
+
+        ENV = cboEnv.Text.Trim
 
         'MAIN STARTING POINT OF APP.
         MakeCommonLang()
@@ -552,19 +573,28 @@ Public Class ConfigForm
 
     Private Function MakeProvinceConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer",
-                                   PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID),,, "10000")
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer"},
+            {"PROD", "xxx"}}
+
+        Return MakeTileLayerConfig(dUrl.Item(ENV), PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID),,, "10000")
+
     End Function
 
     Private Function MakeCitiesConfig(lang As String) As String
 
-        Return MakeTileLayerConfig("https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer",
-                                   CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID),,, "10000")
+        Dim dUrl As New Dictionary(Of String, String) From {
+            {"DEV", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer"},
+            {"PROD", "xxx"}}
+
+        Return MakeTileLayerConfig(dUrl.Item(ENV), CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID),,, "10000")
+
     End Function
 
     Private Function MakeLabelsConfig(lang As String) As String
         Dim url As String = "https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/" & IIf(lang = "en", "CBMT", "CBCT") & "_TXT_3978/MapServer"
         Return MakeTileLayerConfig(url, LABELS_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, LABELS_LAYER_ID),,, "10000")
+
     End Function
 
 #End Region
