@@ -75,6 +75,12 @@ Public Class ConfigForm
     Const SETTINGS_TITLE As String = "SettingsTitle"
     Const LEGEND_TEXT As String = "LegendText"
 
+    'url replacement keys
+    Const GEOMET_WMS As String = "#GEOMETWMS#"
+    Const GEOMET_WFS As String = "#GEOMETWFS#"
+    Const GEOMET_CLIMATE_WMS As String = "#GEOMETCLIMATEWMS#"
+    Const GEOMET_CLIMATE_WFS As String = "#GEOMETCLIMATEWFS#"
+
     Dim oLangParty As New List(Of String)
 
     Private Sub cmdEnhanceMini_Click(sender As Object, e As EventArgs) Handles cmdEnhanceMini.Click
@@ -575,7 +581,7 @@ Public Class ConfigForm
 
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer"},
-            {"PROD", "xxx"}}
+            {"PROD", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer"}} 'TODO update 
 
         Return MakeTileLayerConfig(dUrl.Item(ENV), PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID),,, "10000")
 
@@ -585,7 +591,7 @@ Public Class ConfigForm
 
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer"},
-            {"PROD", "xxx"}}
+            {"PROD", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer"}} 'TODO update 
 
         Return MakeTileLayerConfig(dUrl.Item(ENV), CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID),,, "10000")
 
@@ -684,7 +690,7 @@ Public Class ConfigForm
     Private Function MakeCMIP5DataUrl() As String
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"},
-            {"PROD", "xxx"}}
+            {"PROD", GEOMET_CLIMATE_WMS & "?SERVICE=WMS&VERSION=1.3.0"}}
 
         Return dUrl.Item(ENV)
 
@@ -841,7 +847,7 @@ Public Class ConfigForm
     Private Function MakeDCSDataUrl() As String
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"},
-            {"PROD", "xxx"}}
+            {"PROD", GEOMET_CLIMATE_WMS & "?SERVICE=WMS&VERSION=1.3.0"}}
 
         Return dUrl.Item(ENV)
 
@@ -1031,7 +1037,7 @@ Public Class ConfigForm
     Private Function MakeAHCCDDataUrl() As String
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/ahccd-trends/"},
-            {"PROD", "xxx"}}
+            {"PROD", GEOMET_WFS & "/collections/ahccd-trends/"}}
 
         Return dUrl.Item(ENV)
 
@@ -1128,7 +1134,7 @@ Public Class ConfigForm
     Private Function MakeCAPADataUrl() As String
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "http://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"},
-            {"PROD", "https://geo.weather.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"}}
+            {"PROD", GEOMET_WMS & "?SERVICE=WMS&VERSION=1.3.0"}}
 
         Return dUrl.Item(ENV)
 
@@ -1148,7 +1154,7 @@ Public Class ConfigForm
 
         With oCAPALang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "A short RDPA dataset description goes here",
+            .AddItem(TOP_DESC, "The regional deterministic precipitation analysis (RDPA) produces a best estimate of precipitation amounts that occurred over a period of 6 and 24 hours.",
                      "[fr] A short RDPA dataset description goes here")
 
             'k = "qp25"
@@ -1157,19 +1163,19 @@ Public Class ConfigForm
             '.AddItem(LAYER_NAME, "Quantity of Precipitation, 2.5KM resolution", "[fr] Quantity of Precipitation, 2.5KM resolution", k)
 
             k = "qp10"
-            .AddItem(VAR_DESC, "A short Quantity of Precipitation, 10KM resolution description goes here",
-                     "[fr] A short Quantity of Precipitation, 10KM resolution description goes here", k)
+            '.AddItem(VAR_DESC, "A short Quantity of Precipitation, 10KM resolution description goes here",
+            '         "[fr] A short Quantity of Precipitation, 10KM resolution description goes here", k)
             .AddItem(LAYER_NAME, "Quantity of Precipitation, 10KM resolution", "[fr] Quantity of Precipitation, 10KM resolution", k)
 
-            .AddItem("CAPA_SLIDER", "Canadian Precipitation Analysis", "[fr] Canadian Precipitation Analysis")
+            ' .AddItem("CAPA_SLIDER", "Canadian Precipitation Analysis", "[fr] Canadian Precipitation Analysis")
 
-            k = "24"
-            .AddItem("CAPA_HOUR_DESC", "A short 24 hour description goes here",
-                     "[fr] A short 24 hour description goes here", k)
+            'k = "24"
+            '.AddItem("CAPA_HOUR_DESC", "A short 24 hour description goes here",
+            '         "[fr] A short 24 hour description goes here", k)
 
-            k = "6"
-            .AddItem("CAPA_HOUR_DESC", "A short 6 hour description goes here",
-                     "[fr] A short 6 hour description goes here", k)
+            'k = "6"
+            '.AddItem("CAPA_HOUR_DESC", "A short 6 hour description goes here",
+            '         "[fr] A short 6 hour description goes here", k)
 
         End With
 
@@ -1234,7 +1240,7 @@ Public Class ConfigForm
         With oCAPALang
 
             sLegend &= MakeLegendTitleConfig(.Txt(lang, TOP_TITLE), .Txt(lang, TOP_DESC)) &
-            MakeLayerLegendBlockConfig("", rampId, "", sCoverIcon, sLegendUrl, .Txt(lang, VAR_DESC, variable), 2,, "images") &
+            MakeLayerLegendBlockConfig("", rampId, "", sCoverIcon, sLegendUrl, "", 2,, "images") &
             MakeLegendSettingsConfig(lang, True, True, True)
         End With
 
@@ -1340,7 +1346,7 @@ Public Class ConfigForm
 
         With oHydroLang
             .AddItem(TOP_TITLE, "Data", "[fr] Data")
-            .AddItem(TOP_DESC, "This map indicates the location of over 1800 locations where hydro metric data is collected across Canada.",
+            .AddItem(TOP_DESC, "This map provides the location of over 1800 hydrometric (water quantity) stations on rivers, streams, and lakes across Canada.",
                      "[fr] A short Hydro dataset description goes here")
 
             ' .AddItem(VAR_DESC, "A short hydro description goes here (maybe)", "[fr] A short hydro description goes here (maybe)")
@@ -1355,7 +1361,7 @@ Public Class ConfigForm
     Private Function MakeHydroDataUrl() As String
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/hydrometric-stations/"},
-            {"PROD", "xxx"}}
+            {"PROD", GEOMET_WFS & "/collections/hydrometric-stations/"}}
 
         Return dUrl.Item(ENV)
 
@@ -1466,7 +1472,7 @@ Public Class ConfigForm
     Private Function MakCanGRIDDataUrl() As String
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "http://geomet2-nightly.cmc.ec.gc.ca/geomet-climate?SERVICE=WMS&VERSION=1.3.0"},
-            {"PROD", "xxx"}}
+            {"PROD", GEOMET_CLIMATE_WMS & "?SERVICE=WMS&VERSION=1.3.0"}}
 
         Return dUrl.Item(ENV)
 
@@ -1615,7 +1621,7 @@ Public Class ConfigForm
     Private Function MakeCanSIPSDataUrl() As String
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "http://geomet2-nightly.cmc.ec.gc.ca/geomet?SERVICE=WMS&VERSION=1.3.0"},
-            {"PROD", "xxx"}}
+            {"PROD", GEOMET_WMS & "?SERVICE=WMS&VERSION=1.3.0"}}
 
         Return dUrl.Item(ENV)
 
@@ -1965,7 +1971,7 @@ Public Class ConfigForm
     Private Function MakeNormalsDataUrl() As String
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "http://geo.wxod-dev.cmc.ec.gc.ca/geomet/features/collections/climate-normals/"},
-            {"PROD", "xxx"}}
+            {"PROD", GEOMET_WFS & "/collections/climate-normals/"}}
 
         Return dUrl.Item(ENV)
 
@@ -2025,14 +2031,20 @@ Public Class ConfigForm
 #Region " Fancy Extra Buttons "
 
     Private Sub cmdCopy_Click(sender As Object, e As EventArgs) Handles cmdCopy.Click
-        Const APP_CONFIGS As String = "C:\Git\CCCS_Viewer\assets\configs\"
+
+        ENV = cboEnv.Text.Trim
+
+        Dim APP_CONFIGS As New Dictionary(Of String, String) From {
+            {"DEV", "C:\Git\CCCS_Viewer\assets\configs\"},
+            {"PROD", "C:\Git\CCCS_Viewer\assets\configs-multi\"}}
+
         'Const VER As String = "1"
         Dim aDatasets = {"ahccd", "cangrd", "capa", "cmip5", "dcs", "hydro", "normal"}
 
         For Each ds In aDatasets
             Dim sPathNugget As String = ds & "\" ' & VER & "\"
             Dim sSourceDir As String = DUMP_FOLDER & sPathNugget
-            Dim sTargetDir As String = APP_CONFIGS & sPathNugget
+            Dim sTargetDir As String = APP_CONFIGS.Item(ENV) & sPathNugget
 
             Dim oSrcDir As New DirectoryInfo(sSourceDir)
             Dim aFiles = oSrcDir.GetFiles()
