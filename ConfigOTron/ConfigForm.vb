@@ -79,7 +79,7 @@ Public Class ConfigForm
     Const GEOMET_WMS As String = "#GEOMETWMS#"
     Const GEOMET_WFS As String = "#GEOMETWFS#"
     Const GEOMET_CLIMATE_WMS As String = "#GEOMETCLIMATEWMS#"
-    Const GEOMET_CLIMATE_WFS As String = "#GEOMETCLIMATEWFS#"
+    Const ECCC_ARCGIS As String = "#ECCCARCGIS#"
 
     Dim oLangParty As New List(Of String)
 
@@ -108,6 +108,10 @@ Public Class ConfigForm
         MsgBox("DONE THANKS")
     End Sub
 
+
+
+#Region " General Structure Builders "
+
     Private Sub MakeCommonLang()
         oCommonLang = New LangHive("COMMON", oLangParty)
         With oCommonLang
@@ -118,8 +122,6 @@ Public Class ConfigForm
             .AddItem(SETTINGS_TITLE, "Settings", "[fr] Settings")
         End With
     End Sub
-
-#Region " General Structure Builders "
 
     ''' <summary>
     ''' Turns native boolean into json text boolean
@@ -581,7 +583,7 @@ Public Class ConfigForm
 
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer"},
-            {"PROD", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer"}} 'TODO update 
+            {"PROD", ECCC_ARCGIS & "/Overlays/Provinces/MapServer"}}
 
         Return MakeTileLayerConfig(dUrl.Item(ENV), PROVINCES_LAYER_ID, 1, True, oCommonLang.Txt(lang, LAYER_NAME, PROVINCES_LAYER_ID),,, "10000")
 
@@ -591,7 +593,7 @@ Public Class ConfigForm
 
         Dim dUrl As New Dictionary(Of String, String) From {
             {"DEV", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer"},
-            {"PROD", "https://maps-cartes.dev.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer"}} 'TODO update 
+            {"PROD", ECCC_ARCGIS & "/Overlays/Cities/MapServer"}}
 
         Return MakeTileLayerConfig(dUrl.Item(ENV), CITIES_LAYER_ID, 1, False, oCommonLang.Txt(lang, LAYER_NAME, CITIES_LAYER_ID),,, "10000")
 
