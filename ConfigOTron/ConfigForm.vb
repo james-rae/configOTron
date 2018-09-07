@@ -359,11 +359,14 @@ Public Class ConfigForm
     ''' <param name="indentLevel"></param>
     ''' <param name="trailingComma"></param>
     ''' <returns></returns>
-    Private Function MakeSimpleLegendBlockConfig(infoType As String, content As String, indentLevel As Integer, Optional trailingComma As Boolean = True) As String
+    Private Function MakeSimpleLegendBlockConfig(infoType As String, content As String, indentLevel As Integer, Optional trailingComma As Boolean = True, Optional noExport As Boolean = False) As String
 
         Dim nugget As New ConfigNugget(indentLevel)
 
         nugget.AddLine("{")
+        If noExport Then
+            nugget.AddLine("""export"": false,", 1)
+        End If
         nugget.AddLine("""infoType"": """ & infoType & """,", 1)
         nugget.AddLine("""content"": """ & content & """", 1)
         nugget.AddLine("}" & IIf(trailingComma, ",", ""))
@@ -479,7 +482,7 @@ Public Class ConfigForm
 
     Private Function MakeLegendTitleConfig(titleText As String, descText As String) As String
 
-        Dim json As String = MakeSimpleLegendBlockConfig("title", titleText, 2) &
+        Dim json As String = MakeSimpleLegendBlockConfig("title", titleText, 2,, True) &
              MakeSimpleLegendBlockConfig("text", descText, 2)
 
         Return json
