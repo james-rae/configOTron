@@ -1068,9 +1068,9 @@ Public Class ConfigForm
         Dim template As String = "assets/templates/ahccd/variables-template.html"
         Dim parser As String = "assets/templates/ahccd/variables-script.js"
 
-        Dim url As String = MakeAHCCDDataUrl() & "items?measurement_type=" & varCode & "&period=" & seasonCode
+        Dim url As String = MakeAHCCDDataUrl() & "items?measurement_type__type_mesure=" & varCode & "&period__periode=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "station_name", oAHCCDLang.Txt(lang, LAYER_NAME, variable), colourCode, template, parser)
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "station_name__nom_station", oAHCCDLang.Txt(lang, LAYER_NAME, variable), colourCode, template, parser)
 
     End Function
 
