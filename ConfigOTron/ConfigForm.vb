@@ -116,10 +116,10 @@ Public Class ConfigForm
         oCommonLang = New LangHive("COMMON", oLangParty)
         With oCommonLang
             'support layer names
-            .AddItem(LAYER_NAME, "Labels", "[fr] Labels", LABELS_LAYER_ID)
-            .AddItem(LAYER_NAME, "Provinces", "[fr] Provinces", PROVINCES_LAYER_ID)
-            .AddItem(LAYER_NAME, "Cities", "[fr] Cities", CITIES_LAYER_ID)
-            .AddItem(SETTINGS_TITLE, "Settings", "[fr] Settings")
+            .AddItem(LAYER_NAME, "Labels", "Étiquettes", LABELS_LAYER_ID)
+            .AddItem(LAYER_NAME, "Provinces", "Provinces", PROVINCES_LAYER_ID)
+            .AddItem(LAYER_NAME, "Cities", "Villes", CITIES_LAYER_ID)
+            .AddItem(SETTINGS_TITLE, "Settings", "Paramètres")
         End With
     End Sub
 
@@ -651,38 +651,38 @@ Public Class ConfigForm
         oCMIP5Lang = New LangHive("CMIP5", oLangParty)
 
         With oCMIP5Lang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             ' .AddItem(TOP_DESC, "A short CMIP5 dataset description goes here", "[fr] A short CMIP5 dataset description goes here")
 
             k = "snow"
             .AddItem(VAR_DESC, "Projected changes in snow depth are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
-                     "[fr] A short snow depth description goes here", k)
-            .AddItem(LAYER_NAME, "Snow depth", "[fr] Snow depth", k)
+                     "Les changements projetés dans l'épaisseur de la neige sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(LAYER_NAME, "Snow depth", "Épaisseur de la neige", k)
 
             k = "sith"
             .AddItem(VAR_DESC, "Projected changes in sea ice thickness are with respect to the reference period of 1986-2006 and expressed as percentage change (%).",
-                     "[fr] A short sea ice thickness description goes here", k)
-            .AddItem(LAYER_NAME, "Sea ice thickness", "[fr] Sea ice thickness", k)
+                     "Les changements projetés dans l'épaisseur de la glace de mer sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2006.", k)
+            .AddItem(LAYER_NAME, "Sea ice thickness", "Épaisseur de la glace de mer", k)
 
             k = "sico"
             .AddItem(VAR_DESC, "Projected changes in sea ice concentration are with respect to the reference period of 1986-2005 and expressed as percentage change (%). Sea ice concentration is represented as the percentage (%) of grid cell area.",
-                     "[fr] A short sea ice concentration description goes here", k)
-            .AddItem(LAYER_NAME, "Sea ice concentration", "[fr] Sea ice concentration", k)
+                     "Les changements projetés dans la concentration de la glace de mer sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005. La concentration de la glace de mer est exprimée en pourcentage (%) de la surface.", k)
+            .AddItem(LAYER_NAME, "Sea ice concentration", "Concentration de la glace de mer", k)
 
             k = "wind"
             .AddItem(VAR_DESC, "Projected changes in wind speed are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
-                     "[fr] A short wind speed description goes here", k)
-            .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
+                     "Les changements projetés dans la vitesse du vent sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(LAYER_NAME, "Wind speed", "Vitesse du vent", k)
 
             k = "tmean"
             .AddItem(VAR_DESC, "Projected changes in mean temperature (°C) are with respect to the reference period of 1986-2005.",
-                     "[fr] A short mean temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+                     "Les changements projetés dans la température moyenne (°C) sont calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "Température moyenne", k)
 
             k = "prec"
             .AddItem(VAR_DESC, "Projected relative changes in mean precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
-                     "[fr] A short precipitation description goes here", k)
-            .AddItem(LAYER_NAME, "Mean precipitation", "[fr] Mean precipitation", k)
+                     "Les changements projetés dans les précipitations moyennes sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(LAYER_NAME, "Mean precipitation", "Précipitations moyennes", k)
 
         End With
 
@@ -822,28 +822,28 @@ Public Class ConfigForm
         oDCSLang = New LangHive("DCS", oLangParty)
 
         With oDCSLang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             '  .AddItem(TOP_DESC, "A short DCS dataset description goes here", "[fr] A short DCS dataset description goes here")
 
             k = "tmean"
             .AddItem(VAR_DESC, "Projected changes in statistically downscaled mean temperature (°C) are with respect to the reference period of 1986-2005.",
-                     "[fr] A short mean temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+                     "Les changements projetés dans la température moyenne (°C) statistiquement mise à l'échelle sont calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "Température moyenne", k)
 
             k = "tmin"
             .AddItem(VAR_DESC, "Projected changes in statistically downscaled minimum temperature (°C) are with respect to the reference period of 1986-2005.",
-                     "[fr] A short minimum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Minimum temperature", "[fr] Minimum temperature", k)
+                     "Les changements projetés dans la température minimale (°C) statistiquement mise à l'échelle sont calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(LAYER_NAME, "Minimum temperature", "Température minimale", k)
 
             k = "tmax"
             .AddItem(VAR_DESC, "Projected changes in statistically downscaled maximum temperature (°C) are with respect to the reference period of 1986-2005.",
-                     "[fr] A short maximum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Maximum temperature", "[fr] Maximum temperature", k)
+                     "Les changements projetés dans la température maximale (°C) statistiquement mise à l'échelle sont calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(LAYER_NAME, "Maximum temperature", "Température maximale", k)
 
             k = "prec"
             .AddItem(VAR_DESC, "Projected relative changes in statistically downscaled total precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
-                     "[fr] A short precipitation description goes here", k)
-            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
+                     "Les changements projetés dans les précipitations totales statistiquement mises à l'échelle sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(LAYER_NAME, "Precipitation", "Précipitations", k)
 
         End With
 
@@ -991,37 +991,37 @@ Public Class ConfigForm
         oAHCCDLang = New LangHive("AHCCD", oLangParty)
 
         With oAHCCDLang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             .AddItem(TOP_DESC, "Adjusted and homogenized station data incorporate adjustments to the original station data to account for discontinuities from non-climatic factors.",
-                     "[fr] A short AHCCD dataset description goes here")
+                     "Les données pour les stations climatiques ont été ajustées et homogénéisées pour tenir compte des discontinuités attribuables à des facteurs non climatiques.")
 
             k = "tmean"
             ' .AddItem(VAR_DESC, "A short homogenized mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized mean temperature", "[fr] Mean temperature", k)
+            .AddItem(LAYER_NAME, "Homogenized mean temperature", "Température moyenne homogénéisée", k)
 
             k = "tmin"
             ' .AddItem(VAR_DESC, "A short homogenized minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized minimum temperature", "[fr] Minimum temperature", k)
+            .AddItem(LAYER_NAME, "Homogenized minimum temperature", "Température minimale homogénéisée", k)
 
             k = "tmax"
             ' .AddItem(VAR_DESC, "A short homogenized maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized maximum temperature", "[fr] Maximum temperature", k)
+            .AddItem(LAYER_NAME, "Homogenized maximum temperature", "Température maximale homogénéisée", k)
 
             k = "prec"
             ' .AddItem(VAR_DESC, "A short adjusted total precipitation description goes here", "[fr] A short precipitation description goes here", k)
-            .AddItem(LAYER_NAME, "Adjusted total precipitation", "[fr] Precipitation", k)
+            .AddItem(LAYER_NAME, "Adjusted total precipitation", "Précipitations totales ajustées", k)
 
             k = "supr"
             ' .AddItem(VAR_DESC, "A short homogenized station pressure description goes here", "[fr] A short surface pressure description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized station pressure", "[fr] Surface pressure", k)
+            .AddItem(LAYER_NAME, "Homogenized station pressure", "Pression homogénéisée à la station", k)
 
             k = "slpr"
             ' .AddItem(VAR_DESC, "A short homogenized sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized sea level pressure", "[fr] Sea level pressure", k)
+            .AddItem(LAYER_NAME, "Homogenized sea level pressure", "Pression homogénéisée au niveau de la mer", k)
 
             k = "wind"
             ' .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
-            .AddItem(LAYER_NAME, "Wind speed", "[fr] Wind speed", k)
+            .AddItem(LAYER_NAME, "Wind speed", "Vitesse du vent", k)
 
             'k = "red"
             '.AddItem(LEGEND_TEXT, "Red Circle", "[fr] Red Circle", k)
@@ -1033,7 +1033,7 @@ Public Class ConfigForm
             '.AddItem(LEGEND_TEXT, "Blue Circle", "[fr] Blue Circle", k)
 
             'general non-colour one
-            .AddItem(LEGEND_TEXT, "AHCCD Station", "[fr] AHCCD Station")
+            .AddItem(LEGEND_TEXT, "AHCCD Station", "Station DCCAH")
 
         End With
 
@@ -1158,9 +1158,9 @@ Public Class ConfigForm
         oCAPALang = New LangHive("CAPA", oLangParty)
 
         With oCAPALang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             .AddItem(TOP_DESC, "The regional deterministic precipitation analysis (RDPA) produces a best estimate of precipitation amounts that occurred over a period of 6 and 24 hours.",
-                     "[fr] A short RDPA dataset description goes here")
+                     "L'Analyse régionale déterministe de précipitations (ARPD) produit une estimation optimale de la quantité de précipitations qui est survenue au cours de périodes passées récentes de 6h ou 24h.")
 
             'k = "qp25"
             '.AddItem(VAR_DESC, "A short Quantity of Precipitation, 2.5KM resolution description goes here",
@@ -1170,7 +1170,7 @@ Public Class ConfigForm
             k = "qp10"
             '.AddItem(VAR_DESC, "A short Quantity of Precipitation, 10KM resolution description goes here",
             '         "[fr] A short Quantity of Precipitation, 10KM resolution description goes here", k)
-            .AddItem(LAYER_NAME, "Quantity of Precipitation, 10KM resolution", "[fr] Quantity of Precipitation, 10KM resolution", k)
+            .AddItem(LAYER_NAME, "Quantity of Precipitation, 10KM resolution", "Quantité de précipitations, résolution de 10 km", k)
 
             ' .AddItem("CAPA_SLIDER", "Canadian Precipitation Analysis", "[fr] Canadian Precipitation Analysis")
 
@@ -1350,14 +1350,14 @@ Public Class ConfigForm
         'we only have one layer. so VAR_DESC might be redundant?
 
         With oHydroLang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             .AddItem(TOP_DESC, "This map provides the location of over 1800 hydrometric (water quantity) stations on rivers, streams, and lakes across Canada.",
-                     "[fr] A short Hydro dataset description goes here")
+                     "Cette carte indique l'emplacement de plus de 1800 stations hydrométriques (mesure de quantité d'eau) sur des cours d'eau et des lacs partout au Canada.")
 
             ' .AddItem(VAR_DESC, "A short hydro description goes here (maybe)", "[fr] A short hydro description goes here (maybe)")
-            .AddItem(LAYER_NAME, "Hydrometric stations", "[fr] Hydrometric stations")
+            .AddItem(LAYER_NAME, "Hydrometric stations", "Stations hydrométriques")
 
-            .AddItem(LEGEND_TEXT, "Hydrometric Station", "[fr] Hydrometric Station")
+            .AddItem(LEGEND_TEXT, "Hydrometric Station", "Stations hydrométriques")
 
         End With
 
@@ -1449,18 +1449,18 @@ Public Class ConfigForm
         oCanGRIDLang = New LangHive("CANGRID", oLangParty)
 
         With oCanGRIDLang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             '  .AddItem(TOP_DESC, "A short CanGRID dataset description goes here", "[fr] A short CanGRID dataset description goes here")
 
             k = "tmean"
             .AddItem(VAR_DESC, "Trend of mean temperature change (°C)",
-                     "[fr] A short mean temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Mean temperature", "[fr] Mean temperature", k)
+                     "Tendance des changements de la température moyenne (°C)", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "Température moyenne", k)
 
             k = "prec"
             .AddItem(VAR_DESC, "Trend of relative total precipitation change (%)",
-                     "[fr] A short precipitation description goes here", k)
-            .AddItem(LAYER_NAME, "Precipitation", "[fr] Precipitation", k)
+                     "Tendance des changements relatifs des précipitations totales (%)", k)
+            .AddItem(LAYER_NAME, "Precipitation", "Précipitations", k)
 
             'k = "tmin"
             '.AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
@@ -1584,7 +1584,7 @@ Public Class ConfigForm
         oCanSIPSLang = New LangHive("CANSIPS", oLangParty)
 
         With oCanSIPSLang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             .AddItem(TOP_DESC, "A short CanSIPS dataset description goes here", "[fr] A short CanSIPS dataset description goes here")
 
             k = "slpr"
@@ -1716,7 +1716,7 @@ Public Class ConfigForm
         oDailyLang = New LangHive("DAILY", oLangParty)
 
         With oDailyLang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             .AddItem(TOP_DESC, "A short Daily dataset description goes here", "[fr] A short Daily dataset description goes here")
 
             k = "tmean"
@@ -1819,7 +1819,7 @@ Public Class ConfigForm
         oMonthlyLang = New LangHive("MONTHLY", oLangParty)
 
         With oMonthlyLang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             .AddItem(TOP_DESC, "A short Monthly dataset description goes here", "[fr] A short Monthly dataset description goes here")
 
             k = "tmean"
@@ -1925,28 +1925,28 @@ Public Class ConfigForm
         oNormalsLang = New LangHive("NORMALS", oLangParty)
 
         With oNormalsLang
-            .AddItem(TOP_TITLE, "Data", "[fr] Data")
+            .AddItem(TOP_TITLE, "Data", "Données")
             .AddItem(TOP_DESC, "Climate Normals and Averages are used to summarize or describe the average climatic conditions of a particular location.\n\nAt the completion of each decade, Environment and Climate Change Canada updates its Climate Normals for as many locations and as many climatic characteristics as possible. The Climate Normals, Averages and Extremes offered here are based on Canadian climate stations with at least 15 years of data between 1981 to 2010.",
-                     "Les normales et moyennes climatiques servent à résumer ou à décrire les conditions climatiques moyennes d'un endroit donné.\n\nÀ la fin de chaque décennie, Environnement et Changement climatique Canada met à jour ses normales climatiques pour le plus grand nombre possible de stations et de caractéristiques climatiques. Les normales climatiques, moyennes et extrêmes climatiques, offertes ici reposent sur les stations climatologiques canadiennes ayant au moins 15 années de données entre 1981 à 2010.")
+                     "Les normales et moyennes climatiques sont utilisées pour résumer ou décrire les conditions climatiques moyennes d'un endroit donné.\n\nÀ la fin de chaque décennie, Environnement et Changement climatique Canada met à jour ses normales climatiques pour autant d'endroits et autant de caractéristiques climatiques que possible. Les  normales, moyennes et extrêmes climatiques présentées ici sont fondées sur les données des stations climatologiques canadiennes ayant au moins 15 années de données entre 1981 et 2010.")
 
             k = "tmean"
             .AddItem(VAR_DESC, "The mean temperature in degrees Celsius (°C) is defined as the average of the maximum and minimum temperature at a location for a specified time interval.",
-                     "Température moyenne en degrés Celsius (°C) définie comme moyenne de la température maximale et de la température minimale à un endroit donné au cours d'un intervalle de temps déterminé.", k)
-            .AddItem(LAYER_NAME, "Mean daily temperature", "Température moyenne", k)
+                     "La température moyenne en degrés Celsius (°C) est définie comme la moyenne des températures maximale et minimale à un endroit durant une période précise.", k)
+            .AddItem(LAYER_NAME, "Mean daily temperature", "Température quotidienne moyenne", k)
 
             k = "tmin"
             .AddItem(VAR_DESC, "The average of the minimum temperature in degrees Celsius (°C) observed at the location for that month.",
-                     "Moyenne de la température minimale en degrés Celsius (°C) observée à un endroit donné au cours du mois.", k)
-            .AddItem(LAYER_NAME, "Mean daily minimum temperature", "Température minimale moyenne", k)
+                     "La moyenne des températures minimales en degrés Celsius (°C) observées à un endroit durant ce mois.", k)
+            .AddItem(LAYER_NAME, "Mean daily minimum temperature", "Température minimale quotidienne moyenne", k)
 
             k = "tmax"
             .AddItem(VAR_DESC, "The average of the maximum temperature in degrees Celsius (°C) observed at the location for that month.",
-                     "Moyenne de la température maximale en degrés Celsius (°C) observée à un endroit donné au cours du mois.", k)
-            .AddItem(LAYER_NAME, "Mean daily maximum temperature", "Température maximale moyenne", k)
+                     "La moyenne des températures maximales en degrés Celsius (°C) observées à un endroit durant ce mois.", k)
+            .AddItem(LAYER_NAME, "Mean daily maximum temperature", "Température maximale quotidienne moyenne", k)
 
             k = "prec"
             .AddItem(VAR_DESC, "The sum of the total rainfall and the water equivalent of the total snowfall in millimetres (mm), observed at the location during a specified time interval.",
-                     "Somme de la pluie totale et de l'équivalent en eau de la neige totale en millimètres (mm), observée à un endroit donné au cours d'un intervalle de temps déterminé.", k)
+                     "La somme de la quantité totale de pluie et de l'équivalent en eau des chutes de neige totales, en millimètres (mm), observés à un endroit durant une période précise.", k)
             .AddItem(LAYER_NAME, "Total precipitation", "Précipitations totales", k)
 
             'k = "stpr"
