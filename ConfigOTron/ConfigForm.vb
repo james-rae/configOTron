@@ -8,7 +8,7 @@ Public Class ConfigForm
     'SETUP
     'Check the DUMP_FOLDER variable, point it where you want output to go.
     'I'm lazy so make sure you add the appropriate subfolders to your dump folder.  Get a student to do it. Or copy the config directory from CCP viewer, as it has matching folders.
-    'The MINIFY var will eliminate most of the padding spaces and a good chunk of hard returns. It's not perfect but for lazy effort it gets most of the way there.
+    'The MINIFY var (in ConfigNugget.vb) will eliminate most of the padding spaces and a good chunk of hard returns. It's not perfect but for lazy effort it gets most of the way there.
     'The APP_CONFIGS var (near bottom of file, use Ctrl-F to find) will set the copybot target location.
 
     'USAGE
@@ -24,8 +24,6 @@ Public Class ConfigForm
     'Note that Daily/Monthly/Stations configs are not being maintained in this project. They are managed by hand in the main CCP viewer project.
 
     Const DUMP_FOLDER As String = "c:\git\configotron\configotron\dump\"
-    Const MINIFY As Boolean = True
-
     Dim ENV As String = "DEV"
 
     ' arrays of domains. global scope for sharing fun
