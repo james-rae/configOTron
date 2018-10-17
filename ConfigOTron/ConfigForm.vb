@@ -15,6 +15,8 @@ Public Class ConfigForm
     'The main Enhance button will generate configs in the dump directory. Say "enhance" when you press it, this will help avoid errors.
     'The Copybot button will copy stuff from the dump folder to wherever your CCP viewer configs are lurking. Use this if you don't want to do it by hand.
     'The Language Dump will take all the language strings being used and export them to a tab delimited text file in the DUMP_FOLDER.
+    'The dropdown environment combo (currently has DEV and PROD) will influence what versions of configs get generated (mainly this affects service URLs)
+    'and where things get copied to.  DEV creates configs with dev services, PROD creates configs with environment placeholders (multi-config).
 
     'NOTES
     'Lots of cut & paste, boilerplate, redundant code structures here. While it looks messy, it's done on purpose.
@@ -670,7 +672,7 @@ Public Class ConfigForm
             k = "wind"
             .AddItem(VAR_DESC, "Projected changes in wind speed are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
                      "Les changements projetés dans la vitesse du vent sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
-            .AddItem(LAYER_NAME, "Wind speed", "Vitesse du vent", k)
+            .AddItem(LAYER_NAME, "Surface wind speed", "Vitesse du vent à la surface", k)
 
             k = "tmean"
             .AddItem(VAR_DESC, "Projected changes in mean temperature (°C) are with respect to the reference period of 1986-2005.",
@@ -831,17 +833,17 @@ Public Class ConfigForm
             k = "tmin"
             .AddItem(VAR_DESC, "Projected changes in statistically downscaled minimum temperature (°C) are with respect to the reference period of 1986-2005.",
                      "Les changements projetés dans la température minimale (°C) statistiquement mise à l'échelle sont calculés par rapport à la période de référence 1986-2005.", k)
-            .AddItem(LAYER_NAME, "Minimum temperature", "Température minimale", k)
+            .AddItem(LAYER_NAME, "Daily minimum temperature", "Température minimale quotidienne", k)
 
             k = "tmax"
             .AddItem(VAR_DESC, "Projected changes in statistically downscaled maximum temperature (°C) are with respect to the reference period of 1986-2005.",
                      "Les changements projetés dans la température maximale (°C) statistiquement mise à l'échelle sont calculés par rapport à la période de référence 1986-2005.", k)
-            .AddItem(LAYER_NAME, "Maximum temperature", "Température maximale", k)
+            .AddItem(LAYER_NAME, "Daily maximum temperature", "Température maximale quotidienne", k)
 
             k = "prec"
             .AddItem(VAR_DESC, "Projected relative changes in statistically downscaled total precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
                      "Les changements projetés dans les précipitations totales statistiquement mises à l'échelle sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
-            .AddItem(LAYER_NAME, "Precipitation", "Précipitations", k)
+            .AddItem(LAYER_NAME, "Total precipitation", "Précipitations totales", k)
 
         End With
 
@@ -995,27 +997,27 @@ Public Class ConfigForm
 
             k = "tmean"
             ' .AddItem(VAR_DESC, "A short homogenized mean temperature description goes here", "[fr] A short mean temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized mean temperature", "Température moyenne homogénéisée", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "Température moyenne", k)
 
             k = "tmin"
             ' .AddItem(VAR_DESC, "A short homogenized minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized minimum temperature", "Température minimale homogénéisée", k)
+            .AddItem(LAYER_NAME, "Daily minimum temperature", "Température minimale quotidienne", k)
 
             k = "tmax"
             ' .AddItem(VAR_DESC, "A short homogenized maximum temperature description goes here", "[fr] A short maximum temperature description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized maximum temperature", "Température maximale homogénéisée", k)
+            .AddItem(LAYER_NAME, "Daily maximum temperature", "Température maximale quotidienne", k)
 
             k = "prec"
             ' .AddItem(VAR_DESC, "A short adjusted total precipitation description goes here", "[fr] A short precipitation description goes here", k)
-            .AddItem(LAYER_NAME, "Adjusted total precipitation", "Précipitations totales ajustées", k)
+            .AddItem(LAYER_NAME, "Total precipitation", "Précipitations totales", k)
 
             k = "supr"
             ' .AddItem(VAR_DESC, "A short homogenized station pressure description goes here", "[fr] A short surface pressure description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized station pressure", "Pression homogénéisée à la station", k)
+            .AddItem(LAYER_NAME, "Station pressure", "Pression à la station", k)
 
             k = "slpr"
             ' .AddItem(VAR_DESC, "A short homogenized sea level pressure description goes here", "[fr] A short sea level pressure description goes here", k)
-            .AddItem(LAYER_NAME, "Homogenized sea level pressure", "Pression homogénéisée au niveau de la mer", k)
+            .AddItem(LAYER_NAME, "Sea level pressure", "Pression au niveau de la mer", k)
 
             k = "wind"
             ' .AddItem(VAR_DESC, "A short wind speed description goes here", "[fr] A short wind speed description goes here", k)
@@ -1165,10 +1167,15 @@ Public Class ConfigForm
             '         "[fr] A short Quantity of Precipitation, 2.5KM resolution description goes here", k)
             '.AddItem(LAYER_NAME, "Quantity of Precipitation, 2.5KM resolution", "[fr] Quantity of Precipitation, 2.5KM resolution", k)
 
-            k = "qp10"
+            'note weird trickery here, we are mashing the resolution with the hour period in our key
+
+            k = "qp106"
             '.AddItem(VAR_DESC, "A short Quantity of Precipitation, 10KM resolution description goes here",
             '         "[fr] A short Quantity of Precipitation, 10KM resolution description goes here", k)
-            .AddItem(LAYER_NAME, "Quantity of Precipitation, 10KM resolution", "Quantité de précipitations, résolution de 10 km", k)
+            .AddItem(LAYER_NAME, "6 hour precipitation", "Précipitations sur 6 heures", k)
+
+            k = "qp1024"
+            .AddItem(LAYER_NAME, "24 hour precipitation", "Précipitations sur 24 heures", k)
 
             ' .AddItem("CAPA_SLIDER", "Canadian Precipitation Analysis", "[fr] Canadian Precipitation Analysis")
 
@@ -1225,7 +1232,7 @@ Public Class ConfigForm
         Dim template As String = "assets/templates/capa/variables-template.html"
         Dim parser As String = "assets/templates/capa/variables-script.js"
 
-        Return MakeWMSLayerConfig(url, rampId, 0.85, True, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable) & " " & hour & "H", "text/plain", template, parser, True)
+        Return MakeWMSLayerConfig(url, rampId, 0.85, True, wmsCode, oCAPALang.Txt(lang, LAYER_NAME, variable & hour), "text/plain", template, parser, True)
 
     End Function
 
@@ -1458,7 +1465,7 @@ Public Class ConfigForm
             k = "prec"
             .AddItem(VAR_DESC, "Trend of relative total precipitation change (%)",
                      "Tendance des changements relatifs des précipitations totales (%)", k)
-            .AddItem(LAYER_NAME, "Precipitation", "Précipitations", k)
+            .AddItem(LAYER_NAME, "Total precipitation", "Précipitations totales", k)
 
             'k = "tmin"
             '.AddItem(VAR_DESC, "A short minimum temperature description goes here", "[fr] A short minimum temperature description goes here", k)
@@ -1930,17 +1937,17 @@ Public Class ConfigForm
             k = "tmean"
             .AddItem(VAR_DESC, "The mean temperature in degrees Celsius (°C) is defined as the average of the maximum and minimum temperature at a location for a specified time interval.",
                      "La température moyenne en degrés Celsius (°C) est définie comme la moyenne des températures maximale et minimale à un endroit durant une période précise.", k)
-            .AddItem(LAYER_NAME, "Mean daily temperature", "Température quotidienne moyenne", k)
+            .AddItem(LAYER_NAME, "Mean temperature", "Température moyenne", k)
 
             k = "tmin"
             .AddItem(VAR_DESC, "The average of the minimum temperature in degrees Celsius (°C) observed at the location for that month.",
                      "La moyenne des températures minimales en degrés Celsius (°C) observées à un endroit durant ce mois.", k)
-            .AddItem(LAYER_NAME, "Mean daily minimum temperature", "Température minimale quotidienne moyenne", k)
+            .AddItem(LAYER_NAME, "Daily minimum temperature", "Température minimale quotidienne", k)
 
             k = "tmax"
             .AddItem(VAR_DESC, "The average of the maximum temperature in degrees Celsius (°C) observed at the location for that month.",
                      "La moyenne des températures maximales en degrés Celsius (°C) observées à un endroit durant ce mois.", k)
-            .AddItem(LAYER_NAME, "Mean daily maximum temperature", "Température maximale quotidienne moyenne", k)
+            .AddItem(LAYER_NAME, "Daily maximum temperature", "Température maximale quotidienne", k)
 
             k = "prec"
             .AddItem(VAR_DESC, "The sum of the total rainfall and the water equivalent of the total snowfall in millimetres (mm), observed at the location during a specified time interval.",
