@@ -74,6 +74,7 @@ Public Class ConfigForm
     Const COVER_ICON As String = "CovIcon"
     Const SETTINGS_TITLE As String = "SettingsTitle"
     Const LEGEND_TEXT As String = "LegendText"
+    Const COLUMN_NAME As String = "ColumnName"
 
     'url replacement keys
     Const GEOMET_WMS As String = "#GEOMETWMS#"
@@ -269,8 +270,42 @@ Public Class ConfigForm
 
     End Sub
 
+    ''' <summary>
+    ''' will insert a grid section to a layer config
+    ''' the sourceNugget contents are modified by this function.
+    ''' We assume its not the last item in the layer object, due to lazyness
+    ''' </summary>
+    ''' <param name="sourceNugget"></param>
+    ''' <param name="startingLevel"></param>
+    ''' <param name="columnArray">A 2-d array, with n items on first dimension (an item per grid column) and 3 items on second dimension (data, name, visibility)</param>
+    Private Sub InjectGrid(sourceNugget As ConfigNugget, startingLevel As Integer, columnArray As Object)
+
+        If columnArray Is Nothing Then
+            Exit Sub
+        End If
+
+        Dim numberOfCols = columnArray.getUpperBound(0)
+
+        If numberOfCols = 0 Then
+            Exit Sub
+        End If
+
+        sourceNugget.AddLine("""table"": {", startingLevel)
+        sourceNugget.AddLine("""columns"": [", startingLevel + 1)
+        For colNum = 0 To numberOfCols
+            sourceNugget.AddLine("{ ""data"": """ & columnArray(colNum, 0) & """" &
+                           IIf(columnArray(colNum, 2), ", ""title"": """ & columnArray(colNum, 1) & """", "") &
+                           ", ""visible"": " & columnArray(colNum, 2) &
+                           " }" & IIf(colNum = numberOfCols, "", ","), startingLevel + 2)
+        Next
+        sourceNugget.AddLine("]", startingLevel + 1)
+        sourceNugget.AddLine("},", startingLevel)
+
+
+    End Sub
+
     Private Function MakeWFSLayerConfig(url As String, id As String, opacity As Double, visible As Boolean, nameField As String, layerName As String, colour As String,
-                                        Optional template As String = "", Optional parser As String = "") As String
+                                        Optional template As String = "", Optional parser As String = "", Optional gridColArray As Object = Nothing) As String
         '{
         '  "id":"canadaElevation",
         '  "layerType":"ogcWfs",
@@ -297,6 +332,7 @@ Public Class ConfigForm
         nugget.AddLine("""visibility"": " & BoolToJson(visible), 2)
         nugget.AddLine("},", 1)
         InjectTemplate(nugget, 1, template, parser)
+        InjectGrid(nugget, 1, gridColArray)
         nugget.AddLine("""colour"": """ & colour & """,", 1)  ' should be #112233 format
         nugget.AddLine("""controls"": [""data"", ""visibility"", ""opacity""]", 1)
         nugget.AddLine("}", 0, True)
@@ -519,6 +555,7 @@ Public Class ConfigForm
         Return json
 
     End Function
+
 
     ''' <summary>
     ''' Writes content to a text file
@@ -1974,6 +2011,38 @@ Public Class ConfigForm
             '.AddItem(VAR_DESC, "A short Direction of Maximum Gust description goes here", "[fr] A short Direction of Maximum Gust description goes here", k)
             '.AddItem(LAYER_NAME, "Direction of maximum gust", "[fr] Direction of Maximum Gust", k)
 
+            'grid columns
+            .AddItem(COLUMN_NAME, "x", "x", "OBJECTID")
+            .AddItem(COLUMN_NAME, "y", "y", "rvInternalCoordX")
+            .AddItem(COLUMN_NAME, "z", "z", "rvInternalCoordY")
+            .AddItem(COLUMN_NAME, "Normal code", "Code de la normale", "NORMAL_CODE")
+            .AddItem(COLUMN_NAME, "a", "a", "OCCURRENCE_COUNT")
+            .AddItem(COLUMN_NAME, "b", "b", "FIRST_YEAR")
+            .AddItem(COLUMN_NAME, "Period beginning", "Début de la période", "PERIOD_BEGIN")
+            .AddItem(COLUMN_NAME, "Percentage of possible observations", "Pourcentage d'observations possibles", "PERCENT_OF_POSSIBLE_OBS")
+            .AddItem(COLUMN_NAME, "Period end", "Fin de la période", "PERIOD_END")
+            .AddItem(COLUMN_NAME, "Last year of normal period", "Dernière année de la période pour les normales", "LAST_YEAR_NORMAL_PERIOD")
+            .AddItem(COLUMN_NAME, "Province / Territory", "Province / Territoire", "PROVINCE_CODE")
+            .AddItem(COLUMN_NAME, "f", "f", "PUBLICATION_CODE")
+            .AddItem(COLUMN_NAME, "First year of normal period", "Première année de la période pour les normales", "FIRST_YEAR_NORMAL_PERIOD")
+            .AddItem(COLUMN_NAME, "h", "h", "MAX_DURATION_MISSING_YEARS")
+            .AddItem(COLUMN_NAME, "MSC station name", "Nom de la station du SMC", "STATION_NAME")
+            .AddItem(COLUMN_NAME, "i", "i", "CURRENT_FLAG")
+            .AddItem(COLUMN_NAME, "j", "j", "LAST_YEAR")
+            .AddItem(COLUMN_NAME, "Date calculated", "Date du calcul", "DATE_CALCULATED")
+            .AddItem(COLUMN_NAME, "", "Type de mesure", "FRE_PUB_NAME")
+            .AddItem(COLUMN_NAME, "Total observations count", "Nombre total d'observations", "TOTAL_OBS_COUNT")
+            .AddItem(COLUMN_NAME, "k", "k", "PERIOD")
+            .AddItem(COLUMN_NAME, "Climate value", "Valeur climatique", "VALUE")
+            .AddItem(COLUMN_NAME, "l", "l", "STN_ID")
+            .AddItem(COLUMN_NAME, "m", "m", "NORMAL_ID")
+            .AddItem(COLUMN_NAME, "n", "n", "ID")
+            .AddItem(COLUMN_NAME, "o", "o", "FIRST_OCCURRENCE_DATE")
+            .AddItem(COLUMN_NAME, "Month", "Mois", "MONTH")
+            .AddItem(COLUMN_NAME, "q", "q", "YEAR_COUNT_NORMAL_PERIOD")
+            .AddItem(COLUMN_NAME, "Measurement type", "", "ENG_PUB_NAME")
+
+
         End With
 
     End Sub
@@ -1984,6 +2053,51 @@ Public Class ConfigForm
             {"PROD", GEOMET_WFS & "/collections/climate-normals/"}}
 
         Return dUrl.Item(ENV)
+
+    End Function
+
+    Private Function MakeNormalsGridArray(lang As String) As Object
+        Dim magicArray = {
+            {"OBJECTID", "", False},
+            {"rvInternalCoordX", "", False},
+            {"rvInternalCoordY", "", False},
+            {"NORMAL_CODE", "", True},
+            {"OCCURRENCE_COUNT", "", False},
+            {"FIRST_YEAR", "", False},
+            {"PERIOD_END", "", True},
+            {"PERCENT_OF_POSSIBLE_OBS", "", True},
+            {"PERIOD_BEGIN", "", True},
+            {"LAST_YEAR_NORMAL_PERIOD", "", True},
+            {"PROVINCE_CODE", "", True},
+            {"PUBLICATION_CODE", "", False},
+            {"FIRST_YEAR_NORMAL_PERIOD", "", True},
+            {"MAX_DURATION_MISSING_YEARS", "", False},
+            {"STATION_NAME", "", True},
+            {"CURRENT_FLAG", "", False},
+            {"LAST_YEAR", "", False},
+            {"DATE_CALCULATED", "", True},
+            {"FRE_PUB_NAME", "", lang = "fr"},
+            {"TOTAL_OBS_COUNT", "", True},
+            {"PERIOD", "", False},
+            {"VALUE", "", True},
+            {"STN_ID", "", False},
+            {"NORMAL_ID", "", False},
+            {"ID", "", False},
+            {"FIRST_OCCURRENCE_DATE", "", False},
+            {"MONTH", "", True},
+            {"YEAR_COUNT_NORMAL_PERIOD", "", False},
+            {"ENG_PUB_NAME", "", lang = "en"}
+        }
+
+        'enhance the language
+        For iCol = 0 To magicArray.GetUpperBound(0)
+            If magicArray(0, 2) Then
+                magicArray(iCol, 1) = oNormalsLang.Txt(lang, COLUMN_NAME, magicArray(iCol, 0))
+            End If
+        Next
+
+
+        Return magicArray
 
     End Function
 
