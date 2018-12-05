@@ -295,7 +295,7 @@ Public Class ConfigForm
         For colNum = 0 To numberOfCols
             sourceNugget.AddLine("{ ""data"": """ & columnArray(colNum, 0) & """" &
                            IIf(columnArray(colNum, 2), ", ""title"": """ & columnArray(colNum, 1) & """", "") &
-                           ", ""visible"": " & columnArray(colNum, 2) &
+                           ", ""visible"": " & BoolToJson(columnArray(colNum, 2)) &
                            " }" & IIf(colNum = numberOfCols, "", ","), startingLevel + 2)
         Next
         sourceNugget.AddLine("]", startingLevel + 1)
@@ -719,7 +719,8 @@ Public Class ConfigForm
             k = "prec"
             .AddItem(VAR_DESC, "Projected relative changes in mean precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
                      "Les changements projetés dans les précipitations moyennes sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
-            .AddItem(LAYER_NAME, "Mean precipitation", "Précipitations moyennes", k)
+            .AddItem(LAYER_NAME, "Total precipitation", "Précipitations totales", k)
+
 
         End With
 
@@ -1072,6 +1073,19 @@ Public Class ConfigForm
             'general non-colour one
             .AddItem(LEGEND_TEXT, "AHCCD Station", "Station DCCAH")
 
+            'grid columns
+            .AddItem(COLUMN_NAME, "AHCCD station ID", "Numéro de la station DCCAH", "station_id__id_station")
+            .AddItem(COLUMN_NAME, "Elevation", "Altitude", "elevation__elevation")
+            .AddItem(COLUMN_NAME, "Identifier", "Identifiant", "identifier__identifiant")
+            .AddItem(COLUMN_NAME, "Station name", "Nom station", "station_name__nom_station")
+            .AddItem(COLUMN_NAME, "Province/Territory", "Province / Territoire", "province__province")
+            .AddItem(COLUMN_NAME, "Year range", "Annees", "year_range__annees")
+            .AddItem(COLUMN_NAME, "Period", "Periode", "period__periode")
+            .AddItem(COLUMN_NAME, "Measurement type", "Type mesure", "measurement_type__type_mesure")
+            .AddItem(COLUMN_NAME, "Joined", "Rejoint", "joined__rejoint")
+            .AddItem(COLUMN_NAME, "Trend value", "Valeur tendance", "trend_value__valeur_tendance")
+
+
         End With
 
     End Sub
@@ -1082,6 +1096,35 @@ Public Class ConfigForm
             {"PROD", GEOMET_WFS & "/collections/ahccd-trends/"}}
 
         Return dUrl.Item(ENV)
+
+    End Function
+
+    Private Function MakeAHCCDGridArray(lang As String) As Object
+        Dim magicArray = {
+            {"OBJECTID", "", False},
+            {"rvInternalCoordX", "", False},
+            {"rvInternalCoordY", "", False},
+            {"station_id__id_station", "", True},
+            {"elevation__elevation", "", True},
+            {"identifier__identifiant", "", True},
+            {"station_name__nom_station", "", True},
+            {"province__province", "", True},
+            {"year_range__annees", "", True},
+            {"period__periode", "", True},
+            {"measurement_type__type_mesure", "", True},
+            {"joined__rejoint", "", True},
+            {"trend_value__valeur_tendance", "", True}
+        }
+
+        'enhance the language
+        For iCol = 0 To magicArray.GetUpperBound(0)
+            If magicArray(iCol, 2) Then
+                magicArray(iCol, 1) = oAHCCDLang.Txt(lang, COLUMN_NAME, magicArray(iCol, 0))
+            End If
+        Next
+
+
+        Return magicArray
 
     End Function
 
@@ -1107,7 +1150,9 @@ Public Class ConfigForm
 
         Dim url As String = MakeAHCCDDataUrl() & "items?measurement_type__type_mesure=" & varCode & "&period__periode=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "station_name__nom_station", oAHCCDLang.Txt(lang, LAYER_NAME, variable), colourCode, template, parser)
+        Dim gridArray As Object = MakeAHCCDGridArray(lang)
+
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "station_name__nom_station", oAHCCDLang.Txt(lang, LAYER_NAME, variable), colourCode, template, parser, gridArray)
 
     End Function
 
@@ -1401,6 +1446,16 @@ Public Class ConfigForm
 
             .AddItem(LEGEND_TEXT, "Hydrometric Station", "Stations hydrométriques")
 
+            'grid columns
+            .AddItem(COLUMN_NAME, "", "Contributeur", "CONTRIBUTOR_FR")
+            .AddItem(COLUMN_NAME, "Status", "", "STATUS_EN")
+            .AddItem(COLUMN_NAME, "Station Number", "Numéro de la station", "STATION_NUMBER")
+            .AddItem(COLUMN_NAME, "Contributor", "", "CONTRIBUTOR_EN")
+            .AddItem(COLUMN_NAME, "Vertical Datum", "Plan de référence altimétrique", "VERTICAL_DATUM")
+            .AddItem(COLUMN_NAME, "", "Statut", "STATUS_FR")
+            .AddItem(COLUMN_NAME, "Station Name", "Nom de la station", "STATION_NAME")
+            .AddItem(COLUMN_NAME, "Province / Territory", "Province / Territoire", "PROV_TERR_STATE_LOC")
+
         End With
 
     End Sub
@@ -1414,6 +1469,34 @@ Public Class ConfigForm
 
     End Function
 
+    Private Function MakeHydroGridArray(lang As String) As Object
+        Dim magicArray = {
+            {"OBJECTID", "", False},
+            {"rvInternalCoordX", "", False},
+            {"rvInternalCoordY", "", False},
+            {"CONTRIBUTOR_FR", "", lang = "fr"},
+            {"STATUS_EN", "", lang = "en"},
+            {"STATION_NUMBER", "", True},
+            {"CONTRIBUTOR_EN", "", lang = "en"},
+            {"VERTICAL_DATUM", "", True},
+            {"STATUS_FR", "", lang = "fr"},
+            {"STATION_NAME", "", True},
+            {"IDENTIFIER", "", False},
+            {"PROV_TERR_STATE_LOC", "", True}
+        }
+
+        'enhance the language
+        For iCol = 0 To magicArray.GetUpperBound(0)
+            If magicArray(iCol, 2) Then
+                magicArray(iCol, 1) = oHydroLang.Txt(lang, COLUMN_NAME, magicArray(iCol, 0))
+            End If
+        Next
+
+
+        Return magicArray
+
+    End Function
+
     Private Function MakeHydroDataLayer(lang As String, rampID As String) As String
 
         'calculate url (might be a constant)
@@ -1424,8 +1507,9 @@ Public Class ConfigForm
 
         Dim template As String = "assets/templates/hydro/stations-template.html"
         Dim parser As String = "assets/templates/hydro/stations-script.js"
+        Dim gridArray As Object = MakeHydroGridArray(lang)
 
-        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", oHydroLang.Txt(lang, LAYER_NAME), "#0cb8f0", template, parser)
+        Return MakeWFSLayerConfig(url, rampID, 1, True, "STATION_NAME", oHydroLang.Txt(lang, LAYER_NAME), "#0cb8f0", template, parser, gridArray)
 
     End Function
 
@@ -2012,34 +2096,34 @@ Public Class ConfigForm
             '.AddItem(LAYER_NAME, "Direction of maximum gust", "[fr] Direction of Maximum Gust", k)
 
             'grid columns
-            .AddItem(COLUMN_NAME, "x", "x", "OBJECTID")
-            .AddItem(COLUMN_NAME, "y", "y", "rvInternalCoordX")
-            .AddItem(COLUMN_NAME, "z", "z", "rvInternalCoordY")
+            '.AddItem(COLUMN_NAME, "", "", "OBJECTID")
+            '.AddItem(COLUMN_NAME, "", "", "rvInternalCoordX")
+            '.AddItem(COLUMN_NAME, "", "", "rvInternalCoordY")
             .AddItem(COLUMN_NAME, "Normal code", "Code de la normale", "NORMAL_CODE")
-            .AddItem(COLUMN_NAME, "a", "a", "OCCURRENCE_COUNT")
-            .AddItem(COLUMN_NAME, "b", "b", "FIRST_YEAR")
+            '.AddItem(COLUMN_NAME, "", "", "OCCURRENCE_COUNT")
+            '.AddItem(COLUMN_NAME, "", "", "FIRST_YEAR")
             .AddItem(COLUMN_NAME, "Period beginning", "Début de la période", "PERIOD_BEGIN")
             .AddItem(COLUMN_NAME, "Percentage of possible observations", "Pourcentage d'observations possibles", "PERCENT_OF_POSSIBLE_OBS")
             .AddItem(COLUMN_NAME, "Period end", "Fin de la période", "PERIOD_END")
             .AddItem(COLUMN_NAME, "Last year of normal period", "Dernière année de la période pour les normales", "LAST_YEAR_NORMAL_PERIOD")
             .AddItem(COLUMN_NAME, "Province / Territory", "Province / Territoire", "PROVINCE_CODE")
-            .AddItem(COLUMN_NAME, "f", "f", "PUBLICATION_CODE")
+            '.AddItem(COLUMN_NAME, "", "", "PUBLICATION_CODE")
             .AddItem(COLUMN_NAME, "First year of normal period", "Première année de la période pour les normales", "FIRST_YEAR_NORMAL_PERIOD")
-            .AddItem(COLUMN_NAME, "h", "h", "MAX_DURATION_MISSING_YEARS")
+            '.AddItem(COLUMN_NAME, "", "", "MAX_DURATION_MISSING_YEARS")
             .AddItem(COLUMN_NAME, "MSC station name", "Nom de la station du SMC", "STATION_NAME")
-            .AddItem(COLUMN_NAME, "i", "i", "CURRENT_FLAG")
-            .AddItem(COLUMN_NAME, "j", "j", "LAST_YEAR")
+            '.AddItem(COLUMN_NAME, "", "", "CURRENT_FLAG")
+            '.AddItem(COLUMN_NAME, "", "", "LAST_YEAR")
             .AddItem(COLUMN_NAME, "Date calculated", "Date du calcul", "DATE_CALCULATED")
             .AddItem(COLUMN_NAME, "", "Type de mesure", "FRE_PUB_NAME")
             .AddItem(COLUMN_NAME, "Total observations count", "Nombre total d'observations", "TOTAL_OBS_COUNT")
-            .AddItem(COLUMN_NAME, "k", "k", "PERIOD")
+            '.AddItem(COLUMN_NAME, "", "", "PERIOD")
             .AddItem(COLUMN_NAME, "Climate value", "Valeur climatique", "VALUE")
-            .AddItem(COLUMN_NAME, "l", "l", "STN_ID")
-            .AddItem(COLUMN_NAME, "m", "m", "NORMAL_ID")
-            .AddItem(COLUMN_NAME, "n", "n", "ID")
-            .AddItem(COLUMN_NAME, "o", "o", "FIRST_OCCURRENCE_DATE")
+            '.AddItem(COLUMN_NAME, "", "", "STN_ID")
+            '.AddItem(COLUMN_NAME, "", "", "NORMAL_ID")
+            '.AddItem(COLUMN_NAME, "", "", "ID")
+            '.AddItem(COLUMN_NAME, "", "", "FIRST_OCCURRENCE_DATE")
             .AddItem(COLUMN_NAME, "Month", "Mois", "MONTH")
-            .AddItem(COLUMN_NAME, "q", "q", "YEAR_COUNT_NORMAL_PERIOD")
+            '.AddItem(COLUMN_NAME, "", "", "YEAR_COUNT_NORMAL_PERIOD")
             .AddItem(COLUMN_NAME, "Measurement type", "", "ENG_PUB_NAME")
 
 
@@ -2091,7 +2175,7 @@ Public Class ConfigForm
 
         'enhance the language
         For iCol = 0 To magicArray.GetUpperBound(0)
-            If magicArray(0, 2) Then
+            If magicArray(iCol, 2) Then
                 magicArray(iCol, 1) = oNormalsLang.Txt(lang, COLUMN_NAME, magicArray(iCol, 0))
             End If
         Next
@@ -2119,7 +2203,9 @@ Public Class ConfigForm
 
         Dim url As String = MakeNormalsDataUrl() & "items?NORMAL_ID=" & varCode & "&MONTH=" & seasonCode
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "STN_ID", oNormalsLang.Txt(lang, LAYER_NAME, variable), dColour.Item(variable), template, parser)
+        Dim gridArray As Object = MakeNormalsGridArray(lang)
+
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "STN_ID", oNormalsLang.Txt(lang, LAYER_NAME, variable), dColour.Item(variable), template, parser, gridArray)
 
     End Function
 
