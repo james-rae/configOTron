@@ -717,8 +717,8 @@ Public Class ConfigForm
             .AddItem(LAYER_NAME, "Mean temperature", "Température moyenne", k)
 
             k = "prec"
-            .AddItem(VAR_DESC, "Projected relative changes in mean precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
-                     "Les changements projetés dans les précipitations moyennes sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
+            .AddItem(VAR_DESC, "Projected relative changes in total precipitation are with respect to the reference period of 1986-2005 and expressed as percentage change (%).",
+                     "Les changements projetés dans les précipitations totales sont exprimés en pourcentage (%) et calculés par rapport à la période de référence 1986-2005.", k)
             .AddItem(LAYER_NAME, "Total precipitation", "Précipitations totales", k)
 
 
