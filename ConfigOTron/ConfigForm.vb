@@ -2114,7 +2114,7 @@ Public Class ConfigForm
             '.AddItem(COLUMN_NAME, "", "", "CURRENT_FLAG")
             '.AddItem(COLUMN_NAME, "", "", "LAST_YEAR")
             .AddItem(COLUMN_NAME, "Date calculated", "Date du calcul", "DATE_CALCULATED")
-            .AddItem(COLUMN_NAME, "", "Type de mesure", "FRE_PUB_NAME")
+            .AddItem(COLUMN_NAME, "", "Type de mesure", "F_NORMAL_ELEMENT_NAME")
             .AddItem(COLUMN_NAME, "Total observations count", "Nombre total d'observations", "TOTAL_OBS_COUNT")
             '.AddItem(COLUMN_NAME, "", "", "PERIOD")
             .AddItem(COLUMN_NAME, "Climate value", "Valeur climatique", "VALUE")
@@ -2124,7 +2124,7 @@ Public Class ConfigForm
             '.AddItem(COLUMN_NAME, "", "", "FIRST_OCCURRENCE_DATE")
             .AddItem(COLUMN_NAME, "Month", "Mois", "MONTH")
             '.AddItem(COLUMN_NAME, "", "", "YEAR_COUNT_NORMAL_PERIOD")
-            .AddItem(COLUMN_NAME, "Measurement type", "", "ENG_PUB_NAME")
+            .AddItem(COLUMN_NAME, "Measurement type", "", "E_NORMAL_ELEMENT_NAME")
 
 
         End With
@@ -2160,7 +2160,7 @@ Public Class ConfigForm
             {"CURRENT_FLAG", "", False},
             {"LAST_YEAR", "", False},
             {"DATE_CALCULATED", "", True},
-            {"FRE_PUB_NAME", "", lang = "fr"},
+            {"F_NORMAL_ELEMENT_NAME", "", lang = "fr"},
             {"TOTAL_OBS_COUNT", "", True},
             {"PERIOD", "", False},
             {"VALUE", "", True},
@@ -2170,7 +2170,7 @@ Public Class ConfigForm
             {"FIRST_OCCURRENCE_DATE", "", False},
             {"MONTH", "", True},
             {"YEAR_COUNT_NORMAL_PERIOD", "", False},
-            {"ENG_PUB_NAME", "", lang = "en"}
+            {"E_NORMAL_ELEMENT_NAME", "", lang = "en"}
         }
 
         'enhance the language
