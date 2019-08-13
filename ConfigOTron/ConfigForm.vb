@@ -2164,7 +2164,7 @@ Public Class ConfigForm
             {"TOTAL_OBS_COUNT", "", True},
             {"PERIOD", "", False},
             {"VALUE", "", True},
-            {"STN_ID", "", False},
+            {"CLIMATE_IDENTIFIER", "", False},
             {"NORMAL_ID", "", False},
             {"ID", "", False},
             {"FIRST_OCCURRENCE_DATE", "", False},
@@ -2205,7 +2205,7 @@ Public Class ConfigForm
 
         Dim gridArray As Object = MakeNormalsGridArray(lang)
 
-        Return MakeWFSLayerConfig(url, rampId, 1, True, "STN_ID", oNormalsLang.Txt(lang, LAYER_NAME, variable), dColour.Item(variable), template, parser, gridArray)
+        Return MakeWFSLayerConfig(url, rampId, 1, True, "CLIMATE_IDENTIFIER", oNormalsLang.Txt(lang, LAYER_NAME, variable), dColour.Item(variable), template, parser, gridArray)
 
     End Function
 
